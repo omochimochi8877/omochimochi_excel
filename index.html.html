@@ -2,8 +2,19 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>セルうめ｜穴埋めで関数がわかる</title>
+<title>セルうめ｜穴埋めで作るExcel関数ジェネレーター【無料】</title>
+<meta name="description" content="日本語の穴埋め文にセル番号を入れるだけでExcelの数式（SUM・AVERAGE・COUNTIF・VLOOKUPなど）を自動生成。関数の意味も一緒にわかる無料ツール。">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7308YW3KGH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7308YW3KGH');
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -302,6 +313,13 @@ document.getElementById('copyBtn').addEventListener('click', () => {
     btn.textContent = 'コピーしました';
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 1500);
+
+    // GA4: 数式コピーをコンバージョンイベントとして送信
+    if (typeof gtag === 'function') {
+      gtag('event', 'copy_formula', {
+        function_name: current
+      });
+    }
   });
 });
 
