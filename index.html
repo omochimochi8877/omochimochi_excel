@@ -314,7 +314,11 @@
    ========================================================== */
 const categories = [
   { key:'agg',  label:'集計・計算' },
-  { key:'cond', label:'条件分岐' }
+  { key:'cond', label:'条件分岐' },
+  { key:'search', label:'検索・参照' },
+  { key:'text', label:'文字列操作' },
+  { key:'date', label:'日付・時刻' },
+  { key:'round', label:'端数処理・書式' }
 ];
 
 const functions = {
@@ -435,6 +439,184 @@ const functions = {
     explain: (v) => `<b>IFERROR関数</b>は、既存の数式にそのまま被せて使う「保険」のような関数です。エラーが起きなければ普通に計算結果を表示し、エラーが起きたときだけ指定した表示に切り替わります。`,
     pitfall: `0で割り算をしてしまう（<b>#DIV/0!</b>エラー）ケースで特によく使われます。表示を空欄にしたい場合は、置き換える値の欄に何も入れず<b>""</b>にすると空白表示になります。`,
     version: `Excel 2007以降で使用できます。`
+  },
+
+  /* ---------------- 検索・参照 ---------------- */
+  vlookup: {
+    cat:'search', label:'表から探す (VLOOKUP)', level:'中級',
+    scene:'こんな時に：社員番号から氏名を探す、商品コードから単価を探す',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="key">${v.key}</span> セルの値を、
+      <span contenteditable class="blank" data-k="range">${v.range}</span> の一番左の列から探して、
+      その表の左から
+      <span contenteditable class="blank" data-k="col">${v.col}</span> 列目の値を表示したい。`,
+    values: {target:'D2', key:'C2', range:'A2:B100', col:'2'},
+    formula: (v) => `=VLOOKUP(${v.key},${v.range},${v.col},FALSE)`,
+    explain: (v) => `<b>VLOOKUP関数</b>は、表の一番左の列から検索値を探し、指定した列数分だけ右にずれた値を返します。最後の<b>FALSE</b>は「完全に一致するものだけを探す」という意味です。`,
+    pitfall: `<b>探したい値が表の一番左の列にない</b>場合はVLOOKUPでは探せません（右側の列は探せません）。その場合はXLOOKUPかINDEX+MATCHを使う必要があります。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  xlookup: {
+    cat:'search', label:'新しい検索関数 (XLOOKUP)', level:'中級',
+    scene:'こんな時に：VLOOKUPより柔軟に、左右どちら向きにも検索したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="key">${v.key}</span> セルの値を
+      <span contenteditable class="blank" data-k="lookupRange">${v.lookupRange}</span> の範囲から探して、
+      対応する
+      <span contenteditable class="blank" data-k="returnRange">${v.returnRange}</span> の値を表示したい。`,
+    values: {target:'D2', key:'C2', lookupRange:'A2:A100', returnRange:'B2:B100'},
+    formula: (v) => `=XLOOKUP(${v.key},${v.lookupRange},${v.returnRange})`,
+    explain: (v) => `<b>XLOOKUP関数</b>はVLOOKUPの後継にあたる関数で、検索する列と取得する列を別々に指定できるため、検索対象が表の右側にあっても左側にあっても使えます。`,
+    pitfall: `便利な関数ですが<b>Excel 2021／365限定</b>です。会社のPCがExcel 2019以前の場合は使えないので、その場合はVLOOKUPかINDEX+MATCHを使ってください。`,
+    version: `Excel 2021またはMicrosoft 365が必要です（Excel 2019以前では使用できません）。`
+  },
+
+  /* ---------------- 文字列操作 ---------------- */
+  concat: {
+    cat:'text', label:'文字をつなげる (CONCAT/&)', level:'初級',
+    scene:'こんな時に：姓と名を1つのセルにまとめたい、住所を結合したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="a">${v.a}</span> セルと
+      <span contenteditable class="blank" data-k="b">${v.b}</span> セルの文字を、
+      間に「<span contenteditable class="blank" data-k="sep" style="width:50px;">${v.sep}</span>」を挟んでつなげたい。`,
+    values: {target:'C1', a:'A1', b:'B1', sep:'　'},
+    formula: (v) => `=${v.a}&"${v.sep}"&${v.b}`,
+    explain: (v) => `<b>&（アンパサンド）</b>は文字列同士をつなげる記号です。「${v.a}&"${v.sep}"&${v.b}」は「${v.a}の文字＋区切り文字＋${v.b}の文字」を1つにつなげるという意味です。`,
+    pitfall: `区切り文字を入れずに直接つなげたい場合は、区切りの欄を空にすればOKです。CONCAT関数（=CONCAT(A1,B1)）でも同じ結果になります。`,
+    version: `&によるつなぎ方はExcel 2003以降すべて対応。CONCAT関数はExcel 2019以降が必要です。`
+  },
+  leftright: {
+    cat:'text', label:'文字を一部取り出す (LEFT/RIGHT)', level:'初級',
+    scene:'こんな時に：郵便番号の頭3桁だけ取りたい、電話番号の末尾4桁だけ取りたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの文字列の
+      <span contenteditable class="blank" data-k="side" style="width:50px;">${v.side}</span>から
+      <span contenteditable class="blank" data-k="num">${v.num}</span> 文字を取り出したい。`,
+    values: {target:'B1', source:'A1', side:'左', num:'3'},
+    formula: (v) => v.side.includes('右') ? `=RIGHT(${v.source},${v.num})` : `=LEFT(${v.source},${v.num})`,
+    explain: (v) => `<b>LEFT関数</b>は文字列の左側から、<b>RIGHT関数</b>は右側から、指定した文字数だけ取り出します。「左／右」の指定に応じてどちらかを自動で選んでいます。`,
+    pitfall: `全角文字（漢字・ひらがな等）も半角文字も「1文字」として同じように数えられます。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  mid: {
+    cat:'text', label:'文字を途中から取り出す (MID)', level:'中級',
+    scene:'こんな時に：社員コードの真ん中の部署コードだけ取り出したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの文字列の
+      <span contenteditable class="blank" data-k="start">${v.start}</span> 文字目から
+      <span contenteditable class="blank" data-k="num">${v.num}</span> 文字分を取り出したい。`,
+    values: {target:'B1', source:'A1', start:'3', num:'2'},
+    formula: (v) => `=MID(${v.source},${v.start},${v.num})`,
+    explain: (v) => `<b>MID関数</b>は、文字列の途中から指定した文字数だけを取り出します。「${v.start}文字目から${v.num}文字分」という指定がそのまま数式の順番になります。`,
+    pitfall: `「〇文字目から」の数え始めは<b>1文字目からカウント</b>します（0文字目は存在しません）。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  trim: {
+    cat:'text', label:'余分な空白を消す (TRIM)', level:'初級',
+    scene:'こんな時に：他システムからコピーした文字列に余計な空白が混ざっている',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの文字列にある
+      余分な空白を削除したものを表示したい。`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=TRIM(${v.source})`,
+    explain: (v) => `<b>TRIM関数</b>は、文字列の前後の空白をすべて削除し、単語の間の空白は1つだけ残します。データの取り込み時によくある「見えない空白」の掃除に便利です。`,
+    pitfall: `全角スペースはTRIM関数では削除されない場合があります。全角・半角どちらの空白かを確認してから使ってください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  substitute: {
+    cat:'text', label:'文字を置き換える (SUBSTITUTE)', level:'中級',
+    scene:'こんな時に：住所の「丁目」表記を統一したい、旧社名を新社名に一括変換したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの文字列の中の
+      「<span contenteditable class="blank" data-k="from" style="width:60px;">${v.from}</span>」を
+      「<span contenteditable class="blank" data-k="to" style="width:60px;">${v.to}</span>」に置き換えたい。`,
+    values: {target:'B1', source:'A1', from:'－', to:'ー'},
+    formula: (v) => `=SUBSTITUTE(${v.source},"${v.from}","${v.to}")`,
+    explain: (v) => `<b>SUBSTITUTE関数</b>は、文字列の中の特定の文字を別の文字に置き換えます。元のセル（${v.source}）の値は変更されず、置き換えた結果だけが${v.target}セルに表示されます。`,
+    pitfall: `全角ハイフン・半角ハイフン・長音記号など、見た目が似ている文字はコンピューター上では別の文字として扱われるため、意図通りに置き換わらないことがあります。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+
+  /* ---------------- 日付・時刻 ---------------- */
+  today: {
+    cat:'date', label:'今日の日付 (TODAY)', level:'初級',
+    scene:'こんな時に：帳票に今日の日付を自動で入れたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      今日の日付を自動で表示したい。`,
+    values: {target:'A1'},
+    formula: () => `=TODAY()`,
+    explain: () => `<b>TODAY関数</b>は、ファイルを開いた日（パソコンの日付）を自動で表示します。カッコの中には何も入力しません。`,
+    pitfall: `TODAY関数は<b>ファイルを開くたびに日付が更新</b>されます。「作成した日を固定したい」場合には向かないので、その場合は日付を直接手入力してください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  datedif: {
+    cat:'date', label:'期間を計算する (DATEDIF)', level:'中級',
+    scene:'こんな時に：勤続年数を出したい、在籍期間を「〇年〇ヶ月」で出したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
+      <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの期間を
+      「<span contenteditable class="blank" data-k="unit" style="width:60px;">${v.unit}</span>」単位で計算したい。`,
+    values: {target:'C1', from:'A1', to:'B1', unit:'年'},
+    formula: (v) => {
+      const unitMap = {'年':'Y', '月':'M', '日':'D'};
+      const u = unitMap[v.unit] || 'Y';
+      return `=DATEDIF(${v.from},${v.to},"${u}")`;
+    },
+    explain: (v) => `<b>DATEDIF関数</b>は、2つの日付の間の期間を計算します。「Y」は満年数、「M」は満月数、「D」は日数です。指定した単位に応じて自動で切り替えています。`,
+    pitfall: `関数名の候補として自動で出てこない（Excelの入力補完に表示されない）ため、名前を覚えて手入力する必要がある珍しい関数です。スペルミスに注意してください。`,
+    version: `Excel 2003以降で使用できますが、公式のヘルプには載っていない裏技的な関数です。`
+  },
+  edate: {
+    cat:'date', label:'〇ヶ月後の日付 (EDATE)', level:'中級',
+    scene:'こんな時に：契約更新日（1年後）や支払期日（翌月末）を自動計算したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの日付から
+      <span contenteditable class="blank" data-k="months">${v.months}</span> ヶ月後の日付を計算したい。`,
+    values: {target:'B1', source:'A1', months:'12'},
+    formula: (v) => `=EDATE(${v.source},${v.months})`,
+    explain: (v) => `<b>EDATE関数</b>は、指定した日付から〇ヶ月後（前）の日付を計算します。「前」にしたい場合はヶ月数にマイナスの数字（例：-1）を入力してください。`,
+    pitfall: `計算結果が日付ではなく<b>ただの数字（シリアル値）</b>で表示されてしまう場合は、セルの書式設定を「日付」に変更してください。`,
+    version: `Excel 2007以降で使用できます（Excel 2003では分析ツールアドインが必要です）。`
+  },
+
+  /* ---------------- 端数処理・書式 ---------------- */
+  round: {
+    cat:'round', label:'四捨五入する (ROUND)', level:'初級',
+    scene:'こんな時に：消費税計算後の端数を四捨五入したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値を
+      小数第<span contenteditable class="blank" data-k="digit">${v.digit}</span>位で四捨五入したい。`,
+    values: {target:'B1', source:'A1', digit:'0'},
+    formula: (v) => `=ROUND(${v.source},${v.digit})`,
+    explain: (v) => `<b>ROUND関数</b>は、指定した桁数で四捨五入します。桁数に「0」を指定すると整数に、「-1」を指定すると十の位で四捨五入になります。`,
+    pitfall: `「小数第1位で四捨五入」と「小数第1位まで表示（見た目だけ変える）」は違います。ROUND関数は<b>実際の数値そのもの</b>を変えるので、後の計算にも影響します。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  roundupdown: {
+    cat:'round', label:'切り上げ・切り捨て (ROUNDUP/ROUNDDOWN)', level:'初級',
+    scene:'こんな時に：見積金額の端数を必ず切り上げたい／切り捨てたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値を
+      小数第<span contenteditable class="blank" data-k="digit">${v.digit}</span>位で
+      <span contenteditable class="blank" data-k="mode" style="width:70px;">${v.mode}</span>したい。`,
+    values: {target:'B1', source:'A1', digit:'0', mode:'切り上げ'},
+    formula: (v) => v.mode.includes('上げ') ? `=ROUNDUP(${v.source},${v.digit})` : `=ROUNDDOWN(${v.source},${v.digit})`,
+    explain: (v) => `<b>ROUNDUP関数</b>は必ず切り上げ、<b>ROUNDDOWN関数</b>は必ず切り捨てます。ROUND関数と違い、4以下でも繰り上がったり、5以上でも切り捨てられたりする点が特徴です。`,
+    pitfall: `見積書や請求書で「1円未満は必ず切り上げ」のような社内ルールがある場合、ROUND（四捨五入）ではなくROUNDUPを使う必要があるので使い分けに注意してください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  texttostr: {
+    cat:'round', label:'表示形式を変える (TEXT)', level:'中級',
+    scene:'こんな時に：数字を「¥1,000」や「2026年1月」のような見た目にしたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの値を
+      「<span contenteditable class="blank" data-k="format" style="width:110px;">${v.format}</span>」
+      という表示形式の文字列に変換したい。`,
+    values: {target:'B1', source:'A1', format:'#,##0"円"'},
+    formula: (v) => `=TEXT(${v.source},"${v.format}")`,
+    explain: (v) => `<b>TEXT関数</b>は、数値や日付を指定した書式の「文字列」に変換します。セルの表示形式を変えるのと似ていますが、TEXT関数は他の文字列と&でつなげて使えるのが特徴です。`,
+    pitfall: `TEXT関数で変換した結果は<b>文字列</b>になるため、それ以上の計算（合計など）には使えなくなります。あくまで「表示専用」の値だと覚えておいてください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
   }
 };
 
