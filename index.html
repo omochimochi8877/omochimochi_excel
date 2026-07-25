@@ -432,6 +432,32 @@ const functions = {
     pitfall: `普通の<b>SUM</b>だと、フィルターで非表示にした行の数字も合計に含まれてしまいます。フィルターをよく使う表には最初からSUBTOTALを使っておくのがおすすめです。`,
     version: `Excel 2003以降で使用できます。`
   },
+  countifs: {
+    cat:'agg', label:'複数条件でカウント (COUNTIFS)', level:'上級',
+    scene:'こんな時に：「営業部」かつ「正社員」の人数など、2つ以上の条件で数えたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="range1">${v.range1}</span> の中で「<span contenteditable class="blank" data-k="cond1" style="width:60px;">${v.cond1}</span>」、
+      かつ <span contenteditable class="blank" data-k="range2">${v.range2}</span> の中で「<span contenteditable class="blank" data-k="cond2" style="width:60px;">${v.cond2}</span>」
+      を両方満たす行の数を数えたい。`,
+    values: {target:'F1', range1:'B2:B20', cond1:'営業部', range2:'C2:C20', cond2:'正社員'},
+    formula: (v) => `=COUNTIFS(${v.range1},"${v.cond1}",${v.range2},"${v.cond2}")`,
+    explain: (v) => `<b>COUNTIFS関数</b>は、COUNTIFの「複数条件版」です。条件と範囲のペアを増やせば、3つ以上の条件でも数えられます。すべての条件を満たす行だけがカウントされます（AND条件）。`,
+    pitfall: `条件を「どちらか一方」（OR条件）で数えたい場合はCOUNTIFSでは対応できません。その場合はCOUNTIFを2つ足し算する形にする必要があります。`,
+    version: `Excel 2007以降で使用できます。`
+  },
+  averageif: {
+    cat:'agg', label:'条件付き平均 (AVERAGEIF)', level:'中級',
+    scene:'こんな時に：部署ごとの平均残業時間、商品ごとの平均単価を出したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="condRange">${v.condRange}</span> の中で
+      「<span contenteditable class="blank" data-k="cond" style="width:70px;">${v.cond}</span>」に一致する行だけを対象に、
+      <span contenteditable class="blank" data-k="avgRange">${v.avgRange}</span> の数字の平均を出したい。`,
+    values: {target:'E1', condRange:'B1:B10', cond:'営業部', avgRange:'C1:C10'},
+    formula: (v) => `=AVERAGEIF(${v.condRange},"${v.cond}",${v.avgRange})`,
+    explain: (v) => `<b>AVERAGEIF関数</b>は、SUMIFの平均バージョンです。条件に一致する行だけを対象に平均値を計算します。`,
+    pitfall: `SUMIFと同じく、「条件を見る列」と「平均を出す列」の行数・開始行がズレていないか確認してください。`,
+    version: `Excel 2007以降で使用できます。`
+  },
 
   /* ---------------- 条件分岐 ---------------- */
   if: {
@@ -511,6 +537,20 @@ const functions = {
     pitfall: `便利な関数ですが<b>Excel 2021／365限定</b>です。会社のPCがExcel 2019以前の場合は使えないので、その場合はVLOOKUPかINDEX+MATCHを使ってください。`,
     version: `Excel 2021またはMicrosoft 365が必要です（Excel 2019以前では使用できません）。`
   },
+  indexmatch: {
+    cat:'search', label:'表のどこからでも探す (INDEX+MATCH)', level:'上級',
+    scene:'こんな時に：探したい値が表の右側の列にある、VLOOKUPが使えない場面で',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="key">${v.key}</span> セルの値を
+      <span contenteditable class="blank" data-k="keyRange">${v.keyRange}</span> の中から探して、
+      同じ行にある
+      <span contenteditable class="blank" data-k="returnRange">${v.returnRange}</span> の値を表示したい。`,
+    values: {target:'D2', key:'C2', keyRange:'A2:A100', returnRange:'B2:B100'},
+    formula: (v) => `=INDEX(${v.returnRange},MATCH(${v.key},${v.keyRange},0))`,
+    explain: (v) => `<b>MATCH関数</b>が「探したい値が${v.keyRange}の中の何番目にあるか」を調べ、<b>INDEX関数</b>がその番号を使って${v.returnRange}から値を取り出す、という2段構えの組み合わせです。VLOOKUPと違い、検索する列が取得したい列より右にあっても使えます。`,
+    pitfall: `数式が2つの関数の組み合わせで複雑に見えますが、「MATCHで場所を探す→INDEXでその場所の値を取る」という役割分担さえ覚えれば怖くありません。最後の<b>0</b>は「完全一致で探す」という意味です。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
 
   /* ---------------- 文字列操作 ---------------- */
   concat: {
@@ -577,6 +617,18 @@ const functions = {
     pitfall: `全角ハイフン・半角ハイフン・長音記号など、見た目が似ている文字はコンピューター上では別の文字として扱われるため、意図通りに置き換わらないことがあります。`,
     version: `Excel 2003以降、すべてのバージョンで使用できます。`
   },
+  len: {
+    cat:'text', label:'文字数を数える (LEN)', level:'初級',
+    scene:'こんな時に：入力された文字数が規定の桁数と合っているかチェックしたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルに入力されている
+      文字の数を表示したい。`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=LEN(${v.source})`,
+    explain: (v) => `<b>LEN関数</b>は、セルに入力されている文字数をそのまま数えます。半角も全角も1文字として同じようにカウントされます。`,
+    pitfall: `郵便番号や電話番号など「桁数チェック」に使う場合、<b>スペースや見えないデータ</b>が混ざっていると想定通りの文字数にならないことがあります。TRIM関数と組み合わせて使うと安心です。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
 
   /* ---------------- 日付・時刻 ---------------- */
   today: {
@@ -618,6 +670,18 @@ const functions = {
     explain: (v) => `<b>EDATE関数</b>は、指定した日付から〇ヶ月後（前）の日付を計算します。「前」にしたい場合はヶ月数にマイナスの数字（例：-1）を入力してください。`,
     pitfall: `計算結果が日付ではなく<b>ただの数字（シリアル値）</b>で表示されてしまう場合は、セルの書式設定を「日付」に変更してください。`,
     version: `Excel 2007以降で使用できます（Excel 2003では分析ツールアドインが必要です）。`
+  },
+  weekday: {
+    cat:'date', label:'曜日を判定する (WEEKDAY/TEXT)', level:'中級',
+    scene:'こんな時に：日付から自動で「月」「火」などの曜日を出したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの日付の
+      曜日を「<span contenteditable class="blank" data-k="style" style="width:60px;">${v.style}</span>」で表示したい。`,
+    values: {target:'B1', source:'A1', style:'月火水'},
+    formula: (v) => `=TEXT(${v.source},"aaa")`,
+    explain: (v) => `曜日を「月」「火」のような漢字1文字で表示したい場合は<b>TEXT関数</b>に書式「aaa」を指定するのが簡単です（「aaaa」にすると「月曜日」と表示されます）。数値（1〜7）として扱いたい場合は<b>WEEKDAY関数</b>を使います。`,
+    pitfall: `TEXT関数で作った曜日は<b>文字列</b>なので、条件分岐（土日だけ色をつける等）に使う場合はWEEKDAY関数の方が扱いやすいです。用途に応じて使い分けてください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
   },
 
   /* ---------------- 端数処理・書式 ---------------- */
