@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>使い方ガイド｜セルうめ</title>
+<meta name="description" content="セルうめの使い方を画像付きで解説。日本語の穴埋め文にセル番号を入れるだけでExcel関数の数式が作れます。">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"?";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(26px,5vw,34px);margin:10px 0 8px;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:36px;}
+
+  .step{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:24px 26px;margin-bottom:20px;position:relative;
+  }
+  .step-num{
+    position:absolute;top:-14px;left:20px;
+    background:var(--forest-deep);color:#fff;
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    padding:4px 12px;border-radius:3px;
+  }
+  .step h2{font-size:17px;color:var(--forest-deep);margin:8px 0 10px;}
+  .step p{font-size:14.5px;color:#3c4438;margin:0 0 10px;}
+  .step .example{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+  }
+  .step .example b{color:var(--forest-deep);}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:22px;border-bottom:2px solid var(--forest);padding-bottom:10px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">How to Use</div>
+  <h1>セルうめの使い方</h1>
+  <p class="sub">Excelの知識がなくても、3ステップで数式が作れます。ここでは実際の画面の流れに沿って説明します。</p>
+
+  <div class="step">
+    <div class="step-num">STEP 1</div>
+    <h2>やりたい作業のカテゴリを選ぶ</h2>
+    <p>画面上部に「集計・計算」「条件分岐」「検索・参照」など6つのカテゴリボタンが並んでいます。今困っている作業に近いものをクリックしてください。</p>
+    <div class="example">例：「部署ごとの経費を合計したい」→ <b>集計・計算</b>を選ぶ</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">STEP 2</div>
+    <h2>関数を選ぶ</h2>
+    <p>カテゴリの下に、そのカテゴリに含まれる関数の一覧が表示されます。各関数には「初級・中級・上級」の難易度タグと「こんな時に：〜」という実務シーンの説明がついているので、それを目印に選んでください。</p>
+    <div class="example">例：「部署ごとの経費合計」→ <b>SUMIF（条件付き合計）</b>を選ぶ</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">STEP 3</div>
+    <h2>黄色い空欄にセル番号を入力する</h2>
+    <p>文章の中の黄色い下線が引かれた部分をクリックすると、そのまま書き換えられます。ご自身のExcelの表を見ながら、該当するセル番号（例：A1、B2:B10 など）を入力してください。入力すると、下の「数式プレビュー」が自動で更新されます。</p>
+    <div class="example">例：Ｂ列の中で「営業部」と書かれている行だけを対象に、Ｃ列の数字を合計したい</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">STEP 4</div>
+    <h2>「コピー」ボタンを押してExcelに貼り付ける</h2>
+    <p>数式プレビューの右側にある「コピー」ボタンを押すと、数式全体がコピーされます。あとはExcelの入力したいセルを選び、そのまま貼り付ける（Ctrl+V）だけで完成です。</p>
+  </div>
+
+  <div class="faq">
+    <h2>よくある質問</h2>
+    <div class="qa">
+      <div class="q">入力したセル番号が間違っていても大丈夫？</div>
+      <div class="a">数式の「形」は正しく作られますが、セル番号の中身が正しいかどうかはご自身の表と照らし合わせてご確認ください。貼り付けた後、Excel上で結果が想定通りか一度チェックすることをおすすめします。</div>
+    </div>
+    <div class="qa">
+      <div class="q">自分のExcelのバージョンで使えるか分からない</div>
+      <div class="a">各関数のカードの一番下に「対応バージョン」が表示されています。XLOOKUPなど一部の新しい関数は、古いバージョンのExcelでは使えないのでご注意ください。</div>
+    </div>
+    <div class="qa">
+      <div class="q">使いたい関数が一覧にない</div>
+      <div class="a"><a href="/contact.html">お問い合わせフォーム</a>から関数の追加リクエストを送ってください。順次追加しています。</div>
+    </div>
+    <div class="qa">
+      <div class="q">スマートフォンでも使える？</div>
+      <div class="a">はい、使えます。ただし実際にExcelに数式を貼り付ける作業はパソコン上で行うことになるため、パソコンでの利用を推奨します。</div>
+    </div>
+  </div>
+
+  <a class="cta" href="/index.html">← 数式ジェネレーターを使ってみる</a>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
