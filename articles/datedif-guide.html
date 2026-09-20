@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>DATEDIF関数で勤続年数・年齢を計算する方法｜#NUM!エラーの原因と対処法｜セルうめ</title>
+<meta name="description" content="DATEDIF関数を使って勤続年数や満年齢を計算する方法を実務目線で解説。関数名が入力補完に出てこない理由、#NUM!エラーの原因、「YM」「YD」単位の落とし穴、総務・人事での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/datedif-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="DATEDIF関数で勤続年数・年齢を計算する方法｜セルうめ">
+<meta property="og:description" content="DATEDIF関数の使い方、#NUM!エラーの原因、YM・YD単位の落とし穴、総務・人事での実務例を解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/datedif-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DATEDIF関数で勤続年数・年齢を計算する方法">
+<meta name="twitter:description" content="関数名が出てこない理由、#NUM!エラーの原因と対処法、総務・人事での実務例を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "DATEDIF関数で勤続年数・年齢を計算する方法｜#NUM!エラーの原因と対処法",
+  "description": "DATEDIF関数を使って勤続年数や満年齢を計算する方法を実務目線で解説。関数名が入力補完に出てこない理由、#NUM!エラーの原因、YM・YD単位の落とし穴も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/datedif-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "DATEDIFを入力しても候補が出てきません。使えない関数なのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "使える関数です。DATEDIFはExcelの入力補完（オートコンプリート）の候補一覧にわざと表示されない、いわゆる「隠し関数」です。=DATEDIFと最後までスペルミスなく手入力すれば、そのまま使用できます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "DATEDIFで#NUM!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "多くの場合、開始日に終了日より後の日付が入っているのが原因です。DATEDIFは開始日が終了日より未来だとエラーになるため、2つの日付の前後関係を数式バーで確認してください。日付が文字列として入力されている場合も同様にエラーの原因になります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "満年齢と数え年、DATEDIFで計算できるのはどちらですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "DATEDIFで計算できるのは満年齢です。誕生日を迎えているかどうかを日付単位で正確に判定して計算するため、人事・総務で使う「満年齢」「満勤続年数」の算出に向いています。数え年が必要な場合は別途1〜2を加える計算を行ってください。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>DATEDIF関数で勤続年数・年齢を計算する方法｜#NUM!エラーの原因と対処法</h1>
+  <p class="sub">「入社日から今日までの勤続年数」「生年月日から満年齢」を求めたいのに、DATEDIFと入力しても候補すら出てこない――そんな戸惑いから始まる関数を、実務での使い方とよくあるトラブルとあわせて整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 日付関数</div>
+
+  <article class="article-body">
+    <p>
+      人事・総務の仕事では「入社日から今日までの勤続年数は何年何ヶ月か」「生年月日から満年齢は何歳か」といった、2つの日付の差を計算する場面が頻繁に出てきます。手計算やカレンダーを数えて求めることもできますが、社員数が多くなるほど非現実的です。この計算を1本の数式で済ませてくれるのがDATEDIF関数ですが、Excelの数式一覧やヘルプの目立つ場所には載っておらず、初めて使う人ほど「本当に存在する関数なのか」と不安になりがちです。
+    </p>
+
+    <h2>DATEDIFが「隠し関数」と呼ばれる理由</h2>
+    <p>
+      DATEDIFはセルに「=DATEDIF」と入力しても、SUMやVLOOKUPのように候補が自動で表示されません。これはDATEDIFがExcelの関数一覧・入力補完・ヘルプに正式には掲載されていない、いわゆる非公式（隠し）関数として扱われているためです。もともとLotus 1-2-3との互換性のために残された関数で、マイクロソフトは長年ドキュメント化していませんでした。とはいえ動作自体はExcel 2003以降のほぼすべてのバージョンで安定しており、実務で使う分には問題ありません。候補が出ないことに驚いて「使えない関数だ」と誤解しないよう、スペルミスなく手入力する関数だと覚えておくと安心です。
+    </p>
+
+    <h2>基本の書き方と3つの単位</h2>
+    <p>
+      DATEDIFは「開始日」「終了日」「単位」の3つの引数を取ります。単位を切り替えることで、年数・月数・日数のどれを求めたいかを指定します。
+    </p>
+    <div class="box">
+      <div class="code">=DATEDIF(開始日, 終了日, 単位)</div>
+      <p style="margin-bottom:0;">例：A1セルの入社日から今日までの満勤続年数を求める場合<br>
+        <span style="font-family:var(--mono);">=DATEDIF(A1, TODAY(), "Y")</span></p>
+    </div>
+    <div class="compare">
+      <div class="col">
+        <h3>"Y"</h3>
+        <ul>
+          <li>満年数を求める</li>
+          <li>勤続年数、満年齢の算出に使用</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>"M"</h3>
+        <ul>
+          <li>満月数を求める</li>
+          <li>ローン返済月数などに使用</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>"D"</h3>
+        <ul>
+          <li>日数を求める</li>
+          <li>契約日数、経過日数などに使用</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      実務ではさらに「YM」（1年未満の月数）、「YD」（1年未満の日数）という単位もよく使われます。たとえば「勤続5年3ヶ月」のように年と月を両方表示したい場合は、"Y"単位と"YM"単位の2つのDATEDIFを組み合わせ、TEXT関数などで「5年3ヶ月」という文字列に整形します。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>人事・総務担当者</b>であれば、社員名簿の入社日列からDATEDIFで勤続年数を自動計算し、永年勤続表彰や退職金計算の基礎資料に使うケースが典型的です。<b>経理担当者</b>であれば、契約開始日から満了日までの契約期間を月数で算出し、按分計算の根拠として使う場面があります。<b>総務担当者</b>であれば、従業員の生年月日から満年齢を計算し、社会保険の年齢要件（40歳、60歳、65歳など)の判定に利用することもよくあります。いずれも「今日の日付」を基準にする場合はTODAY関数と組み合わせるのがポイントです。
+    </p>
+
+    <h2>DATEDIFでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#NUM! エラー</span>
+      <p style="margin-bottom:6px;">DATEDIFで最もよく遭遇するエラーです。主な原因は次の2つです。</p>
+      <ul>
+        <li>開始日が終了日より後（未来）の日付になっている</li>
+        <li>開始日または終了日のセルが、日付ではなく文字列として入力されている</li>
+      </ul>
+      <div class="code">例：=DATEDIF(A1,B1,"Y") でA1に「2027/1/1」、B1に「2026/9/20」が入っている（開始日の方が未来）</div>
+      <p style="margin-bottom:0;">対処法として、まず数式バーで開始日・終了日の前後関係を確認してください。他システムから取り込んだ日付が文字列扱いになっているケースも多いため、セルが左寄せ表示になっていないか（＝文字列扱いのサイン）も合わせてチェックしましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">「YM」単位で結果がマイナスになる・想定と違う</span>
+      <p style="margin-bottom:6px;">YM単位は「1年未満の月数」を求めるものですが、日にちの繰り上がり処理を誤解しているケースがあります。</p>
+      <div class="code">例：開始日が「2025/8/31」、終了日が「2026/9/1」の場合、月末と月初の関係で想定と1ヶ月ずれることがある</div>
+      <p style="margin-bottom:0;">月末日を開始日にすると、月をまたぐ計算で誤差が出やすくなります。厳密な日数管理が必要な場合は、"YM"単独ではなく"M"単位や"D"単位との併用で結果を検算することをおすすめします。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">関数の候補が出ない・入力できているか不安になる</span>
+      <p style="margin-bottom:6px;">前述の通りDATEDIFは入力補完に表示されない仕様です。エラーではありません。</p>
+      <p style="margin-bottom:0;">「=DATEDIF(」まで入力してもポップアップのヒントが出ないため不安になりますが、スペルミスなく最後まで入力しEnterを押せば正しく計算されます。心配な場合は一度セルに計算結果が表示されるか確認してから、他のセルにコピーして使いましょう。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>単位は必ず半角のダブルクォーテーションで囲む。</b>"Y"、"M"、"D"、"YM"、"YD"のいずれも文字列として指定するため、クォーテーションを忘れるとエラーになります。</li>
+      <li><b>「今日時点」の年数を出したいときはTODAY()と組み合わせる。</b>終了日を固定の日付にしてしまうと、翌日以降に開いたときの勤続年数が古いままになってしまいます。</li>
+      <li><b>年齢や勤続年数は「Y」単位が基本。</b>「M」単位で計算した月数を12で割って年数に丸めようとすると、誕生日前後の端数処理でズレが生じるため、素直に"Y"単位を使うのが安全です。</li>
+      <li><b>結果の表示形式は自動で「数値」になる。</b>日付として表示されてしまう場合は、セルの表示形式を「標準」または「数値」に変更してください。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      DATEDIFは入力補完に出てこないため最初は戸惑う関数ですが、勤続年数・満年齢・契約期間といった「2つの日付の差」を求める場面では非常に頼りになります。単位を"Y""M""D""YM""YD"の中から目的に合わせて選び、開始日と終了日の前後関係さえ間違えなければ、#NUM!エラーに悩まされることもありません。TODAY関数と組み合わせて「今日時点」の年数を自動更新できるようにしておくと、名簿の更新作業もぐっと楽になります。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">DATEDIFを入力しても候補が出てきません。使えない関数なのですか？</div>
+        <div class="a">使える関数です。DATEDIFはExcelの入力補完（オートコンプリート）の候補一覧にわざと表示されない、いわゆる「隠し関数」です。=DATEDIFと最後までスペルミスなく手入力すれば、そのまま使用できます。</div>
+      </div>
+      <div class="qa">
+        <div class="q">DATEDIFで#NUM!エラーが出るのはなぜですか？</div>
+        <div class="a">多くの場合、開始日に終了日より後の日付が入っているのが原因です。DATEDIFは開始日が終了日より未来だとエラーになるため、2つの日付の前後関係を数式バーで確認してください。日付が文字列として入力されている場合も同様にエラーの原因になります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">満年齢と数え年、DATEDIFで計算できるのはどちらですか？</div>
+        <div class="a">DATEDIFで計算できるのは満年齢です。誕生日を迎えているかどうかを日付単位で正確に判定して計算するため、人事・総務で使う「満年齢」「満勤続年数」の算出に向いています。数え年が必要な場合は別途1〜2を加える計算を行ってください。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ DATEDIFの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
