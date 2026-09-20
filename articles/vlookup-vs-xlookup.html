@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>VLOOKUPとXLOOKUPの違いは？よくあるエラーと使い分けを解説｜セルうめ</title>
+<meta name="description" content="VLOOKUPとXLOOKUPは何が違うのか、どちらを使うべきかを実務目線で解説。#N/Aや#REF!など検索関数でよくあるエラーの原因と対処法、経理・総務でのリアルな使用例もあわせて紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/vlookup-vs-xlookup.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="VLOOKUPとXLOOKUPの違いは？よくあるエラーと使い分け｜セルうめ">
+<meta property="og:description" content="VLOOKUPとXLOOKUPの違い、よくあるエラー（#N/A・#REF!）の原因と対処法、経理・総務での実務例を解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/vlookup-vs-xlookup.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VLOOKUPとXLOOKUPの違いは？よくあるエラーと使い分け">
+<meta name="twitter:description" content="検索関数でよくあるエラーの原因と対処法、VLOOKUPとXLOOKUPの使い分けを実務目線で解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "VLOOKUPとXLOOKUPの違いは？よくあるエラーと使い分けを解説",
+  "description": "VLOOKUPとXLOOKUPは何が違うのか、どちらを使うべきかを実務目線で解説。#N/Aや#REF!など検索関数でよくあるエラーの原因と対処法も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/vlookup-vs-xlookup.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "VLOOKUPで#N/Aエラーが出ます。原因は何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "多くの場合、検索値が検索範囲の中に存在しないか、見た目は同じでも表記ゆれ（全角半角、余分な空白）があります。IFERROR関数と組み合わせてエラー時の表示を指定しつつ、元データの表記を確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "会社のExcelがXLOOKUPに対応していません。代わりに何を使えばいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "XLOOKUPはExcel 2021・Microsoft 365以降でしか使えません。古いバージョンではVLOOKUP、または検索したい列が表の左側にない場合はINDEX関数とMATCH関数の組み合わせを使ってください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "VLOOKUPとXLOOKUP、結局どちらを覚えればいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "会社のExcelがMicrosoft 365やExcel 2021であればXLOOKUPを優先して覚えるのがおすすめです。ただし古いバージョンのExcelを使う取引先とファイルをやり取りする可能性がある場合は、VLOOKUPも合わせて理解しておくと安心です。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:560px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>VLOOKUPとXLOOKUPの違いは？よくあるエラーと使い分けを解説</h1>
+  <p class="sub">「表から値を探す」場面で必ず出てくるVLOOKUPとXLOOKUP。何が違い、どちらを覚えるべきなのか。実務でつまずきやすいエラーとあわせて整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 検索・参照関数</div>
+
+  <article>
+    <p>
+      経理でも総務でも営業事務でも、「別の表から該当する値を探してきて転記する」という作業は日常的に発生します。Excelではこの検索作業をVLOOKUP関数、あるいはその後継であるXLOOKUP関数で自動化できますが、「結局どっちを使えばいいの？」「同じような数式なのにエラーになる」と迷う方は少なくありません。この記事では、両者の違いと、検索関数でつまずきやすいポイントを実務目線で整理します。
+    </p>
+
+    <h2>VLOOKUPとXLOOKUPの基本的な違い</h2>
+    <p>
+      どちらも「ある値を手がかりに、別の列から対応する値を取り出す」関数という点は共通しています。ただし内部の仕組みと制約が異なります。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>VLOOKUP</h3>
+        <ul>
+          <li>検索する列は必ず表の一番左</li>
+          <li>取得したい列は検索列より右側限定</li>
+          <li>列を挿入すると列番号がズレて壊れやすい</li>
+          <li>ほぼ全バージョンのExcelで利用可能</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>XLOOKUP</h3>
+        <ul>
+          <li>検索列と取得列を別々に指定できる</li>
+          <li>検索対象が表の右側にあっても左側にあっても対応</li>
+          <li>列を挿入しても数式が壊れにくい</li>
+          <li>Excel 2021／Microsoft 365以降限定</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      つまりXLOOKUPのほうが柔軟で壊れにくい上位互換ですが、「会社のExcelがそもそも対応しているか」がボトルネックになります。まずは自分の職場のExcelのバージョンを確認し、対応していればXLOOKUP、していなければVLOOKUPという判断が現実的です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば「社員番号を手がかりに、別シートの社員マスタから部署名や口座情報を取得する」場面。<b>総務担当者</b>であれば「従業員名簿から入社日を検索して勤続年数を算出する」場面。<b>営業事務</b>であれば「商品コードから単価表を検索して見積書に単価を反映する」場面などで、これらの関数は頻繁に使われます。共通しているのは「毎回目で探して手入力すると時間がかかり、転記ミスも起きやすい」という点で、検索関数を使うことでその両方を解消できます。
+    </p>
+
+    <h2>よくあるエラーとその原因・対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#N/A エラー</span>
+      <p style="margin-bottom:6px;">「該当する値が見つかりません」という意味のエラーです。原因としてよくあるのは次の3つです。</p>
+      <ul>
+        <li>検索したい値が検索範囲の中に本当に存在しない（表記ミス・入力漏れ）</li>
+        <li>見た目は同じでも全角と半角が混ざっている、余分な空白（スペース）が入っている</li>
+        <li>数値のセルと文字列のセルが混在していて、見た目が同じでも一致しない</li>
+      </ul>
+      <p style="margin-bottom:0;">対処法としては、検索範囲側のデータをよく確認するほか、IFERROR関数を組み合わせて「見つからない場合は空欄や『該当なし』と表示する」形にしておくと、エラーで数式が崩れて見えるのを防げます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">#REF! エラー</span>
+      <p style="margin-bottom:6px;">VLOOKUPで特に起きやすいエラーです。表の途中に列を挿入・削除すると、VLOOKUPの「右にいくつ移動するか」を指定する列番号がズレてしまい、参照先が壊れて発生します。</p>
+      <div class="code">例：=VLOOKUP(A2,商品マスタ!A:D,3,FALSE) の後で商品マスタに列を1本追加 → 3列目の意味が変わってしまう</div>
+      <p style="margin-bottom:0;">XLOOKUPであれば取得したい列を直接指定するため、この種のズレは起きにくくなります。表の構成が今後変わる可能性がある場合は、XLOOKUPが使える環境ならそちらを優先しましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">エラーは出ないのに違う値が返る</span>
+      <p style="margin-bottom:6px;">これが一番厄介なケースです。多くは、VLOOKUPの最後の引数（完全一致か近似一致か）を省略、または「TRUE」にしてしまっていることが原因です。近似一致の状態では、検索範囲が昇順に並んでいないと想定と違う行の値を拾ってしまいます。</p>
+      <div class="code">=VLOOKUP(A2,商品マスタ!A:D,3,<b>FALSE</b>) ← 最後をFALSEにして完全一致検索にする</div>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>検索範囲は絶対参照（$）で固定する。</b>数式を下の行にコピーしたときに範囲がズレて、検索対象がだんだんおかしくなるトラブルを防げます。</li>
+      <li><b>検索範囲の1列目（VLOOKUPの場合）に重複がないか確認する。</b>同じ値が複数あると、一番上の行の値しか返ってきません。</li>
+      <li><b>まず1行だけで数式を作り、正しく動くのを確認してからコピーする。</b>いきなり表全体にコピーすると、間違いに気づきにくくなります。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      VLOOKUPとXLOOKUPは「表から値を探す」という目的は同じですが、XLOOKUPのほうが柔軟で数式が壊れにくいという特徴があります。まずは自分の職場のExcelのバージョンを確認し、使えるならXLOOKUP、使えないならVLOOKUP＋IFERRORの組み合わせを基本形として覚えておくと安心です。数式そのものを一から書くのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を組み立てられます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">VLOOKUPで#N/Aエラーが出ます。原因は何ですか？</div>
+        <div class="a">多くの場合、検索値が検索範囲の中に存在しないか、見た目は同じでも表記ゆれ（全角半角、余分な空白）があります。IFERROR関数と組み合わせてエラー時の表示を指定しつつ、元データの表記を確認してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">会社のExcelがXLOOKUPに対応していません。代わりに何を使えばいいですか？</div>
+        <div class="a">XLOOKUPはExcel 2021・Microsoft 365以降でしか使えません。古いバージョンではVLOOKUP、または検索したい列が表の左側にない場合はINDEX関数とMATCH関数の組み合わせを使ってください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">VLOOKUPとXLOOKUP、結局どちらを覚えればいいですか？</div>
+        <div class="a">会社のExcelがMicrosoft 365やExcel 2021であればXLOOKUPを優先して覚えるのがおすすめです。ただし古いバージョンのExcelを使う取引先とファイルをやり取りする可能性がある場合は、VLOOKUPも合わせて理解しておくと安心です。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ VLOOKUP・XLOOKUPの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
