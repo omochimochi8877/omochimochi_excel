@@ -481,6 +481,20 @@ const functions = {
     pitfall: `SUMIFと同じく、「条件を見る列」と「平均を出す列」の行数・開始行がズレていないか確認してください。`,
     version: `Excel 2007以降で使用できます。`
   },
+  maxmin: {
+    cat:'agg', label:'最大値・最小値 (MAX/MIN)', level:'初級',
+    scene:'こんな時に：一番高い売上、一番低いテストの点数を知りたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
+      <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの中で
+      <span contenteditable class="blank" data-k="mode" style="width:80px;">${v.mode}</span>
+      数字を出したい。`,
+    values: {target:'F1', from:'B1', to:'D1', mode:'一番大きい'},
+    formula: (v) => v.mode.includes('大きい') ? `=MAX(${v.from}:${v.to})` : `=MIN(${v.from}:${v.to})`,
+    explain: (v) => `<b>MAX関数</b>は指定した範囲の中で一番大きい数値を、<b>MIN関数</b>は一番小さい数値を返します。「一番大きい／一番小さい」の指定に応じてどちらかを自動で選んでいます。`,
+    pitfall: `文字が入っているセルや空白のセルは無視されて計算されるので、範囲に余分な列が混ざっていても結果には影響しません。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
 
   /* ---------------- 条件分岐 ---------------- */
   if: {
