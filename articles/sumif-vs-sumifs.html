@@ -74,6 +74,7 @@
   :root{
     --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
     --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
     --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
     --mono:'JetBrains Mono',monospace;
   }
@@ -101,6 +102,17 @@
   h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
   .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
   .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
 
   article h2{
     font-family:var(--serif);font-size:20px;color:var(--forest-deep);
@@ -162,7 +174,7 @@
   <p class="sub">「条件に合う数字だけを合計したい」という場面で登場するSUMIFとSUMIFS。名前が似ていて何が違うのか分かりにくい2つの関数を、実務でつまずきやすいポイントとあわせて整理します。</p>
   <div class="meta">2026-09-20更新 ｜ 集計・関数の使い分け</div>
 
-  <article>
+  <article class="article-body">
     <p>
       月次の売上集計、部署別の経費集計、担当者別の件数集計など、「表の中から条件に合う行だけを取り出して合計する」作業は経理・営業事務の定番業務です。この作業を手作業でやろうとすると、フィルターをかけて範囲選択して合計、という手順を条件の数だけ繰り返すことになり、時間もかかれば範囲選択ミスも起きやすくなります。SUMIF関数とSUMIFS関数を使えば、この集計を数式1本で自動化できますが、名前が似ているため「どちらを使えばいいのか」「引数の順番が覚えられない」と迷う方が多い関数でもあります。
     </p>
