@@ -250,6 +250,26 @@
     font-weight:700;
   }
   .blank:focus{outline:none;border-bottom-color:var(--forest);background:#F0F7F3;}
+  .blank-select{
+    display:inline-block;
+    min-width:44px;
+    padding:3px 22px 3px 8px;
+    border:none;
+    border-bottom:2px solid var(--amber);
+    background:#FFF8EA url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23274734' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 6px center;
+    background-size:10px 7px;
+    font-family:var(--mono);
+    font-size:14px;
+    text-align:center;
+    text-align-last:center;
+    color:var(--forest-deep);
+    font-weight:700;
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    cursor:pointer;
+  }
+  .blank-select:focus{outline:none;border-bottom-color:var(--forest);background-color:#F0F7F3;}
 
   .divider{
     height:1px;
@@ -422,7 +442,10 @@ const functions = {
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
       <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの中で、
-      <span contenteditable class="blank" data-k="mode" style="width:90px;">数字が入っている</span>
+      <select class="blank-select" data-k="mode" style="width:110px;">
+        <option value="数字が入っている" ${v.mode==='数字が入っている'?'selected':''}>数字が入っている</option>
+        <option value="文字も含めて全部" ${v.mode==='文字も含めて全部'?'selected':''}>文字も含めて全部</option>
+      </select>
       セルの数を出したい。`,
     values: {target:'F1', from:'B1', to:'B10', mode:'数字が入っている'},
     formula: (v) => v.mode.includes('数字') ? `=COUNT(${v.from}:${v.to})` : `=COUNTA(${v.from}:${v.to})`,
@@ -488,7 +511,10 @@ const functions = {
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
       <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの中で
-      <span contenteditable class="blank" data-k="mode" style="width:80px;">${v.mode}</span>
+      <select class="blank-select" data-k="mode" style="width:90px;">
+        <option value="一番大きい" ${v.mode==='一番大きい'?'selected':''}>一番大きい</option>
+        <option value="一番小さい" ${v.mode==='一番小さい'?'selected':''}>一番小さい</option>
+      </select>
       数字を出したい。`,
     values: {target:'F1', from:'B1', to:'D1', mode:'一番大きい'},
     formula: (v) => v.mode.includes('大きい') ? `=MAX(${v.from}:${v.to})` : `=MIN(${v.from}:${v.to})`,
@@ -503,7 +529,10 @@ const functions = {
       <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値が、
       <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
       <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの範囲の中で
-      <span contenteditable class="blank" data-k="mode" style="width:70px;">${v.mode}</span>
+      <select class="blank-select" data-k="mode" style="width:85px;">
+        <option value="大きい順" ${v.mode==='大きい順'?'selected':''}>大きい順</option>
+        <option value="小さい順" ${v.mode==='小さい順'?'selected':''}>小さい順</option>
+      </select>
       で何番目かを出したい。`,
     values: {target:'C1', source:'B1', from:'B1', to:'B10', mode:'大きい順'},
     formula: (v) => v.mode.includes('大きい') ? `=RANK(${v.source},${v.from}:${v.to},0)` : `=RANK(${v.source},${v.from}:${v.to},1)`,
@@ -517,7 +546,10 @@ const functions = {
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
       <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの範囲の中で
-      <span contenteditable class="blank" data-k="mode" style="width:60px;">${v.mode}</span>
+      <select class="blank-select" data-k="mode" style="width:70px;">
+        <option value="上位" ${v.mode==='上位'?'selected':''}>上位</option>
+        <option value="下位" ${v.mode==='下位'?'selected':''}>下位</option>
+      </select>
       から
       <span contenteditable class="blank" data-k="n">${v.n}</span> 番目の数字を出したい。`,
     values: {target:'D1', from:'B1', to:'B10', mode:'上位', n:'1'},
@@ -533,7 +565,13 @@ const functions = {
     scene:'こんな時に：合格/不合格の判定、金額によって処理を分けたい',
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルの数字が
       <span contenteditable class="blank" data-k="threshold">${v.threshold}</span>
-      <span contenteditable class="blank" data-k="cmp" style="width:90px;">${v.cmp}</span>なら
+      <select class="blank-select" data-k="cmp" style="width:100px;">
+        <option value="より大きい" ${v.cmp==='より大きい'?'selected':''}>より大きい</option>
+        <option value="以上" ${v.cmp==='以上'?'selected':''}>以上</option>
+        <option value="より小さい" ${v.cmp==='より小さい'?'selected':''}>より小さい</option>
+        <option value="以下" ${v.cmp==='以下'?'selected':''}>以下</option>
+        <option value="と等しい" ${v.cmp==='と等しい'?'selected':''}>と等しい</option>
+      </select>なら
       「<span contenteditable class="blank" data-k="yes" style="width:70px;">${v.yes}</span>」、
       そうでなければ
       「<span contenteditable class="blank" data-k="no" style="width:70px;">${v.no}</span>」
@@ -581,7 +619,10 @@ const functions = {
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="range1">${v.range1}</span> セルが
       「<span contenteditable class="blank" data-k="cond1" style="width:60px;">${v.cond1}</span>」、
-      <span contenteditable class="blank" data-k="logic" style="width:80px;">${v.logic}</span>
+      <select class="blank-select" data-k="logic" style="width:100px;">
+        <option value="かつ(AND)" ${v.logic==='かつ(AND)'?'selected':''}>かつ(AND)</option>
+        <option value="または(OR)" ${v.logic==='または(OR)'?'selected':''}>または(OR)</option>
+      </select>
       <span contenteditable class="blank" data-k="range2">${v.range2}</span> セルが
       「<span contenteditable class="blank" data-k="cond2" style="width:60px;">${v.cond2}</span>」
       なら「<span contenteditable class="blank" data-k="yes" style="width:60px;">${v.yes}</span>」、
@@ -703,7 +744,10 @@ const functions = {
     scene:'こんな時に：郵便番号の頭3桁だけ取りたい、電話番号の末尾4桁だけ取りたい',
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="source">${v.source}</span> セルの文字列の
-      <span contenteditable class="blank" data-k="side" style="width:50px;">${v.side}</span>から
+      <select class="blank-select" data-k="side" style="width:60px;">
+        <option value="左" ${v.side==='左'?'selected':''}>左</option>
+        <option value="右" ${v.side==='右'?'selected':''}>右</option>
+      </select>から
       <span contenteditable class="blank" data-k="num">${v.num}</span> 文字を取り出したい。`,
     values: {target:'B1', source:'A1', side:'左', num:'3'},
     formula: (v) => v.side.includes('右') ? `=RIGHT(${v.source},${v.num})` : `=LEFT(${v.source},${v.num})`,
@@ -766,7 +810,11 @@ const functions = {
     scene:'こんな時に：ローマ字入力の表記ゆれ（すべて大文字・すべて小文字・先頭だけ大文字）を統一したい',
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="source">${v.source}</span> セルの英字を
-      <span contenteditable class="blank" data-k="mode" style="width:110px;">${v.mode}</span>
+      <select class="blank-select" data-k="mode" style="width:120px;">
+        <option value="すべて大文字" ${v.mode==='すべて大文字'?'selected':''}>すべて大文字</option>
+        <option value="すべて小文字" ${v.mode==='すべて小文字'?'selected':''}>すべて小文字</option>
+        <option value="先頭だけ大文字" ${v.mode==='先頭だけ大文字'?'selected':''}>先頭だけ大文字</option>
+      </select>
       に変換したい。`,
     values: {target:'B1', source:'A1', mode:'すべて大文字'},
     formula: (v) => v.mode.includes('先頭') ? `=PROPER(${v.source})` : v.mode.includes('小文字') ? `=LOWER(${v.source})` : `=UPPER(${v.source})`,
@@ -807,7 +855,11 @@ const functions = {
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
       <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの期間を
-      「<span contenteditable class="blank" data-k="unit" style="width:60px;">${v.unit}</span>」単位で計算したい。`,
+      「<select class="blank-select" data-k="unit" style="width:70px;">
+        <option value="年" ${v.unit==='年'?'selected':''}>年</option>
+        <option value="月" ${v.unit==='月'?'selected':''}>月</option>
+        <option value="日" ${v.unit==='日'?'selected':''}>日</option>
+      </select>」単位で計算したい。`,
     values: {target:'C1', from:'A1', to:'B1', unit:'年'},
     formula: (v) => {
       const unitMap = {'年':'Y', '月':'M', '日':'D'};
@@ -860,7 +912,11 @@ const functions = {
     scene:'こんな時に：日付データから「年」だけ、「月」だけを取り出して集計に使いたい',
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="source">${v.source}</span> セルの日付から
-      <span contenteditable class="blank" data-k="mode" style="width:50px;">${v.mode}</span>
+      <select class="blank-select" data-k="mode" style="width:60px;">
+        <option value="年" ${v.mode==='年'?'selected':''}>年</option>
+        <option value="月" ${v.mode==='月'?'selected':''}>月</option>
+        <option value="日" ${v.mode==='日'?'selected':''}>日</option>
+      </select>
       だけを数字で取り出したい。`,
     values: {target:'B1', source:'A1', mode:'年'},
     formula: (v) => v.mode.includes('月') ? `=MONTH(${v.source})` : v.mode.includes('日') ? `=DAY(${v.source})` : `=YEAR(${v.source})`,
@@ -888,7 +944,10 @@ const functions = {
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値を
       小数第<span contenteditable class="blank" data-k="digit">${v.digit}</span>位で
-      <span contenteditable class="blank" data-k="mode" style="width:70px;">${v.mode}</span>したい。`,
+      <select class="blank-select" data-k="mode" style="width:80px;">
+        <option value="切り上げ" ${v.mode==='切り上げ'?'selected':''}>切り上げ</option>
+        <option value="切り捨て" ${v.mode==='切り捨て'?'selected':''}>切り捨て</option>
+      </select>したい。`,
     values: {target:'B1', source:'A1', digit:'0', mode:'切り上げ'},
     formula: (v) => v.mode.includes('上げ') ? `=ROUNDUP(${v.source},${v.digit})` : `=ROUNDDOWN(${v.source},${v.digit})`,
     explain: (v) => `<b>ROUNDUP関数</b>は必ず切り上げ、<b>ROUNDDOWN関数</b>は必ず切り捨てます。ROUND関数と違い、4以下でも繰り上がったり、5以上でも切り捨てられたりする点が特徴です。`,
@@ -914,7 +973,10 @@ const functions = {
     render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
       <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値を、
       <span contenteditable class="blank" data-k="base">${v.base}</span> の倍数になるように
-      <span contenteditable class="blank" data-k="mode" style="width:70px;">${v.mode}</span>したい。`,
+      <select class="blank-select" data-k="mode" style="width:80px;">
+        <option value="切り上げ" ${v.mode==='切り上げ'?'selected':''}>切り上げ</option>
+        <option value="切り捨て" ${v.mode==='切り捨て'?'selected':''}>切り捨て</option>
+      </select>したい。`,
     values: {target:'B1', source:'A1', base:'100', mode:'切り上げ'},
     formula: (v) => v.mode.includes('上げ') ? `=CEILING(${v.source},${v.base})` : `=FLOOR(${v.source},${v.base})`,
     explain: (v) => `<b>CEILING関数</b>は指定した基準値の倍数になるように切り上げ、<b>FLOOR関数</b>は切り捨てます。ROUNDUP／ROUNDDOWNと違い、「10の倍数」「100の倍数」のようなキリのいい数字に揃えたいときに便利です。`,
@@ -1019,7 +1081,7 @@ function renderCards(){
   area.innerHTML = pageKeys.map(buildCardHTML).join('');
 
   pageKeys.forEach(key => {
-    document.querySelectorAll(`#card-${key} .blank`).forEach(el => el.setAttribute('data-fn', key));
+    document.querySelectorAll(`#card-${key} .blank, #card-${key} .blank-select`).forEach(el => el.setAttribute('data-fn', key));
     updateFormula(key);
   });
 
@@ -1044,6 +1106,14 @@ function bindBlanks(){
       const key = el.getAttribute('data-fn');
       const k = el.getAttribute('data-k');
       functions[key].values[k] = el.textContent.trim();
+      updateFormula(key);
+    });
+  });
+  document.querySelectorAll('#cardsArea .blank-select').forEach(el => {
+    el.addEventListener('change', () => {
+      const key = el.getAttribute('data-fn');
+      const k = el.getAttribute('data-k');
+      functions[key].values[k] = el.value;
       updateFormula(key);
     });
   });
