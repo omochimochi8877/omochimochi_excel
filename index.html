@@ -167,6 +167,7 @@
     padding:28px;
     margin-bottom:22px;
     position:relative;
+    transition: box-shadow .3s ease;
   }
   .card::before{
     content:attr(data-cellref);
@@ -179,6 +180,43 @@
     font-size:11px;
     padding:2px 8px;
     border-radius:3px;
+    letter-spacing:.05em;
+  }
+  .card.highlight{
+    box-shadow: 0 0 0 3px var(--amber), 0 1px 0 var(--line);
+  }
+
+  /* ページング */
+  .pager{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    margin:-6px 0 30px;
+    flex-wrap:wrap;
+  }
+  .pager-btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:700;
+    background:var(--amber);
+    color:#3A2A0A;
+    border:none;
+    border-radius:3px;
+    padding:9px 18px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .pager-btn:active{transform:translateY(1px);}
+  .pager-btn:disabled{
+    background:#E5E1D3;
+    color:#9aa093;
+    cursor:not-allowed;
+  }
+  .pager-info{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:#5b6459;
     letter-spacing:.05em;
   }
 
@@ -319,25 +357,9 @@
   <div class="category-row" id="categoryRow"></div>
   <div class="fn-row" id="fnRow"></div>
 
-  <div class="card" data-cellref="A1" id="mainCard">
-    <div class="scene" id="sceneArea"></div>
+  <div id="cardsArea"></div>
 
-    <div class="sentence" id="sentenceArea"></div>
-
-    <div class="divider"></div>
-
-    <div class="output-label">数式プレビュー</div>
-    <div class="output-row">
-      <div class="output-cell" id="formulaOut">=SUM(セルを入力)</div>
-      <button class="copy-btn" id="copyBtn">コピー</button>
-    </div>
-    <div class="copy-hint">この式をコピーしてExcelに貼り付けるだけでOKです。</div>
-
-    <div class="explain" id="explainArea"></div>
-    <div class="pitfall" id="pitfallArea"></div>
-
-    <div class="version-note"><span class="dot"></span><span id="versionNote"></span></div>
-  </div>
+  <div class="pager" id="pagerArea"></div>
 
   <footer>
     セルうめ β — 事務員さんのためのExcel関数ジェネレーター
@@ -729,8 +751,18 @@ const functions = {
 /* ==========================================================
    状態管理・描画ロジック
    ========================================================== */
+const PAGE_SIZE = 4;
+
 let currentCat = 'agg';
-let currentFn = 'sum';
+let currentPage = 0;
+
+function catFnKeys(){
+  return Object.keys(functions).filter(k => functions[k].cat === currentCat);
+}
+
+function totalPages(){
+  return Math.max(1, Math.ceil(catFnKeys().length / PAGE_SIZE));
+}
 
 function renderCategoryRow(){
   const row = document.getElementById('categoryRow');
@@ -741,11 +773,10 @@ function renderCategoryRow(){
     btn.textContent = c.label;
     btn.addEventListener('click', () => {
       currentCat = c.key;
-      const firstFn = Object.keys(functions).find(k => functions[k].cat === currentCat);
-      currentFn = firstFn;
+      currentPage = 0;
       renderCategoryRow();
       renderFnRow();
-      renderCard();
+      renderCards();
     });
     row.appendChild(btn);
   });
@@ -754,64 +785,138 @@ function renderCategoryRow(){
 function renderFnRow(){
   const row = document.getElementById('fnRow');
   row.innerHTML = '';
-  Object.keys(functions).filter(k => functions[k].cat === currentCat).forEach(key => {
+  const fnKeys = catFnKeys();
+  const start = currentPage * PAGE_SIZE;
+  const visibleKeys = fnKeys.slice(start, start + PAGE_SIZE);
+  fnKeys.forEach(key => {
     const f = functions[key];
     const btn = document.createElement('div');
-    btn.className = 'fn-btn' + (key === currentFn ? ' active' : '');
+    btn.className = 'fn-btn' + (visibleKeys.includes(key) ? ' active' : '');
     btn.innerHTML = `${f.label} <span class="lv">${f.level}</span>`;
     btn.addEventListener('click', () => {
-      currentFn = key;
+      currentPage = Math.floor(fnKeys.indexOf(key) / PAGE_SIZE);
       renderFnRow();
-      renderCard();
+      renderCards();
+      highlightCard(key);
     });
     row.appendChild(btn);
   });
 }
 
-function renderCard(){
-  const f = functions[currentFn];
-  document.getElementById('sceneArea').textContent = f.scene;
-  document.getElementById('sentenceArea').innerHTML = f.render(f.values);
-  document.getElementById('versionNote').textContent = f.version;
-  document.getElementById('mainCard').setAttribute('data-cellref', f.values.target);
-  updateFormula();
-  bindBlanks();
+function buildCardHTML(key){
+  const f = functions[key];
+  return `
+    <div class="card" data-cellref="${f.values.target}" id="card-${key}">
+      <div class="scene">${f.scene}</div>
+      <div class="sentence" id="sentence-${key}">${f.render(f.values)}</div>
+      <div class="divider"></div>
+      <div class="output-label">数式プレビュー</div>
+      <div class="output-row">
+        <div class="output-cell" id="formulaOut-${key}"></div>
+        <button class="copy-btn" data-fn="${key}">コピー</button>
+      </div>
+      <div class="copy-hint">この式をコピーしてExcelに貼り付けるだけでOKです。</div>
+      <div class="explain" id="explainArea-${key}"></div>
+      <div class="pitfall" id="pitfallArea-${key}"></div>
+      <div class="version-note"><span class="dot"></span><span>${f.version}</span></div>
+    </div>
+  `;
 }
 
-function updateFormula(){
-  const f = functions[currentFn];
-  document.getElementById('formulaOut').textContent = f.formula(f.values);
-  document.getElementById('explainArea').innerHTML = f.explain(f.values);
-  document.getElementById('pitfallArea').innerHTML = f.pitfall;
+function renderCards(){
+  const fnKeys = catFnKeys();
+  const start = currentPage * PAGE_SIZE;
+  const pageKeys = fnKeys.slice(start, start + PAGE_SIZE);
+
+  const area = document.getElementById('cardsArea');
+  area.innerHTML = pageKeys.map(buildCardHTML).join('');
+
+  pageKeys.forEach(key => {
+    document.querySelectorAll(`#card-${key} .blank`).forEach(el => el.setAttribute('data-fn', key));
+    updateFormula(key);
+  });
+
+  bindBlanks();
+  bindCopyButtons();
+  renderPager();
+}
+
+function updateFormula(key){
+  const f = functions[key];
+  const out = document.getElementById(`formulaOut-${key}`);
+  const exp = document.getElementById(`explainArea-${key}`);
+  const pit = document.getElementById(`pitfallArea-${key}`);
+  if (out) out.textContent = f.formula(f.values);
+  if (exp) exp.innerHTML = f.explain(f.values);
+  if (pit) pit.innerHTML = f.pitfall;
 }
 
 function bindBlanks(){
-  document.querySelectorAll('.blank').forEach(el => {
+  document.querySelectorAll('#cardsArea .blank').forEach(el => {
     el.addEventListener('input', () => {
+      const key = el.getAttribute('data-fn');
       const k = el.getAttribute('data-k');
-      functions[currentFn].values[k] = el.textContent.trim();
-      updateFormula();
+      functions[key].values[k] = el.textContent.trim();
+      updateFormula(key);
     });
   });
 }
 
-document.getElementById('copyBtn').addEventListener('click', () => {
-  const text = document.getElementById('formulaOut').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'コピーしました';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 1500);
+function bindCopyButtons(){
+  document.querySelectorAll('#cardsArea .copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-fn');
+      const text = document.getElementById(`formulaOut-${key}`).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'コピーしました';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 1500);
 
-    if (typeof gtag === 'function') {
-      gtag('event', 'copy_formula', { function_name: currentFn });
+        if (typeof gtag === 'function') {
+          gtag('event', 'copy_formula', { function_name: key });
+        }
+      });
+    });
+  });
+}
+
+function renderPager(){
+  const area = document.getElementById('pagerArea');
+  const pages = totalPages();
+  area.innerHTML = `
+    <button class="pager-btn" id="prevPageBtn" ${currentPage <= 0 ? 'disabled' : ''}>← 前へ</button>
+    <span class="pager-info">${currentPage + 1} / ${pages} ページ</span>
+    <button class="pager-btn" id="nextPageBtn" ${currentPage >= pages - 1 ? 'disabled' : ''}>次へ →</button>
+  `;
+  document.getElementById('prevPageBtn').addEventListener('click', () => {
+    if (currentPage > 0) {
+      currentPage--;
+      renderFnRow();
+      renderCards();
     }
   });
-});
+  document.getElementById('nextPageBtn').addEventListener('click', () => {
+    if (currentPage < totalPages() - 1) {
+      currentPage++;
+      renderFnRow();
+      renderCards();
+    }
+  });
+}
+
+function highlightCard(key){
+  const el = document.getElementById(`card-${key}`);
+  if (!el) return;
+  if (typeof el.scrollIntoView === 'function') {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  el.classList.add('highlight');
+  setTimeout(() => el.classList.remove('highlight'), 1500);
+}
 
 renderCategoryRow();
 renderFnRow();
-renderCard();
+renderCards();
 </script>
 </body>
 </html>
