@@ -496,6 +496,36 @@ const functions = {
     pitfall: `文字が入っているセルや空白のセルは無視されて計算されるので、範囲に余分な列が混ざっていても結果には影響しません。`,
     version: `Excel 2003以降、すべてのバージョンで使用できます。`
   },
+  rank: {
+    cat:'agg', label:'順位を出す (RANK)', level:'中級',
+    scene:'こんな時に：テストの順位、売上ランキングを出したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値が、
+      <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
+      <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの範囲の中で
+      <span contenteditable class="blank" data-k="mode" style="width:70px;">${v.mode}</span>
+      で何番目かを出したい。`,
+    values: {target:'C1', source:'B1', from:'B1', to:'B10', mode:'大きい順'},
+    formula: (v) => v.mode.includes('大きい') ? `=RANK(${v.source},${v.from}:${v.to},0)` : `=RANK(${v.source},${v.from}:${v.to},1)`,
+    explain: (v) => `<b>RANK関数</b>は、指定した範囲の中で対象のセルの値が何番目に大きい（小さい）かを順位として返します。第3引数の「0」は大きい順（降順）、「1」は小さい順（昇順）を意味し、指定に応じて自動で切り替えています。`,
+    pitfall: `この数式をほかの行にコピーする場合は、範囲の部分を<b>絶対参照（$B$1:$B$10のように$を付ける）</b>にしておかないと、コピーするたびに範囲がずれてしまいます。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます（Excel 2010以降はRANK.EQ関数への置き換えが推奨されています）。`
+  },
+  largesmall: {
+    cat:'agg', label:'上位・下位N番目の値 (LARGE/SMALL)', level:'中級',
+    scene:'こんな時に：売上ランキング1位の数字だけ抜き出したい、テストの下から2番目の点数を知りたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
+      <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの範囲の中で
+      <span contenteditable class="blank" data-k="mode" style="width:60px;">${v.mode}</span>
+      から
+      <span contenteditable class="blank" data-k="n">${v.n}</span> 番目の数字を出したい。`,
+    values: {target:'D1', from:'B1', to:'B10', mode:'上位', n:'1'},
+    formula: (v) => v.mode.includes('上位') ? `=LARGE(${v.from}:${v.to},${v.n})` : `=SMALL(${v.from}:${v.to},${v.n})`,
+    explain: (v) => `<b>LARGE関数</b>は範囲の中でn番目に大きい値を、<b>SMALL関数</b>はn番目に小さい値を返します。「上位／下位」の指定に応じてどちらかを自動で選んでいます。`,
+    pitfall: `n番目の「1」は最大値（最小値）そのものを意味します。同じ数値が複数ある場合は、同じ順位の値が重複してカウントされる点に注意してください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
 
   /* ---------------- 条件分岐 ---------------- */
   if: {
@@ -545,6 +575,41 @@ const functions = {
     pitfall: `0で割り算をしてしまう（<b>#DIV/0!</b>エラー）ケースで特によく使われます。表示を空欄にしたい場合は、置き換える値の欄に何も入れず<b>""</b>にすると空白表示になります。`,
     version: `Excel 2007以降で使用できます。`
   },
+  andor: {
+    cat:'cond', label:'複数条件を組み合わせる (AND/OR)', level:'中級',
+    scene:'こんな時に：「部署が営業部」かつ「役職が課長」など、複数条件を同時に判定したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="range1">${v.range1}</span> セルが
+      「<span contenteditable class="blank" data-k="cond1" style="width:60px;">${v.cond1}</span>」、
+      <span contenteditable class="blank" data-k="logic" style="width:80px;">${v.logic}</span>
+      <span contenteditable class="blank" data-k="range2">${v.range2}</span> セルが
+      「<span contenteditable class="blank" data-k="cond2" style="width:60px;">${v.cond2}</span>」
+      なら「<span contenteditable class="blank" data-k="yes" style="width:60px;">${v.yes}</span>」、
+      そうでなければ「<span contenteditable class="blank" data-k="no" style="width:60px;">${v.no}</span>」
+      と表示したい。`,
+    values: {target:'D2', range1:'B2', cond1:'営業部', logic:'かつ(AND)', range2:'C2', cond2:'課長', yes:'対象', no:'対象外'},
+    formula: (v) => v.logic.includes('OR') || v.logic.includes('または')
+      ? `=IF(OR(${v.range1}="${v.cond1}",${v.range2}="${v.cond2}"),"${v.yes}","${v.no}")`
+      : `=IF(AND(${v.range1}="${v.cond1}",${v.range2}="${v.cond2}"),"${v.yes}","${v.no}")`,
+    explain: (v) => `<b>AND関数</b>はすべての条件を満たす場合に、<b>OR関数</b>はいずれかの条件を満たす場合にTRUEを返します。IF関数と組み合わせることで、複数条件による表示の切り替えができます。「かつ／または」の指定に応じてAND・ORを自動で切り替えています。`,
+    pitfall: `条件をさらに増やしたい場合は、AND（条件1,条件2,条件3）のようにカンマで条件を追加するだけで対応できます。「かつ」と「または」を取り違えると、対象になる行が大きく変わってしまうので注意してください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  isblankif: {
+    cat:'cond', label:'空欄かどうかで表示を変える (ISBLANK+IF)', level:'初級',
+    scene:'こんな時に：未入力の欄はそのまま空白にしておき、入力済みの行だけ計算結果を出したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルが空欄なら
+      「<span contenteditable class="blank" data-k="blankMsg" style="width:50px;">${v.blankMsg}</span>」と表示し、
+      何か入力されていれば
+      「<span contenteditable class="blank" data-k="filledExpr" style="width:90px;">${v.filledExpr}</span>」
+      の計算結果を表示したい。`,
+    values: {target:'C1', source:'A1', blankMsg:'', filledExpr:'A1*1.1'},
+    formula: (v) => `=IF(ISBLANK(${v.source}),"${v.blankMsg}",${v.filledExpr})`,
+    explain: (v) => `<b>ISBLANK関数</b>は、セルが完全に空欄かどうかをTRUE／FALSEで判定します。IF関数と組み合わせることで「空欄ならそのまま空白、入力済みなら計算する」という表を作れます。`,
+    pitfall: `ISBLANK関数は「本当に何も入力されていないセル」だけをTRUEと判定します。数式の結果が""（空文字）になっているセルはISBLANKではFALSE扱いになるので注意してください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
 
   /* ---------------- 検索・参照 ---------------- */
   vlookup: {
@@ -587,6 +652,35 @@ const functions = {
     formula: (v) => `=INDEX(${v.returnRange},MATCH(${v.key},${v.keyRange},0))`,
     explain: (v) => `<b>MATCH関数</b>が「探したい値が${v.keyRange}の中の何番目にあるか」を調べ、<b>INDEX関数</b>がその番号を使って${v.returnRange}から値を取り出す、という2段構えの組み合わせです。VLOOKUPと違い、検索する列が取得したい列より右にあっても使えます。`,
     pitfall: `数式が2つの関数の組み合わせで複雑に見えますが、「MATCHで場所を探す→INDEXでその場所の値を取る」という役割分担さえ覚えれば怖くありません。最後の<b>0</b>は「完全一致で探す」という意味です。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  hlookup: {
+    cat:'search', label:'横方向の表引き (HLOOKUP)', level:'中級',
+    scene:'こんな時に：月ごとの数字が横に並んだ表から、特定の月の値を探したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="key">${v.key}</span> セルの値を、
+      <span contenteditable class="blank" data-k="range">${v.range}</span> の一番上の行から探して、
+      その表の上から
+      <span contenteditable class="blank" data-k="row">${v.row}</span> 行目の値を表示したい。`,
+    values: {target:'B5', key:'B4', range:'B1:M2', row:'2'},
+    formula: (v) => `=HLOOKUP(${v.key},${v.range},${v.row},FALSE)`,
+    explain: (v) => `<b>HLOOKUP関数</b>はVLOOKUPの「横方向」バージョンです。表の一番上の行から検索値を探し、指定した行数分だけ下にずれた値を返します。最後の<b>FALSE</b>は「完全に一致するものだけを探す」という意味です。`,
+    pitfall: `表が縦方向ではなく横方向（左から右ではなく上から下）に並んでいる場合に使う関数です。通常の縦方向の表には<b>VLOOKUPやXLOOKUP</b>を使ってください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  choose: {
+    cat:'search', label:'番号で値を選ぶ (CHOOSE)', level:'中級',
+    scene:'こんな時に：曜日番号や区分番号から、対応する名称を表示したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="indexCell">${v.indexCell}</span> セルの番号に応じて、
+      1なら「<span contenteditable class="blank" data-k="v1" style="width:50px;">${v.v1}</span>」、
+      2なら「<span contenteditable class="blank" data-k="v2" style="width:50px;">${v.v2}</span>」、
+      3なら「<span contenteditable class="blank" data-k="v3" style="width:50px;">${v.v3}</span>」
+      を表示したい。`,
+    values: {target:'B1', indexCell:'A1', v1:'月', v2:'火', v3:'水'},
+    formula: (v) => `=CHOOSE(${v.indexCell},"${v.v1}","${v.v2}","${v.v3}")`,
+    explain: (v) => `<b>CHOOSE関数</b>は、指定した番号に対応する値をリストの中から選んで返します。「1番目なら○○、2番目なら△△」という切り替えを、IFの入れ子より簡潔に書けます。`,
+    pitfall: `番号に対応する値が用意されていない場合（例えば候補が3つしかないのに4が入力された場合）は<b>エラー（#VALUE!）</b>になります。番号の範囲を候補の数と必ず合わせてください。`,
     version: `Excel 2003以降、すべてのバージョンで使用できます。`
   },
 
@@ -667,6 +761,33 @@ const functions = {
     pitfall: `郵便番号や電話番号など「桁数チェック」に使う場合、<b>スペースや見えないデータ</b>が混ざっていると想定通りの文字数にならないことがあります。TRIM関数と組み合わせて使うと安心です。`,
     version: `Excel 2003以降、すべてのバージョンで使用できます。`
   },
+  upperlower: {
+    cat:'text', label:'英字の大文字・小文字を変換する (UPPER/LOWER/PROPER)', level:'初級',
+    scene:'こんな時に：ローマ字入力の表記ゆれ（すべて大文字・すべて小文字・先頭だけ大文字）を統一したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの英字を
+      <span contenteditable class="blank" data-k="mode" style="width:110px;">${v.mode}</span>
+      に変換したい。`,
+    values: {target:'B1', source:'A1', mode:'すべて大文字'},
+    formula: (v) => v.mode.includes('先頭') ? `=PROPER(${v.source})` : v.mode.includes('小文字') ? `=LOWER(${v.source})` : `=UPPER(${v.source})`,
+    explain: (v) => `<b>UPPER関数</b>はすべて大文字に、<b>LOWER関数</b>はすべて小文字に、<b>PROPER関数</b>は単語の先頭だけ大文字に変換します。指定した変換方法に応じて自動でどれかを選んでいます。`,
+    pitfall: `日本語（全角文字）にはこれらの関数は影響しません。あくまで<b>半角英字</b>だけが変換される点に注意してください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  textjoin: {
+    cat:'text', label:'複数セルを区切り文字でつなげる (TEXTJOIN)', level:'中級',
+    scene:'こんな時に：バラバラのセルにある住所の各部分を、区切り文字を入れて1つにまとめたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
+      <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの文字を、
+      区切り文字「<span contenteditable class="blank" data-k="sep" style="width:40px;">${v.sep}</span>」
+      でつなげたい（空欄のセルは無視したい）。`,
+    values: {target:'E1', from:'A1', to:'D1', sep:'、'},
+    formula: (v) => `=TEXTJOIN("${v.sep}",TRUE,${v.from}:${v.to})`,
+    explain: (v) => `<b>TEXTJOIN関数</b>は、指定した範囲の文字列を区切り文字でつなげます。第2引数の<b>TRUE</b>は「空白セルを無視する」という意味で、区切り文字を自動で挿入してくれるのが特徴です。`,
+    pitfall: `&（アンパサンド）で複数セルをつなげようとすると区切り文字を何度も入力する必要がありますが、TEXTJOINなら区切り文字は<b>最初に1回指定するだけ</b>で済みます。`,
+    version: `Excel 2019またはMicrosoft 365が必要です（Excel 2016以前では使用できません）。`
+  },
 
   /* ---------------- 日付・時刻 ---------------- */
   today: {
@@ -721,6 +842,32 @@ const functions = {
     pitfall: `TEXT関数で作った曜日は<b>文字列</b>なので、条件分岐（土日だけ色をつける等）に使う場合はWEEKDAY関数の方が扱いやすいです。用途に応じて使い分けてください。`,
     version: `Excel 2003以降、すべてのバージョンで使用できます。`
   },
+  networkdays: {
+    cat:'date', label:'稼働日数を計算する (NETWORKDAYS)', level:'中級',
+    scene:'こんな時に：土日を除いた実働日数、納期までの営業日数を計算したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="from">${v.from}</span> セルから
+      <span contenteditable class="blank" data-k="to">${v.to}</span> セルまでの間で、
+      土日を除いた稼働日数を計算したい。`,
+    values: {target:'C1', from:'A1', to:'B1'},
+    formula: (v) => `=NETWORKDAYS(${v.from},${v.to})`,
+    explain: (v) => `<b>NETWORKDAYS関数</b>は、開始日から終了日までの日数から、土曜日・日曜日を自動で除いて計算します。開始日と終了日の両方が稼働日としてカウントされます。`,
+    pitfall: `祝日を除きたい場合は、祝日の日付を入力したセル範囲を第3引数に追加する必要があります。何も指定しないと<b>祝日も稼働日として</b>数えられてしまいます。`,
+    version: `Excel 2007以降で使用できます（Excel 2003では分析ツールアドインが必要です）。`
+  },
+  yearmonthday: {
+    cat:'date', label:'日付から年・月・日を取り出す (YEAR/MONTH/DAY)', level:'初級',
+    scene:'こんな時に：日付データから「年」だけ、「月」だけを取り出して集計に使いたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの日付から
+      <span contenteditable class="blank" data-k="mode" style="width:50px;">${v.mode}</span>
+      だけを数字で取り出したい。`,
+    values: {target:'B1', source:'A1', mode:'年'},
+    formula: (v) => v.mode.includes('月') ? `=MONTH(${v.source})` : v.mode.includes('日') ? `=DAY(${v.source})` : `=YEAR(${v.source})`,
+    explain: (v) => `<b>YEAR関数</b>は日付から「年」、<b>MONTH関数</b>は「月」、<b>DAY関数</b>は「日」の数字だけを取り出します。指定した項目に応じて自動でどれかを選んでいます。`,
+    pitfall: `取り出した年・月・日は<b>すべて数値</b>として扱われます。「2026年1月」のような文字列表示にしたい場合はTEXT関数と組み合わせてください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
 
   /* ---------------- 端数処理・書式 ---------------- */
   round: {
@@ -759,6 +906,31 @@ const functions = {
     formula: (v) => `=TEXT(${v.source},"${v.format}")`,
     explain: (v) => `<b>TEXT関数</b>は、数値や日付を指定した書式の「文字列」に変換します。セルの表示形式を変えるのと似ていますが、TEXT関数は他の文字列と&でつなげて使えるのが特徴です。`,
     pitfall: `TEXT関数で変換した結果は<b>文字列</b>になるため、それ以上の計算（合計など）には使えなくなります。あくまで「表示専用」の値だと覚えておいてください。`,
+    version: `Excel 2003以降、すべてのバージョンで使用できます。`
+  },
+  ceilingfloor: {
+    cat:'round', label:'倍数に切り上げ・切り下げる (CEILING/FLOOR)', level:'中級',
+    scene:'こんな時に：金額を100円単位で切り上げたい、時間を15分単位で切り捨てたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値を、
+      <span contenteditable class="blank" data-k="base">${v.base}</span> の倍数になるように
+      <span contenteditable class="blank" data-k="mode" style="width:70px;">${v.mode}</span>したい。`,
+    values: {target:'B1', source:'A1', base:'100', mode:'切り上げ'},
+    formula: (v) => v.mode.includes('上げ') ? `=CEILING(${v.source},${v.base})` : `=FLOOR(${v.source},${v.base})`,
+    explain: (v) => `<b>CEILING関数</b>は指定した基準値の倍数になるように切り上げ、<b>FLOOR関数</b>は切り捨てます。ROUNDUP／ROUNDDOWNと違い、「10の倍数」「100の倍数」のようなキリのいい数字に揃えたいときに便利です。`,
+    pitfall: `基準値（倍数）にマイナスの数値を使う場合など、数値の正負によって挙動が変わることがあります。プラスの数値であれば、指定した基準値の倍数に丸められると覚えておけば問題ありません。`,
+    version: `Excel 2007以降で使用できます（バージョンによってはCEILING.MATH／FLOOR.MATHへの置き換えが推奨されています）。`
+  },
+  int: {
+    cat:'round', label:'整数部分だけ取り出す (INT)', level:'初級',
+    scene:'こんな時に：小数点以下を切り捨てて整数だけにしたい、割り算の商だけを求めたい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="source">${v.source}</span> セルの数値の
+      整数部分だけを取り出したい。`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=INT(${v.source})`,
+    explain: (v) => `<b>INT関数</b>は、数値の小数点以下を切り捨てて整数部分だけを返します。ROUNDDOWN(セル,0)と似ていますが、マイナスの数値の場合は結果が異なる点に注意してください。`,
+    pitfall: `マイナスの数値（例：-2.5）の場合、INT関数は<b>より小さい整数</b>（-3）を返します。ROUNDDOWN(-2.5,0)の結果（-2）とは異なるので、マイナスの数値を扱う場合は注意してください。`,
     version: `Excel 2003以降、すべてのバージョンで使用できます。`
   }
 };
