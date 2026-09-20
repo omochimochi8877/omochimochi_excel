@@ -1,0 +1,28 @@
+name: Create Children's Animation (Free MVP)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Build 5-minute animation
+        run: |
+          chmod +x video-automation/scripts/build_video.sh
+          video-automation/scripts/build_video.sh
+      - name: Upload MP4
+        uses: actions/upload-artifact@v4
+        with:
+          name: children-animation-mp4
+          path: video-automation/output/little-star-5min.mp4
+          retention-days: 7
