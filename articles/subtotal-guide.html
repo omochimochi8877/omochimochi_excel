@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>SUBTOTAL関数でフィルター後の合計を正しく出す方法｜SUMとの違いと集計方法9・109の使い分け｜セルうめ</title>
+<meta name="description" content="SUBTOTAL関数を使ってオートフィルターで絞り込んだ行だけを集計する方法を実務目線で解説。SUMだと合計が合わない理由、集計方法9と109の違い、小計行の二重集計を防ぐ仕組み、経理・総務での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/subtotal-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="SUBTOTAL関数でフィルター後の合計を正しく出す方法｜セルうめ">
+<meta property="og:description" content="SUMだと合計が合わない理由、集計方法9と109の違い、小計行の二重集計を防ぐ仕組みを経理・総務の実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/subtotal-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SUBTOTAL関数でフィルター後の合計を正しく出す方法">
+<meta name="twitter:description" content="SUMだと合計が合わない理由、集計方法9と109の違い、小計行の二重集計を防ぐ仕組みを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "SUBTOTAL関数でフィルター後の合計を正しく出す方法｜SUMとの違いと集計方法9・109の使い分け",
+  "description": "SUBTOTAL関数を使ってオートフィルターで絞り込んだ行だけを集計する方法を実務目線で解説。SUMだと合計が合わない理由、集計方法9と109の違い、小計行の二重集計を防ぐ仕組みも紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/subtotal-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "SUBTOTALとSUMは何が違うのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SUMはオートフィルターで非表示になっている行の数値もすべて合計してしまう関数です。一方SUBTOTALは、オートフィルターで絞り込んで非表示になった行を自動的に無視し、画面に見えている行だけを集計してくれます。フィルターで一部のデータだけを表示させて合計を出したい場合は、SUMではなくSUBTOTALを使う必要があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "集計方法の9と109、どちらを使えばいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "9と109はどちらも合計(SUM)を計算しますが、手動で非表示にした行の扱いが異なります。9はフィルター非表示行だけを除外し、右クリックで手動非表示にした行は合計に含みます。109はフィルター非表示行に加えて、手動非表示にした行も合計から除外します。迷った場合は、非表示にした行はすべて集計から外したいというケースが多いため、109を選ぶと意図とのズレが起きにくくなります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SUBTOTALの範囲に別のSUBTOTAL行(小計行)が含まれていると二重に集計されませんか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "されません。SUBTOTAL関数は、集計範囲の中に他のSUBTOTAL関数で作られた小計行が含まれている場合、その小計行を自動的に集計対象から除外する仕組みになっています。そのため部署ごとの小計行と全体の合計行の両方にSUBTOTALを使っても、小計の数値が二重に足し込まれる心配はありません。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>SUBTOTAL関数でフィルター後の合計を正しく出す方法｜SUMとの違いと集計方法9・109の使い分け</h1>
+  <p class="sub">オートフィルターで絞り込んだのに、合計欄の数字だけ全体分のまま変わらない――それはSUM関数が非表示行まで拾ってしまっているせいかもしれません。「見えている行だけ」を正しく集計するSUBTOTAL関数の使い方を整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 集計・計算</div>
+
+  <article class="article-body">
+    <p>
+      経理や総務の仕事でExcelのオートフィルターを使い、特定の部署・期間・担当者だけに行を絞り込んだあと、「画面に見えている行だけの合計」を出したい場面はよくあります。ところが合計欄にいつも通りSUM関数を入れてしまうと、フィルターで非表示になっているはずの行の数値までこっそり計算に含まれてしまい、電卓で検算した数字と合わずに首をかしげることになります。この記事では、見えている行だけを正しく集計するSUBTOTAL関数の使い方と、集計方法の番号選びで起きやすい失敗を実務目線で整理します。
+    </p>
+
+    <h2>SUBTOTALとSUMの決定的な違い</h2>
+    <p>
+      SUM関数は、指定したセル範囲に含まれる数値をすべて機械的に合計します。この「すべて」には、オートフィルターによって非表示になっている行の数値も含まれます。見た目には数行しか表示されていなくても、SUMは非表示行の数値までしっかり拾って合計してしまうため、フィルターで部署や商品を絞り込んだつもりが、合計金額は全部署・全商品分のままになっているという事故が起こります。SUBTOTAL関数は、このオートフィルターで非表示になった行を自動的に無視して集計してくれる関数です。同じ範囲・同じデータを指定しても、SUMとSUBTOTALでは結果が変わってくるのはこのためです。
+    </p>
+
+    <h2>基本の書き方</h2>
+    <p>
+      SUBTOTALは「集計方法」と「範囲」の2つの引数を取ります。集計方法には1〜11、または101〜111の番号を指定し、合計・平均・件数など何を計算するかを切り替えます。
+    </p>
+    <div class="box">
+      <div class="code">=SUBTOTAL(集計方法, 範囲)</div>
+      <p style="margin-bottom:0;">例：C列（金額）にオートフィルターがかかっている表で、表示されている行だけの合計を出す場合<br>
+        <span style="font-family:var(--mono);">=SUBTOTAL(9, C2:C100)</span></p>
+    </div>
+    <p>
+      集計方法「9」はSUM（合計）を意味します。1〜11の番号にはAVERAGE、COUNT、COUNTA、MAX、MIN、PRODUCT、STDEV、STDEVP、SUM、VAR、VARPの11個の関数が割り当てられており、9番目にあたるのがSUMというわけです。すべての番号を暗記する必要はなく、実務でよく使うのは合計の「9」（または後述の「109」）と、件数を数える「3」（COUNTA）の2つがほとんどです。
+    </p>
+
+    <h2>集計方法9と109の違い</h2>
+    <p>
+      SUBTOTALのややこしいポイントが、集計方法の番号が1〜11と101〜111の2系統に分かれていることです。どちらもフィルターで非表示になった行は自動的に除外しますが、「手動で右クリックして非表示にした行」の扱いが異なります。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>9</h3>
+        <ul>
+          <li>フィルター非表示行は自動で除外</li>
+          <li>手動で非表示にした行は合計に<b>含む</b></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>109</h3>
+        <ul>
+          <li>フィルター非表示行は自動で除外</li>
+          <li>手動で非表示にした行も合計から<b>除外</b></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>覚え方</h3>
+        <ul>
+          <li>100を足すと「手動非表示も除外」になる</li>
+          <li>迷ったら109を選ぶと安全</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>小計行の二重集計を防ぐ仕組み</h2>
+    <p>
+      売上一覧のような表で「部署ごとの小計行」と「全体の合計行」の両方をSUBTOTALで作るケースは珍しくありません。このとき心配になるのが、小計行の数値が全体の合計に二重に足し込まれてしまわないかという点です。SUBTOTAL関数は、集計範囲の中に他のSUBTOTAL関数で作られた行（小計行）が含まれている場合、その行を自動的に集計対象から除外する仕組みになっています。そのため部署ごとの小計行を範囲に含めたまま全体の合計をSUBTOTALで求めても、二重集計になる心配はありません。ただしこれはSUBTOTAL同士の関係に限った仕組みで、小計行がSUMで作られている場合はこの自動除外は働かない点には注意が必要です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば、月次の経費一覧からオートフィルターで特定部署だけに絞り込み、その部署の交通費や交際費の合計金額をSUBTOTALで算出して稟議書に添付する、という場面が典型的です。<b>総務担当者</b>であれば、勤怠データをフィルターで絞り込み、遅刻者や有給取得者だけを表示させたうえで、その対象者数を集計方法「3」（COUNTA）のSUBTOTALでカウントするといった使い方がよくあります。どちらのケースも、フィルターの条件を変えるたびに手作業で範囲を選び直す必要がなく、数式を1つ入れておくだけで絞り込みのたびに自動で数字が更新される点がSUBTOTALの実務上の利点です。
+    </p>
+
+    <h2>SUBTOTALでよくあるトラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">フィルターで絞り込んだのに合計が変わらない（エラー表示なし）</span>
+      <p style="margin-bottom:6px;">エラーメッセージは出ないため気づきにくいのですが、実務上もっとも重大なトラブルです。合計欄にSUM関数が入っていると発生します。</p>
+      <div class="code">例：=SUM(C2:C100) をそのまま合計欄に置いた表で、部署列をフィルターで「営業部」だけに絞り込んでも、合計金額は全部署分のまま変わらない</div>
+      <p style="margin-bottom:0;">対処法は、合計欄の数式をSUMから=SUBTOTAL(9,C2:C100)に置き換えることです。フィルターを変更するたびに、表示されている行だけを対象に自動で再計算されるようになります。過去に作った集計表を流用する場合は特に、合計欄が本当にSUBTOTALになっているか一度確認しておくと安心です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">集計方法9と109を選び間違え、手動非表示行の扱いが意図と逆になる</span>
+      <p style="margin-bottom:6px;">フィルターとは別に「この行だけ一時的に隠したい」と右クリックで手動非表示にした行がある場合に起こりやすいミスです。</p>
+      <div class="code">例：手動で非表示にした退職者の行を合計から除きたいのに=SUBTOTAL(9,...)を使ってしまい、退職者分の金額が合計に含まれたままになる</div>
+      <p style="margin-bottom:0;">対処法は、手動非表示にした行も含めて完全に「見えている行だけ」を集計したいのであれば109を、手動非表示行は合計に残したままフィルターだけ効かせたいのであれば9を選ぶことです。用途を確認せずに片方だけを覚えて使い続けると、この手のズレに気づきにくいので注意しましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">小計行を範囲に含めると数字が二重になっているのでは、と不安になる</span>
+      <p style="margin-bottom:6px;">前述の通り、SUBTOTAL同士であれば自動的に二重集計は防がれますが、この仕組みを知らないと不安になり、小計行を範囲から手作業で除外してしまう人がいます。</p>
+      <div class="code">例：部署ごとの小計行（SUBTOTAL）を避けようとして範囲を細かく分割し、かえって数式が複雑になってしまう</div>
+      <p style="margin-bottom:0;">対処法は、小計行がSUBTOTAL関数で作られていることを確認したうえで、全体の合計範囲に小計行を含めてそのままSUBTOTALで集計することです。範囲を無理に分割する必要はありません。逆に小計行がSUMで作られている場合は本当に二重集計されるため、その場合のみ小計行を範囲から除く必要があります。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>集計方法の番号は9と109だけ覚えれば実務の大半に対応できる。</b>1〜11・101〜111の全11種類を無理に暗記する必要はなく、合計を出すときの2つの番号の使い分けさえ押さえておけば十分です。</li>
+      <li><b>フィルターを解除すると全行が集計対象に戻る点に注意する。</b>SUBTOTALはあくまで「今表示されている行」を対象にする関数なので、フィルター条件を変更・解除すれば結果も自動的に変わります。特定条件時点の数字を固定して残したい場合は、値としてコピー＆貼り付けしておく必要があります。</li>
+      <li><b>非表示と削除は違う。</b>SUBTOTALが無視するのは「非表示」になっている行であり、行そのものを削除すれば当然その数値は最初から集計対象になりません。非表示のまま運用するか削除するかは、後で条件を戻す可能性があるかどうかで判断しましょう。</li>
+      <li><b>範囲は表全体を指定してよい。</b>フィルターの状態に応じて自動で対象行が切り替わるため、非表示行を避けて範囲を細かく指定し直す必要はありません。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      SUBTOTAL関数は、オートフィルターで絞り込んだ行だけを対象に集計してくれる、実務で欠かせない関数です。SUMのように非表示行まで拾ってしまうことがないため、「見えている行だけの合計」を正しく出したいときはSUBTOTALを使いましょう。集計方法は合計であれば9か109を、手動非表示行の扱いに応じて選び分けるのがポイントです。範囲の中に別のSUBTOTAL行が含まれていても自動的に二重集計は防がれるため、小計行と合計行を安心して同じ表の中に共存させられます。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">SUBTOTALとSUMは何が違うのですか？</div>
+        <div class="a">SUMはオートフィルターで非表示になっている行の数値もすべて合計してしまう関数です。一方SUBTOTALは、オートフィルターで絞り込んで非表示になった行を自動的に無視し、画面に見えている行だけを集計してくれます。フィルターで一部のデータだけを表示させて合計を出したい場合は、SUMではなくSUBTOTALを使う必要があります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">集計方法の9と109、どちらを使えばいいですか？</div>
+        <div class="a">9と109はどちらも合計(SUM)を計算しますが、手動で非表示にした行の扱いが異なります。9はフィルター非表示行だけを除外し、右クリックで手動非表示にした行は合計に含みます。109はフィルター非表示行に加えて、手動非表示にした行も合計から除外します。迷った場合は、非表示にした行はすべて集計から外したいというケースが多いため、109を選ぶと意図とのズレが起きにくくなります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">SUBTOTALの範囲に別のSUBTOTAL行(小計行)が含まれていると二重に集計されませんか？</div>
+        <div class="a">されません。SUBTOTAL関数は、集計範囲の中に他のSUBTOTAL関数で作られた小計行が含まれている場合、その小計行を自動的に集計対象から除外する仕組みになっています。そのため部署ごとの小計行と全体の合計行の両方にSUBTOTALを使っても、小計の数値が二重に足し込まれる心配はありません。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ SUBTOTALの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

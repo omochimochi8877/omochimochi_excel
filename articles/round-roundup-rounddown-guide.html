@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ROUND・ROUNDUP・ROUNDDOWNの使い分け｜表示形式の丸めとの違いで1円ズレる原因｜セルうめ</title>
+<meta name="description" content="ROUND・ROUNDUP・ROUNDDOWN関数の違いと使い分けを実務目線で解説。桁数(第2引数)の符号の意味、セルの表示形式で桁数を減らす丸めと関数で実際に値を丸める丸めの違い、消費税計算で取引先と1円ズレるトラブルの原因と対処法まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/round-roundup-rounddown-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="ROUND・ROUNDUP・ROUNDDOWNの使い分け｜セルうめ">
+<meta property="og:description" content="ROUND・ROUNDUP・ROUNDDOWNの違い、桁数の符号の意味、表示形式の丸めと関数の丸めの違いによる1円ズレの原因を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/round-roundup-rounddown-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ROUND・ROUNDUP・ROUNDDOWNの使い分けと1円ズレの原因">
+<meta name="twitter:description" content="桁数の符号の意味、表示形式の丸めと関数の丸めの違い、消費税計算で取引先と1円ズレる原因を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "ROUND・ROUNDUP・ROUNDDOWNの使い分け｜表示形式の丸めとの違いで1円ズレる原因",
+  "description": "ROUND・ROUNDUP・ROUNDDOWN関数の違いと使い分けを実務目線で解説。桁数(第2引数)の符号の意味、表示形式の丸めと関数の丸めの違い、消費税計算で取引先と1円ズレるトラブルの原因を紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/round-roundup-rounddown-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "ROUNDとROUNDUP、ROUNDDOWNの結果はどう違うのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ROUNDは四捨五入、ROUNDUPは端数があれば必ず切り上げ、ROUNDDOWNは端数があれば必ず切り捨てるという違いがあります。たとえば108.4を整数(桁数0)に丸める場合、ROUND(108.4,0)は四捨五入により108、ROUNDUP(108.4,0)は端数を問答無用で繰り上げて109、ROUNDDOWN(108.4,0)は端数を切り捨てて108になります。ROUNDは端数の大きさによって結果が変わりますが、ROUNDUPとROUNDDOWNは端数がどんなに小さくても必ず同じ方向に丸められる点が異なります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "セルの表示形式で小数点以下を非表示にしただけなのに、合計が1円ズレるのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "表示形式の変更はあくまで「見た目」を丸めているだけで、セルの中に入っている実際の値は小数点以下も含めてそのまま残っているためです。SUM関数などは表示上の丸めた数字ではなく、セルに実際に入っている値で計算するため、目に見える数字を足し算した結果と、Excelが計算した合計が食い違うことがあります。実際の値そのものを丸めたい場合は、表示形式ではなくROUND・ROUNDUP・ROUNDDOWNのいずれかの関数を使う必要があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ROUNDの桁数(第2引数)にマイナスの数値を指定すると何が起きますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "桁数にマイナスの数値を指定すると、小数点以下ではなく整数部分の十の位・百の位・千の位単位で丸めることができます。たとえばROUND(12345,-2)は百の位で四捨五入して12300、ROUND(12345,-3)は千の位で四捨五入して12000になります。経営資料などで金額を千円単位・万円単位に丸めて見やすくしたい場合によく使われる指定方法です。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>ROUND・ROUNDUP・ROUNDDOWNの使い分け｜表示形式の丸めとの違いで1円ズレる原因</h1>
+  <p class="sub">「表示形式で小数点以下を非表示にしたのに、なぜか合計が1円合わない」――経理・総務の現場で意外と多いこのトラブルの正体と、ROUND・ROUNDUP・ROUNDDOWNの使い分けを実務目線で整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 端数処理・書式</div>
+
+  <article class="article-body">
+    <p>
+      消費税額の計算、単価の按分、勤怠時間の集計など、Excelで数値を扱っていると「端数をどう処理するか」という場面に必ず突き当たります。四捨五入すればよいのか、切り捨てるべきなのか、切り上げるべきなのかは業務のルール次第であり、これを正しく指定できるのがROUND・ROUNDUP・ROUNDDOWNの3関数です。見た目は似ていますが挙動は明確に異なり、さらに「セルの表示形式」による丸めと混同すると、後続の集計でじわじわと誤差が積み重なるトラブルにつながります。この記事では3関数の違いと、実務でつまずきやすいポイントを具体的に解説します。
+    </p>
+
+    <h2>ROUND・ROUNDUP・ROUNDDOWNの基本と違い</h2>
+    <p>
+      3関数はいずれも「数値」「桁数」の2つの引数を取り、指定した桁数まで数値を丸めて返します。違うのは丸め方の方向だけです。
+    </p>
+    <div class="box">
+      <div class="code">=ROUND(数値, 桁数)　=ROUNDUP(数値, 桁数)　=ROUNDDOWN(数値, 桁数)</div>
+      <p style="margin-bottom:0;">例：108.4を整数(桁数0)に丸める場合<br>
+        <span style="font-family:var(--mono);">=ROUND(108.4,0)</span> → 108（四捨五入で切り捨て側になる）<br>
+        <span style="font-family:var(--mono);">=ROUNDUP(108.4,0)</span> → 109（端数がある限り必ず繰り上げ）<br>
+        <span style="font-family:var(--mono);">=ROUNDDOWN(108.4,0)</span> → 108（端数がある限り必ず切り捨て）</p>
+    </div>
+    <div class="compare">
+      <div class="col">
+        <h3>ROUND</h3>
+        <ul>
+          <li>四捨五入</li>
+          <li>端数が5以上なら切り上げ、4以下なら切り捨て</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>ROUNDUP</h3>
+        <ul>
+          <li>必ず切り上げ</li>
+          <li>端数が0.001でも繰り上がる</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>ROUNDDOWN</h3>
+        <ul>
+          <li>必ず切り捨て</li>
+          <li>端数がどれだけあっても捨てられる</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      注意したいのは、ROUNDUPとROUNDDOWNには「四捨五入」という概念がそもそも存在しない点です。端数が0.0001であってもROUNDUPは容赦なく繰り上げ、ROUNDDOWNは容赦なく切り捨てます。「だいたい四捨五入と同じだろう」という思い込みで使うと、計算結果が想定と数円単位でずれることがあります。
+    </p>
+
+    <h2>桁数（第2引数）の符号による応用</h2>
+    <p>
+      桁数にプラスの数値を指定すると小数点以下の桁数を、マイナスの数値を指定すると整数部分の十の位・百の位・千の位を丸めることができます。符号の向きが直感と逆に感じられるため、ここでつまずく人は少なくありません。
+    </p>
+    <div class="box">
+      <div class="code">=ROUND(12345,-2) → 12300（百の位で四捨五入）
+=ROUND(12345,-3) → 12000（千の位で四捨五入）</div>
+      <p style="margin-bottom:0;">経営会議資料や見積書で金額を「千円単位」「万円単位」に丸めて見やすく表示したい場合、この負の桁数指定がよく使われます。</p>
+    </div>
+
+    <h2>表示形式の丸めと関数の丸め、実は「値」が違う</h2>
+    <p>
+      実務でもっとも重要かつ見落とされがちなのが、「セルの表示形式で小数点以下の桁数を減らす」ことと「関数で実際の値を丸める」ことはまったく別物だという点です。表示形式を変更しても、それは画面上の見た目が変わるだけで、セルの中に格納されている実際の値は小数点以下も含めてそのまま残っています。一方でROUND・ROUNDUP・ROUNDDOWNは、実際の値そのものを丸めた新しい数値を返します。
+    </p>
+    <p>
+      この違いを理解していないと、「表示上は整数に見えるのに、SUMで合計すると1円だけ合わない」という現象が起こります。たとえば単価×税率で算出した消費税額のセルを、表示形式だけ「小数点以下非表示」にして整数のように見せている場合、実際のセルには108.4のような小数が残ったままです。これを複数行分SUMすると、見た目の整数を単純に足した金額とはズレた合計が出てしまい、「経理の集計が1円合わない」というクレームの典型的な原因になります。表示だけを丸めるのか、実際の値を丸めるのかは、常に意識して使い分ける必要があります。
+    </p>
+
+    <h2>消費税計算と会社ごとの端数処理ルール</h2>
+    <p>
+      消費税額の端数処理は「切り捨て」「四捨五入」「切り上げ」のいずれを採用するかが会社ごとの規定で決まっており、法律で一律に決まっているわけではありません。そのため、自社が切り捨てを採用していても、取引先が四捨五入を採用していると、同じ取引金額でも請求書に記載される消費税額が1円ズレるということが実際に起こります。ROUNDDOWNで計算していたのに先方はROUNDで計算していた、というのはよくあるすれ違いのパターンです。経理担当者は自社の端数処理ルールを数式に正しく反映させると同時に、取引先とのズレが起きた際に「どちらの端数処理ルールに基づく差なのか」を説明できるようにしておくことが大切です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば、自社の消費税端数処理ルールが「切り捨て」と定められている場合、税抜金額に税率を掛けて算出した消費税額をROUNDDOWNで処理し、請求書や仕訳データの税額欄に反映させる場面が典型的です。<b>総務担当者</b>であれば、勤怠システムから出力された実労働時間(たとえば7.83333時間のような小数)を、給与計算規定に沿って15分単位・30分未満切り捨てなどのルールで丸める際にROUNDDOWNやROUNDを使うことがあります。<b>営業事務担当者</b>であれば、見積書の単価を端数のない金額に整えるためにROUNDを使ったり、経営資料で金額を万円単位に丸めて見やすくする際にROUND(数値,-4)のような負の桁数指定を使ったりする場面があります。
+    </p>
+
+    <h2>よくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー</span>
+      <p style="margin-bottom:6px;">第1引数に数値でないセルを参照していると発生します。</p>
+      <div class="code">例：=ROUND(A1,0) でA1に「未確定」という文字列や、見た目は数字でも他システムからの取り込みで文字列扱いになっているセルが入っている</div>
+      <p style="margin-bottom:0;">対処法として、対象セルにISNUMBER(A1)を入れて数値かどうかを確認しましょう。外部システムやCSVから取り込んだ数値が文字列扱いになっていることが原因であれば、VALUE関数で数値化するか、セルの左寄せ表示(文字列扱いのサイン)を確認して修正してください。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">桁数の符号を逆に覚えていて、丸めたい桁がズレる</span>
+      <p style="margin-bottom:6px;">プラスとマイナスの意味を逆に覚えていると、想定と違う桁が丸められます。</p>
+      <div class="code">例：千円未満を切り捨てたいのに =ROUNDDOWN(A1,2) と書いてしまい、実際は小数点以下2桁までしか切り捨てられず千円未満の端数はそのまま残る</div>
+      <p style="margin-bottom:0;">正しくは千の位で切り捨てたい場合 =ROUNDDOWN(A1,-3) のようにマイナスの桁数を指定します。「プラスは小数点側、マイナスは整数側」という向きを、数直線の右がプラス・左がマイナスとイメージして覚えると混同しにくくなります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">表示形式だけ変更して「丸めた」つもりになり、後続の計算に誤差が出る</span>
+      <p style="margin-bottom:6px;">前述の「表示形式の丸め」と「関数の丸め」の違いを理解していないまま作業を進めてしまうケースです。</p>
+      <div class="code">例：セルの書式設定で小数点以下の表示桁数を0にしただけで、実際のセルの値は108.4のまま。このセルをSUMやVLOOKUPの参照元にすると、見た目の整数とは異なる計算結果になる</div>
+      <p style="margin-bottom:0;">対処法として、実際の値そのものを丸める必要がある場合は表示形式ではなく必ずROUND・ROUNDUP・ROUNDDOWNのいずれかを使い、新しいセルに丸めた後の値として計算結果を持たせるようにしましょう。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>桁数の符号は「プラス＝小数点以下、マイナス＝整数部分」と覚える。</b>符号を逆に覚えると、丸めたい桁とはまったく違う桁が丸められてしまいます。</li>
+      <li><b>表示形式の変更は「見た目」だけで、セルの実際の値は変わらない。</b>合計が1円ズレるトラブルの多くは、この違いを理解していないまま表示形式だけで端数を隠していることが原因です。</li>
+      <li><b>消費税など社内規定で端数処理方法が決まっている場合は、必ず事前に確認する。</b>切り捨て・四捨五入・切り上げのどれを採用しているかで数式に使う関数が変わり、取引先との金額ズレの原因にもなります。</li>
+      <li><b>ROUND系の関数は元のセルの値を書き換えるわけではない。</b>あくまで丸めた結果を新しい計算結果として返す関数なので、元データをそのまま残しておきたい場合は別セルに数式を入れて使いましょう。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      ROUNDは四捨五入、ROUNDUPは必ず切り上げ、ROUNDDOWNは必ず切り捨てと、丸める方向がそれぞれ明確に決まっています。桁数の符号を正しく使い分ければ、小数点以下だけでなく十の位・百の位単位での丸めも自在に行えます。そして最も実務で誤解が起きやすいのが、セルの表示形式による見た目の丸めと、関数による実際の値の丸めはまったくの別物だという点です。合計が1円ズレるようなトラブルを防ぐためにも、「見た目を整えたいのか、値そのものを丸めたいのか」を意識して使い分けましょう。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">ROUNDとROUNDUP、ROUNDDOWNの結果はどう違うのですか？</div>
+        <div class="a">ROUNDは四捨五入、ROUNDUPは端数があれば必ず切り上げ、ROUNDDOWNは端数があれば必ず切り捨てるという違いがあります。たとえば108.4を整数(桁数0)に丸める場合、ROUND(108.4,0)は四捨五入により108、ROUNDUP(108.4,0)は端数を問答無用で繰り上げて109、ROUNDDOWN(108.4,0)は端数を切り捨てて108になります。ROUNDは端数の大きさによって結果が変わりますが、ROUNDUPとROUNDDOWNは端数がどんなに小さくても必ず同じ方向に丸められる点が異なります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">セルの表示形式で小数点以下を非表示にしただけなのに、合計が1円ズレるのはなぜですか？</div>
+        <div class="a">表示形式の変更はあくまで「見た目」を丸めているだけで、セルの中に入っている実際の値は小数点以下も含めてそのまま残っているためです。SUM関数などは表示上の丸めた数字ではなく、セルに実際に入っている値で計算するため、目に見える数字を足し算した結果と、Excelが計算した合計が食い違うことがあります。実際の値そのものを丸めたい場合は、表示形式ではなくROUND・ROUNDUP・ROUNDDOWNのいずれかの関数を使う必要があります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">ROUNDの桁数(第2引数)にマイナスの数値を指定すると何が起きますか？</div>
+        <div class="a">桁数にマイナスの数値を指定すると、小数点以下ではなく整数部分の十の位・百の位・千の位単位で丸めることができます。たとえばROUND(12345,-2)は百の位で四捨五入して12300、ROUND(12345,-3)は千の位で四捨五入して12000になります。経営資料などで金額を千円単位・万円単位に丸めて見やすくしたい場合によく使われる指定方法です。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ ROUNDの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

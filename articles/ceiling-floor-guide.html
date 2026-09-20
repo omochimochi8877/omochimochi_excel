@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CEILING・FLOOR関数で「〇〇単位」に切り上げ・切り下げる方法｜ROUNDUPとの違いと#NUM!エラー対処法｜セルうめ</title>
+<meta name="description" content="CEILING関数・FLOOR関数の使い方を実務目線で解説。基準値の倍数に丸める仕組み、ROUNDUP/ROUNDDOWNとの違い、符号違いで#NUM!エラーになる原因、経理・購買担当者での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/ceiling-floor-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="CEILING・FLOOR関数で「〇〇単位」に切り上げ・切り下げる方法｜セルうめ">
+<meta property="og:description" content="基準値の倍数に丸める仕組み、ROUNDUPとの違い、符号違いで#NUM!エラーになる原因、経理・購買担当者での使用例を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/ceiling-floor-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CEILING・FLOOR関数で「〇〇単位」に切り上げ・切り下げる方法">
+<meta name="twitter:description" content="基準値の倍数に丸める仕組み、ROUNDUPとの違い、符号違いで#NUM!エラーになる原因を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "CEILING・FLOOR関数で「〇〇単位」に切り上げ・切り下げる方法｜ROUNDUPとの違いと#NUM!エラー対処法",
+  "description": "CEILING関数・FLOOR関数の使い方を実務目線で解説。基準値の倍数に丸める仕組み、ROUNDUP/ROUNDDOWNとの違い、符号違いで#NUM!エラーになる原因を紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/ceiling-floor-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "CEILING関数で基準値を省略したらエラーになりました。省略できないのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "省略できません。CEILING関数もFLOOR関数も「数値」と「基準値」の2つの引数がどちらも必須です。=CEILING(237)のように基準値を書かずに数式を確定しようとすると、Excelが「この数式には問題があります」という警告を出して受け付けません。ROUNDUPのように桁数を省略できる関数と混同しないよう、必ず基準値までセットで入力してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "CEILINGで#NUM!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "数値と基準値の符号（プラス・マイナス）が食い違っているのが原因です。CEILING/FLOORはどちらも数値がマイナスの場合は基準値もマイナスで指定する必要があり、符号が一致していないと#NUM!エラーになります。マイナスの数値を丸めたい場合は、基準値の前にも-（マイナス）を付けて符号を揃えてください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "CEILINGとROUNDUP、結局何が違うのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "丸める基準が異なります。ROUNDUPは「小数点以下の桁数」を指定して丸める関数で、桁数は-1や2のような数値で指定します。一方CEILINGは「任意の倍数（基準値）」を指定して、その倍数のうち直近で大きい値に丸める関数です。10円単位や12個入りのケース単位のように、桁数ではなく「特定の数の倍数」に揃えたい場合はCEILING・FLOORを使います。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>CEILING・FLOOR関数で「〇〇単位」に切り上げ・切り下げる方法｜ROUNDUPとの違いと#NUM!エラー対処法</h1>
+  <p class="sub">「10円単位に切り上げ」「12個入りのケース単位で発注」など、任意の倍数に数値を揃えたいのにROUNDUPでは思い通りにいかない――CEILING・FLOOR関数の使い方と、符号違いで起こる#NUM!エラーの対処法を整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 端数処理・書式</div>
+
+  <article class="article-body">
+    <p>
+      経理担当者が単価を会社規定にあわせて「10円単位」に丸めたり、購買担当者が発注数量を「1箱12個入り」のケース単位に合わせたりと、実務では小数点以下の桁数ではなく「任意の倍数」に数値を揃えたい場面がよくあります。ROUNDUPやROUNDDOWNは桁数指定でしか丸められないため、こうした「特定の数の倍数への丸め」には対応できません。ここで使うのがCEILING関数とFLOOR関数です。この記事では基本の使い方から、符号違いで起こる#NUM!エラー、ROUNDUPとの混同によるつまずきまで、実務目線で整理します。
+    </p>
+
+    <h2>CEILING・FLOORの基本構文と「基準値」の考え方</h2>
+    <p>
+      CEILING関数は、指定した基準値の倍数のうち、直近で数値以上になる値に切り上げます。FLOOR関数はその逆で、直近で数値以下になる倍数に切り下げます。どちらも引数は「数値」と「基準値」の2つだけです。
+    </p>
+    <div class="box">
+      <div class="code">=CEILING(数値, 基準値)　/　=FLOOR(数値, 基準値)</div>
+      <p style="margin-bottom:0;">例：単価237円を10円単位に切り上げる／切り下げる場合<br>
+        <span style="font-family:var(--mono);">=CEILING(237,10)</span> → 240　　<span style="font-family:var(--mono);">=FLOOR(237,10)</span> → 230</p>
+    </div>
+    <p>
+      基準値には10や100だけでなく、12（ケースの入数）や0.05（通貨の最小単位）のような数値も指定できます。「基準値の倍数のどこに丸めるか」という発想さえ押さえれば、応用範囲は非常に広い関数です。
+    </p>
+
+    <h2>ROUNDUPとの違いは「桁数」か「任意の倍数」か</h2>
+    <p>
+      CEILING・FLOORとROUNDUP・ROUNDDOWNは、どちらも「端数処理」という点は同じですが、丸める基準がまったく異なります。ROUND系は「小数点以下の桁数」を基準に丸めるのに対し、CEILING・FLOORは「任意の倍数（基準値）」を基準に丸めます。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>ROUNDUP/ROUNDDOWN</h3>
+        <ul>
+          <li>桁数で丸める</li>
+          <li>例：-1で10の位、2で小数第2位</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>CEILING</h3>
+        <ul>
+          <li>基準値の倍数に切り上げ</li>
+          <li>例：10円単位、12個単位</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>FLOOR</h3>
+        <ul>
+          <li>基準値の倍数に切り下げ</li>
+          <li>例：15分単位、100円単位</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      たとえば「237を10の位で切り上げたい」という結果だけを見るとROUNDUP(237,-1)とCEILING(237,10)は同じ240になりますが、基準値が7や12のような「10のべき乗ではない倍数」になった瞬間、ROUNDUPでは対応できなくなります。ケース単位の発注数量のように「10進法のキリの良い数」ではない倍数に揃えたい場合は、CEILING・FLOORが必須です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば、社内の値付けルールで「税込単価は10円単位に切り上げて表示する」と決まっている場合に、CEILING(税込単価,10)で自動的に丸めた金額を請求書や見積書に反映させる使い方が典型的です。<b>営業事務・購買担当者</b>であれば、必要数量を計算した結果が半端になったとき、「1箱12個入り」のようなケース単位に合わせて発注書の数量を確定させる場面でCEILINGを使います。たとえば必要数が130個であれば、CEILING(130,12)で132個（＝12箱分）に切り上げ、不足なく発注できるようにします。<b>総務担当者</b>であれば、勤怠管理で退勤時刻を15分単位に切り捨てる社内ルールがある場合、FLOOR関数で退勤時刻を丸めて残業時間の集計に使うケースもあります。
+    </p>
+
+    <h2>CEILING・FLOORでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#NUM! エラー</span>
+      <p style="margin-bottom:6px;">数値と基準値の符号（プラス・マイナス）が食い違っているときに発生する、CEILING・FLOOR特有のエラーです。</p>
+      <div class="code">例：=CEILING(-237,10) → 数値がマイナス、基準値がプラスで符号が不一致</div>
+      <p style="margin-bottom:0;">対処法として、マイナスの数値を丸めたい場合は基準値の符号も揃えて<span style="font-family:var(--mono);">=CEILING(-237,-10)</span>のように書きます。前月比の増減額のようにマイナスの値が混在する列に数式をコピーする場合は特に注意が必要です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">数式エラー（引数不足）</span>
+      <p style="margin-bottom:6px;">ROUNDUPと同じ感覚で基準値を省略できると思い込み、数値だけを指定して確定しようとすると発生します。</p>
+      <div class="code">例：=CEILING(237) と入力してEnterを押すと「この数式には問題があります」という警告が出て確定できない</div>
+      <p style="margin-bottom:0;">CEILING関数もFLOOR関数も「数値」と「基準値」の2つの引数がどちらも必須です。桁数を省略した書き方に慣れていると陥りやすいミスなので、必ず基準値までセットで入力する癖をつけましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">意図しない結果（エラーは出ないが数値が変わらない）</span>
+      <p style="margin-bottom:6px;">「切り上げ」という言葉のイメージからROUNDUPと混同し、基準値に桁数のような小さい数字を入れてしまうケースです。</p>
+      <div class="code">例：10円単位に丸めたいのに =CEILING(237,1) と書いてしまい、237のまま結果が変わらない</div>
+      <p style="margin-bottom:0;">CEILINGの基準値は「桁数」ではなく「丸める先の倍数そのもの」です。10円単位なら10、100円単位なら100というように、揃えたい実際の数値を基準値に入力することを徹底してください。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>基準値は「桁数」ではなく「倍数そのもの」を書く。</b>ROUNDUP(数値,-1)のようなマイナスの桁数指定に慣れていると、CEILINGの基準値にも同じ感覚で小さい数字を入れがちですが、CEILINGの基準値には10や100といった実際の倍数の数値を入力します。</li>
+      <li><b>マイナスの数値を丸めるときは基準値の符号も揃える。</b>符号が食い違うと#NUM!エラーになるため、負の数値が混在する可能性がある数式では符号の一致をあらかじめ確認しておきましょう。</li>
+      <li><b>「ケース単位の発注数」を出すときは丸めた後の意味に注意する。</b>CEILING(必要数,1箱の入数)が返すのは「発注すべき合計個数」であり、箱数そのものではありません。箱数が知りたい場合は、さらに入数で割る計算が必要です。</li>
+      <li><b>基準値には小数も指定できる。</b>0.05や0.25のような小数を基準値にすれば、通貨の最小単位や規格の刻みに合わせた丸めにも応用できます。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      CEILING・FLORは「小数点以下の桁数」で丸めるROUNDUP・ROUNDDOWNとは異なり、「任意の倍数（基準値）」に数値を揃えるための関数です。10円単位の値付けや12個入りケースへの発注数量調整など、10進法のキリの良い桁数では対応できない場面で真価を発揮します。つまずきやすいのは、基準値を省略してしまう入力ミスと、数値・基準値の符号が食い違うことで起こる#NUM!エラーの2点です。基準値には「揃えたい倍数の実際の数値」を必ずセットで入力し、マイナスの数値を扱う場合は符号を揃えることを意識すれば、実務でも安心して使えます。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">CEILING関数で基準値を省略したらエラーになりました。省略できないのですか？</div>
+        <div class="a">省略できません。CEILING関数もFLOOR関数も「数値」と「基準値」の2つの引数がどちらも必須です。=CEILING(237)のように基準値を書かずに数式を確定しようとすると、Excelが「この数式には問題があります」という警告を出して受け付けません。ROUNDUPのように桁数を省略できる関数と混同しないよう、必ず基準値までセットで入力してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">CEILINGで#NUM!エラーが出るのはなぜですか？</div>
+        <div class="a">数値と基準値の符号（プラス・マイナス）が食い違っているのが原因です。CEILING/FLOORはどちらも数値がマイナスの場合は基準値もマイナスで指定する必要があり、符号が一致していないと#NUM!エラーになります。マイナスの数値を丸めたい場合は、基準値の前にも-（マイナス）を付けて符号を揃えてください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">CEILINGとROUNDUP、結局何が違うのですか？</div>
+        <div class="a">丸める基準が異なります。ROUNDUPは「小数点以下の桁数」を指定して丸める関数で、桁数は-1や2のような数値で指定します。一方CEILINGは「任意の倍数（基準値）」を指定して、その倍数のうち直近で大きい値に丸める関数です。10円単位や12個入りのケース単位のように、桁数ではなく「特定の数の倍数」に揃えたい場合はCEILING・FLOORを使います。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ CEILING/FLOORの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

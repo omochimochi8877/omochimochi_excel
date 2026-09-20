@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>RANK・RANK.EQ関数で売上や点数の順位をつける方法｜同順位で順位が飛ぶ理由と対処法｜セルうめ</title>
+<meta name="description" content="RANK・RANK.EQ関数を使って売上や試験の点数から順位をつける方法を実務目線で解説。絶対参照の付け忘れで順位がずれるミス、同順位で次の順位が飛ぶ仕様、昇順・降順を決める順序引数の落とし穴、営業事務・総務での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/rank-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="RANK・RANK.EQ関数で売上や点数の順位をつける方法｜セルうめ">
+<meta property="og:description" content="RANK・RANK.EQ関数の使い方、絶対参照の付け忘れで順位がずれるミス、同順位で順位が飛ぶ仕様、順序引数の落とし穴を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/rank-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RANK・RANK.EQ関数で売上や点数の順位をつける方法">
+<meta name="twitter:description" content="絶対参照の付け忘れで順位がずれるミス、同順位で順位が飛ぶ仕様、順序引数の落とし穴を実務目線で解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "RANK・RANK.EQ関数で売上や点数の順位をつける方法｜同順位で順位が飛ぶ理由と対処法",
+  "description": "RANK・RANK.EQ関数を使って売上や試験の点数から順位をつける方法を実務目線で解説。絶対参照の付け忘れで順位がずれるミス、同順位で次の順位が飛ぶ仕様、順序引数の落とし穴を紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/rank-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "RANKとRANK.EQ、結果は同じですか？ どちらを使うべきですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "どちらも計算結果は同じです。RANKはExcel 2007以前から存在する旧式の関数で、下位互換性のためにExcelに残されているだけの位置づけです。今後のバージョンで利用できなくなる可能性もあるとマイクロソフトが案内しているため、新しく数式を組む場合はRANK.EQを使うことをおすすめします。すでにRANKで組まれている既存のシートを無理に書き換える必要はありません。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "同じ点数の人が2人いると、次の順位が3位から始まるのはなぜですか？（1位が2人いて、2位がなく3位になる）",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "これはRANK・RANK.EQの仕様であり、不具合ではありません。同点の人数分だけ同じ順位が並び、その次の順位は「本来の順番」まで繰り上げて表示されます。たとえば1位が2人いれば、次の人は2位ではなく3位になります。この飛び方が気になる場合や、同点者に平均の順位（1位が2人なら1.5位ずつ）を割り振りたい場合は、RANK.AVG関数を使ってください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "セルをコピーしたら急に順位がおかしくなりました。原因は何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "多くの場合、数式内の範囲（比較対象のセル範囲）に絶対参照（$）を付け忘れているのが原因です。相対参照のままコピーすると、コピー先のセルごとに比較範囲が1行ずつずれてしまい、正しい母集団で順位が計算されなくなります。ひどい場合は比較対象の値が範囲の外に出てしまい、#N/Aエラーになることもあります。範囲部分は$C$2:$C$11のように行と列の両方を固定してからコピーしてください。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>RANK・RANK.EQ関数で売上や点数の順位をつける方法｜同順位で順位が飛ぶ理由と対処法</h1>
+  <p class="sub">「営業成績を順位表にしたのに、下の行にコピーしたら数字がおかしい」「同点の人がいるのに順位が飛んで見える」――RANK・RANK.EQ関数を使うときに実務でつまずきやすいポイントを、具体的な数式例とあわせて整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 集計・計算</div>
+
+  <article class="article-body">
+    <p>
+      営業成績のランキング表や、試験・研修の点数から順位を出す表は、経理・総務・営業事務を問わず社内で頻繁に作られます。こうした「数値の大小から順位を求める」作業を1本の数式で済ませてくれるのがRANK関数、そしてその後継であるRANK.EQ関数です。書き方自体はシンプルですが、下の行にコピーしたときに参照範囲がずれてしまうミスや、同点者が出たときに順位が予想外の飛び方をする挙動など、初めて使う人が戸惑いやすいポイントがいくつかあります。この記事では、営業事務・総務の実務シーンに沿って、RANK・RANK.EQの使い方とよくあるトラブルを解説します。
+    </p>
+
+    <h2>RANKとRANK.EQ、どちらを使えばいい？</h2>
+    <p>
+      Excelには順位を求める関数として、古くからあるRANKと、Excel 2010以降に追加されたRANK.EQの2つが存在します。この2つは引数の構成も計算結果もまったく同じで、単純に呼び名が変わっただけです。RANKは以前のバージョンとの互換性のためにExcelに残されている旧式の関数という位置づけで、マイクロソフト自身も将来のバージョンで使えなくなる可能性があると案内しています。そのため、これから新しく数式を組むのであればRANK.EQを使うのが無難です。すでにRANKで組まれた既存のシートを見つけても、動作に問題がなければ急いで書き換える必要はありません。
+    </p>
+
+    <h2>基本の書き方と順序引数の意味</h2>
+    <p>
+      RANK.EQは「順位を求めたい数値」「比較する範囲」「順序」の3つの引数を取ります。順序は0（または省略）で降順、1で昇順になります。
+    </p>
+    <div class="box">
+      <div class="code">=RANK.EQ(数値, 範囲, [順序])</div>
+      <p style="margin-bottom:0;">例：C2セルの売上金額を、C2:C11の範囲の中で大きい順（降順）に順位づけする<br>
+        <span style="font-family:var(--mono);">=RANK.EQ(C2,$C$2:$C$11,0)</span></p>
+    </div>
+    <div class="compare">
+      <div class="col">
+        <h3>順序 0（省略）</h3>
+        <ul>
+          <li>降順＝数値が大きいほど1位</li>
+          <li>売上ランキング、試験の得点など「大きいほど良い」場合に使用</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>順序 1</h3>
+        <ul>
+          <li>昇順＝数値が小さいほど1位</li>
+          <li>競技のタイム、不良品数など「小さいほど良い」場合に使用</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>RANK.AVG</h3>
+        <ul>
+          <li>同点に平均順位を付与</li>
+          <li>1位が2人なら1.5位・1.5位のように返す</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      「大きい値を1位にしたいのに、順序を1にしてしまい結果が逆になった」という間違いは非常に多く見られます。0と1の意味は感覚と逆に覚えている人も多いため、数式を入れた直後は必ず1位・最下位が想定通りの人になっているか目視で確認する習慣をつけると安心です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>営業事務担当者</b>であれば、月末に営業担当者10名分の月間売上をC2:C11に集計し、D列にRANK.EQで順位を出して、社内共有用のランキング表を作成するのが典型的な使い方です。「今月のトップ3」を会議資料に転記したり、インセンティブの対象者を判定したりする根拠として使われます。<b>総務担当者</b>であれば、社内研修や昇格試験の点数を一覧にまとめ、受験者30名の中での順位を出して、成績上位者への表彰や、逆に点数が低い層への補講対象の判定に利用する場面がよくあります。どちらのケースも、対象者が増減するたびに範囲がずれないよう、後述する絶対参照の指定が重要になります。
+    </p>
+
+    <h2>RANK・RANK.EQでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">下の行にコピーすると順位がずれる・#N!Aエラーになる</span>
+      <p style="margin-bottom:6px;">最もよくあるミスです。範囲を絶対参照（$）で固定せずにコピーすると、行ごとに比較範囲がずれてしまいます。</p>
+      <div class="code">誤：D2に =RANK(C2,C2:C11,0) と入力し、そのままD3〜D11にコピー<br>
+→ D3では自動的に範囲がC3:C12にずれ、D11では範囲がC11:C20（大半が空欄）にずれてしまう</div>
+      <p style="margin-bottom:0;">対処法は、範囲の部分だけを$C$2:$C$11のように行と列を両方固定することです。=RANK(C2,$C$2:$C$11,0)としてからコピーすれば、どの行でも比較範囲は常に同じC2:C11のままになります。範囲がずれた結果、比較対象の数値自体が範囲の外に出てしまうと#N/Aエラーになることもあるため、コピー後は最終行の数式を数式バーで確認する癖をつけましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">同点が複数いると順位が1,1,3のように飛ぶ</span>
+      <p style="margin-bottom:6px;">「2位が存在しないのはおかしいのでは」と不安になりがちですが、これはRANK・RANK.EQの仕様であり、数式が壊れているわけではありません。</p>
+      <div class="code">例：売上が90万円の担当者が2人いる場合、2人とも1位になり、3人目（次に売上が高い人）は2位ではなく3位になる</div>
+      <p style="margin-bottom:0;">RANK・RANK.EQは「自分より大きい（または小さい）数値が何個あるか」を数えて順位を決めるため、同点の人数分だけ次の順位が繰り上がります。この動きに違和感がある場合や、同点者に「1.5位」のような平均順位を与えたい場合は、RANK.AVG関数への切り替えを検討してください。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">順序引数の0と1を逆に覚えていて、結果が逆順になる</span>
+      <p style="margin-bottom:6px;">数式自体はエラーにならず正常に計算されるため、かえって気づきにくいミスです。</p>
+      <div class="code">例：売上ランキングのつもりで =RANK.EQ(C2,$C$2:$C$11,1) と順序に1を指定すると、売上が最も少ない担当者が1位として表示されてしまう</div>
+      <p style="margin-bottom:0;">エラーが出ないため、順位の列を目視で確認しない限り気づかないまま資料として配布してしまう危険があります。売上・得点など「大きいほど上位」の場面では順序を0または省略、タイムなど「小さいほど上位」の場面でのみ1を指定する、とルールを決めておくと安全です。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>範囲は必ず絶対参照（$）で固定する。</b>下の行にコピーして使うことが前提の関数なので、範囲部分に$を付け忘れるとほぼ確実にずれます。範囲をドラッグで選択した直後にF4キーを押して固定する習慣をつけましょう。</li>
+      <li><b>順序引数の0と1の意味は逆に覚えやすい。</b>0（省略）は「大きい値が1位になる降順」、1は「小さい値が1位になる昇順」です。売上や点数のランキングでは基本的に0（省略）を使うと覚えておくと迷いません。</li>
+      <li><b>同順位が出て順位が飛ぶのは仕様であり不具合ではない。</b>1位が2人いれば次は3位になるのが正しい動作です。連番のような順位が必要な場合はRANK.AVGや、順位が重複しないよう別途タイブレーク用の値を加える工夫が必要です。</li>
+      <li><b>RANKよりRANK.EQを優先して使う。</b>計算結果は同じですが、RANKは将来的に廃止される可能性がある旧式関数のため、新規に作る数式ではRANK.EQを選びましょう。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      RANK・RANK.EQ関数は、営業成績や試験の点数から順位表を作る際に欠かせない関数です。範囲を絶対参照で固定してコピーによるずれを防ぐこと、順序引数の0（降順）と1（昇順）の意味を取り違えないこと、そして同点で順位が飛ぶのは仕様であり必要なら平均順位が出せるRANK.AVGに切り替えることの3点を押さえておけば、実務でのトラブルはほとんど防げます。これから数式を組む場合は、旧式のRANKではなく後継のRANK.EQを使うのが安心です。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">RANKとRANK.EQ、結果は同じですか？ どちらを使うべきですか？</div>
+        <div class="a">どちらも計算結果は同じです。RANKはExcel 2007以前から存在する旧式の関数で、下位互換性のためにExcelに残されているだけの位置づけです。今後のバージョンで利用できなくなる可能性もあるとマイクロソフトが案内しているため、新しく数式を組む場合はRANK.EQを使うことをおすすめします。すでにRANKで組まれている既存のシートを無理に書き換える必要はありません。</div>
+      </div>
+      <div class="qa">
+        <div class="q">同じ点数の人が2人いると、次の順位が3位から始まるのはなぜですか？（1位が2人いて、2位がなく3位になる）</div>
+        <div class="a">これはRANK・RANK.EQの仕様であり、不具合ではありません。同点の人数分だけ同じ順位が並び、その次の順位は「本来の順番」まで繰り上げて表示されます。たとえば1位が2人いれば、次の人は2位ではなく3位になります。この飛び方が気になる場合や、同点者に平均の順位（1位が2人なら1.5位ずつ）を割り振りたい場合は、RANK.AVG関数を使ってください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">セルをコピーしたら急に順位がおかしくなりました。原因は何ですか？</div>
+        <div class="a">多くの場合、数式内の範囲（比較対象のセル範囲）に絶対参照（$）を付け忘れているのが原因です。相対参照のままコピーすると、コピー先のセルごとに比較範囲が1行ずつずれてしまい、正しい母集団で順位が計算されなくなります。ひどい場合は比較対象の値が範囲の外に出てしまい、#N/Aエラーになることもあります。範囲部分は$C$2:$C$11のように行と列の両方を固定してからコピーしてください。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ RANKの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

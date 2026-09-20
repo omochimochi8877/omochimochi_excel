@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>IF・IFS・IFERRORの使い分けとよくあるエラー｜ネスト地獄を卒業する方法｜セルうめ</title>
+<meta name="description" content="IF・IFS・IFERRORの違いと使い分けを実務目線で解説。IFのネスト(入れ子)が崩壊する原因、IFSで#N/Aが出る理由、IFERRORとISERRORの違いなど、条件分岐でよくあるつまずきと対処法を紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/if-ifs-iferror-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="IF・IFS・IFERRORの使い分けとよくあるエラー｜セルうめ">
+<meta property="og:description" content="IFのネストが崩壊する原因、IFSで#N/Aが出る理由、IFERRORとISERRORの違いを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/if-ifs-iferror-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IF・IFS・IFERRORの使い分けとよくあるエラー">
+<meta name="twitter:description" content="IFのネストが崩壊する原因、IFSで#N/Aが出る理由、IFERRORとISERRORの違いを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "IF・IFS・IFERRORの使い分けとよくあるエラー｜ネスト地獄を卒業する方法",
+  "description": "IF・IFS・IFERRORの違いと使い分けを実務目線で解説。IFのネストが崩壊する原因、IFSで#N/Aが出る理由、IFERRORとISERRORの違いを紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/if-ifs-iferror-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "IFを何個もネストしたら「この関数には引数が多すぎます」と出ました。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IF関数は最大64個までネストできますが、実務でそこまで重ねることはほぼなく、多くの場合は括弧の対応ミスや引数の数え間違いが原因です。条件分岐が4つ以上になる場合は、ネストしたIFではなくIFS関数に置き換えると数式が読みやすくなり、この種のエラーも起きにくくなります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "IFSで全部の条件を満たさないと#N/Aエラーになるのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IFS関数は、指定したどの条件にも一致しなかった場合に#N/Aエラーを返す仕様です。IFのように自動で「それ以外」を拾ってくれないため、最後の条件にTRUEを指定して「それ以外の場合」の処理を明示的に書いておく必要があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "IFERRORとISERROR、何が違うのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IFERRORはエラーが出たときの代わりの値を1つの関数で直接指定できるのに対し、ISERRORはエラーかどうかをTRUE/FALSEで判定するだけの関数です。ISERRORを使う場合はIF(ISERROR(数式),代わりの値,数式)のように数式を2回書く必要があり冗長になるため、単純にエラー時の表示を変えたいだけならIFERRORの方が数式が短くシンプルになります。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>IF・IFS・IFERRORの使い分けとよくあるエラー｜ネスト地獄を卒業する方法</h1>
+  <p class="sub">「IFの中にIFを入れて、さらにその中にIFを入れて……」気づけば括弧だらけで自分でも読めない数式になっていませんか。IF・IFS・IFERRORの役割の違いと、条件分岐でつまずきやすいポイントを整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 条件分岐</div>
+
+  <article class="article-body">
+    <p>
+      経理・総務・営業事務を問わず、Excelで最も使用頻度が高い関数のひとつがIFです。「達成率が100%以上なら○、未満なら×」のような単純な分岐であれば迷うことはありませんが、判定条件が3つ、4つと増えてくると、IFの中にIFを入れ子にする「ネストIF」がどんどん複雑になり、後から見た自分自身でも数式の意味が分からなくなることがあります。この記事では、IFの基本からIFS・IFERRORとの使い分け、ネストIFが崩壊する原因までを実務目線で整理します。
+    </p>
+
+    <h2>IF関数の基本と、ネストが増える理由</h2>
+    <p>
+      IF関数は「条件」「条件が真の場合の値」「条件が偽の場合の値」の3つの引数を取るシンプルな関数です。
+    </p>
+    <div class="box">
+      <div class="code">=IF(論理式, 真の場合, 偽の場合)</div>
+      <p style="margin-bottom:0;">例：達成率(A1)が100%以上なら「達成」、それ未満なら「未達」と表示する<br>
+        <span style="font-family:var(--mono);">=IF(A1&gt;=1,"達成","未達")</span></p>
+    </div>
+    <p>
+      判定を「達成／未達」の2択ではなく「A評価／B評価／C評価／D評価」のように3段階以上に分けたい場合、偽の場合の引数にさらにIFを入れ子にする書き方が広く使われてきました。しかし4段階、5段階と条件が増えるたびに括弧がネストし、「)))」が並ぶ数式は書いた本人以外はもちろん、数ヶ月後の自分でも解読が困難になります。
+    </p>
+
+    <h2>IFS関数でネストを解消する</h2>
+    <p>
+      Excel 2019・Microsoft 365で使えるIFS関数を使うと、複数の条件を1つのIF入れ子ではなく、条件と結果のペアを横に並べる形で書けるため、可読性が大きく向上します。
+    </p>
+    <div class="box">
+      <div class="code">=IFS(条件1, 結果1, 条件2, 結果2, ..., TRUE, それ以外の結果)</div>
+      <p style="margin-bottom:0;">例：達成率(A1)を4段階評価する場合<br>
+        <span style="font-family:var(--mono);">=IFS(A1&gt;=1.2,"S",A1&gt;=1,"A",A1&gt;=0.8,"B",TRUE,"C")</span></p>
+    </div>
+    <p>
+      ポイントは条件を上から順に評価し、最初にTRUEになった時点の結果を返す点です。そのため条件は必ず範囲が狭いもの・厳しいものから先に書く必要があります。逆順に書くと、本来「S」評価になるべきデータが先に緩い条件に引っかかってしまい、常に同じ評価しか出なくなるというミスが起こります。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、勤怠データから遅刻・早退・欠勤の状況を判定して表示する場面や、人事評価シートで点数に応じたランク分けを自動化する場面でIF・IFSがよく使われます。<b>営業事務担当者</b>であれば、受注金額に応じた値引き率の自動判定、達成率に応じたインセンティブ区分の表示などが典型例です。<b>経理担当者</b>であれば、取引先ごとの与信枠を超えていないかの判定、消費税率が複数存在する取引の税区分判定などにIFを組み合わせます。条件が2〜3個ならIF、4個以上ならIFSと使い分けると数式全体がすっきりします。
+    </p>
+
+    <h2>IF・IFS・IFERRORでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">「この関数には引数が多すぎます」エラー</span>
+      <p style="margin-bottom:6px;">ネストしたIFの括弧の対応が崩れているときに出やすいエラーです。</p>
+      <ul>
+        <li>閉じ括弧の数が足りない、または多い</li>
+        <li>カンマの数え間違いで意図しない位置に引数が入ってしまっている</li>
+      </ul>
+      <div class="code">例：=IF(A1&gt;=1,"達成",IF(A1&gt;=0.5,"一部達成","未達") と閉じ括弧が1つ足りない</div>
+      <p style="margin-bottom:0;">対処法として、数式バーで括弧をクリックすると対応する括弧が色分けされて表示されるので、ペアが揃っているか目視確認しましょう。ネストが3段階を超える場合は、素直にIFSへの書き換えを検討した方が事故が減ります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">IFSで#N/Aエラーが出る</span>
+      <p style="margin-bottom:6px;">IFSはIFと違い「それ以外」を自動で拾ってくれない仕様のため、想定漏れがあるとエラーになります。</p>
+      <div class="code">例：=IFS(A1&gt;=1,"達成",A1&gt;=0.5,"一部達成") でA1が0.3の場合、どちらの条件にも合致せず#N/A</div>
+      <p style="margin-bottom:0;">対処法は、最後の条件に必ずTRUEを指定し「それ以外の場合」の結果を明示しておくことです。=IFS(A1&gt;=1,"達成",A1&gt;=0.5,"一部達成",TRUE,"未達")のように書けば、どの条件にも当てはまらないデータが来てもエラーになりません。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">数式全体がエラーで潰れてIFERRORで隠したいが原因も分からなくなる</span>
+      <p style="margin-bottom:6px;">IFERRORでエラーを一律に「-」や空欄に置き換えると、本来直すべき入力ミスまで見えなくなってしまうことがあります。</p>
+      <div class="code">例：=IFERROR(VLOOKUP(A1,商品マスタ,2,FALSE),"-") と書くと、A1が空欄でも該当なしでも同じ「-」が表示される</div>
+      <p style="margin-bottom:0;">対処法として、IFERRORは「エラーが出ても仕方がない・想定内」の場合にだけ使い、原因不明のエラーが多発する数式にはまず生のエラー表示のまま原因を特定してから導入するのが安全です。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>文字列を条件や結果に使うときは必ずダブルクォーテーションで囲む。</b>"達成"のようにクォーテーションを忘れると、セル参照や名前として認識されエラーになります。</li>
+      <li><b>IFSの条件は必ず「厳しい条件」から先に書く。</b>順番を間違えると、緩い条件に先に引っかかってしまい正しい評価が出ません。</li>
+      <li><b>IFERRORは数式全体を包む。</b>=IFERROR(数式全体,代替値)のように、エラーが出る可能性のある数式全体をIFERRORでくるむのが基本形です。数式の一部分だけを囲んでも意味がありません。</li>
+      <li><b>TRUE/FALSEは文字列ではない。</b>IF(A1="TRUE",...)のように""で囲むと正しく判定できないことがあるため、論理値として比較する場合は""を付けません。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      IFはシンプルな2択判定に、IFSは3段階以上の判定に、IFERRORはエラー時の代替表示にと、それぞれ役割が異なります。ネストしたIFが読みにくくなってきたら無理に1つの数式に詰め込まず、IFSへの書き換えを検討しましょう。IFSを使う際は条件の順番と「それ以外」の受け皿(TRUE)を忘れないこと、IFERRORはエラーの原因を握りつぶしすぎないことがポイントです。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">IFを何個もネストしたら「この関数には引数が多すぎます」と出ました。なぜですか？</div>
+        <div class="a">IF関数は最大64個までネストできますが、実務でそこまで重ねることはほぼなく、多くの場合は括弧の対応ミスや引数の数え間違いが原因です。条件分岐が4つ以上になる場合は、ネストしたIFではなくIFS関数に置き換えると数式が読みやすくなり、この種のエラーも起きにくくなります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">IFSで全部の条件を満たさないと#N/Aエラーになるのはなぜですか？</div>
+        <div class="a">IFS関数は、指定したどの条件にも一致しなかった場合に#N/Aエラーを返す仕様です。IFのように自動で「それ以外」を拾ってくれないため、最後の条件にTRUEを指定して「それ以外の場合」の処理を明示的に書いておく必要があります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">IFERRORとISERROR、何が違うのですか？</div>
+        <div class="a">IFERRORはエラーが出たときの代わりの値を1つの関数で直接指定できるのに対し、ISERRORはエラーかどうかをTRUE/FALSEで判定するだけの関数です。ISERRORを使う場合はIF(ISERROR(数式),代わりの値,数式)のように数式を2回書く必要があり冗長になるため、単純にエラー時の表示を変えたいだけならIFERRORの方が数式が短くシンプルになります。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ IFの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

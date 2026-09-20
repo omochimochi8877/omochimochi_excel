@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>LARGE・SMALL関数で上位・下位ランキングを抽出する方法｜#NUM!エラーの原因と対処法｜セルうめ</title>
+<meta name="description" content="LARGE・SMALL関数を使って上位・下位のランキングを抽出する方法を実務目線で解説。第2引数(k)が個数を超えたときの#NUM!エラー、文字列や空白セルが無視される仕様、RANK関数との使い分け、営業事務・経理での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/large-small-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="LARGE・SMALL関数で上位・下位ランキングを抽出する方法｜セルうめ">
+<meta property="og:description" content="LARGE・SMALL関数の使い方、#NUM!エラーの原因、文字列・空白セルが無視される仕様、RANK関数との使い分けを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/large-small-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LARGE・SMALL関数で上位・下位ランキングを抽出する方法">
+<meta name="twitter:description" content="#NUM!エラーの原因、文字列・空白セルが無視される仕様、RANK関数との使い分けを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "LARGE・SMALL関数で上位・下位ランキングを抽出する方法｜#NUM!エラーの原因と対処法",
+  "description": "LARGE・SMALL関数を使って上位・下位のランキングを抽出する方法を実務目線で解説。第2引数(k)が個数を超えたときの#NUM!エラー、文字列や空白セルが無視される仕様、RANK関数との使い分けを紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/large-small-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "LARGE関数で#NUM!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "第2引数(k)に指定した順位が、範囲内のデータの個数を超えている場合に#NUM!エラーになります。たとえばデータが5件しかないのにk=8を指定すると、8番目に大きい値は存在しないためエラーになります。データ件数が可変の表では、k=COUNT(範囲)を超えないようIF関数などで上限をチェックすると安全です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "データがあるのにLARGEやSMALLの結果に反映されないのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "LARGE・SMALLは数値だけを集計対象とし、文字列や空白セルは自動的に無視する仕様です。金額欄に「未確定」「-」といった文字列が混ざっていたり、数値が文字列として入力されていたりすると、そのセルは件数にも順位にもカウントされません。セルの表示が左寄せになっていないか確認し、文字列になっている場合は数値に変換してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "RANK関数とLARGE・SMALL関数はどう使い分ければよいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "RANK関数は「特定の値が全体の中で何位か」を求める関数で、SMALL・LARGE関数は「何位の値がいくつか」を求める関数です。両者は入力と出力が逆の関係にあります。個々のデータの順位を一覧に表示したいならRANK、上位・下位だけを抜き出したランキング表を作りたいならLARGE・SMALLを使います。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>LARGE・SMALL関数で上位・下位ランキングを抽出する方法｜#NUM!エラーの原因と対処法</h1>
+  <p class="sub">「売上上位3名を表にまとめたい」「経費の中で金額が大きい順に3件だけチェックしたい」――そんなときに便利なLARGE・SMALL関数の使い方と、k番目の指定でつまずきやすいポイントを整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 集計・計算</div>
+
+  <article class="article-body">
+    <p>
+      月次の営業成績表や経費精算の一覧から「上位◯件」「下位◯件」だけを取り出したいという場面は、事務職の仕事の中で意外とよく出てきます。並べ替え(ソート)機能を使えば一時的には確認できますが、元の表の並び順を崩したくない、他の集計とあわせて自動更新したいという場合には不向きです。この記事では、範囲内のk番目に大きい・小さい値をそのまま数式で取り出せるLARGE関数とSMALL関数について、実務での使い方とよくあるトラブルを解説します。
+    </p>
+
+    <h2>LARGE・SMALL関数の基本構文</h2>
+    <p>
+      LARGE関数は指定した範囲の中でk番目に大きい値を、SMALL関数はk番目に小さい値を返す関数です。どちらも引数は「範囲」と「順位(k)」の2つだけとシンプルです。
+    </p>
+    <div class="box">
+      <div class="code">=LARGE(範囲, k)　/　=SMALL(範囲, k)</div>
+      <p style="margin-bottom:0;">例：B2:B20の売上金額のうち、1番大きい値(トップの売上)を求める場合<br>
+        <span style="font-family:var(--mono);">=LARGE(B2:B20, 1)</span><br>
+        3番目に小さい値を求める場合<br>
+        <span style="font-family:var(--mono);">=SMALL(B2:B20, 3)</span></p>
+    </div>
+    <p>
+      kに1を指定すれば最大値・最小値と同じ結果になり、kを2、3……と増やしていけば、2位、3位の値を順に取り出せます。ROW関数と組み合わせてkの値を自動で1、2、3と変化させれば、セルをコピーするだけで「上位3件のリスト」を一気に作ることもできます。たとえば<span style="font-family:var(--mono);">=LARGE($B$2:$B$20, ROW()-1)</span>という数式を3行分下にコピーすれば、1位・2位・3位が自動的に並びます。
+    </p>
+
+    <h2>RANK関数との使い分け</h2>
+    <p>
+      LARGE・SMALLとよく混同される関数にRANK(またはRANK.EQ)があります。この2つは似ているようで、求めている情報がまったく逆です。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>RANK関数</h3>
+        <ul>
+          <li>「この値」が何位かを求める</li>
+          <li>入力：値、出力：順位</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>LARGE関数</h3>
+        <ul>
+          <li>「この順位」の値がいくつかを求める(降順)</li>
+          <li>入力：順位、出力：値</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>SMALL関数</h3>
+        <ul>
+          <li>「この順位」の値がいくつかを求める(昇順)</li>
+          <li>入力：順位、出力：値</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      名簿の各行に「この人は全体の何位か」を表示したいならRANK、名簿とは別の場所に「上位3名の売上額だけ」を一覧化したいならLARGEというように、作りたい表の形によって選ぶ関数が変わります。両方を組み合わせて、LARGEで抽出した金額をキーにINDEX・MATCHで氏名を引っ張ってくるランキング表もよく作られます。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>営業事務担当者</b>であれば、月間の個人別売上一覧からLARGE関数で上位3名の売上金額を抽出し、INDEX・MATCHと組み合わせて「営業成績上位3名」の氏名入りランキング表を毎月自動で更新する、という使い方が典型的です。<b>経理担当者</b>であれば、経費精算の科目別集計のうち、金額が特に大きい上位数件を抽出して申請内容に不備がないか重点的にチェックしたり、逆にSMALL関数で金額が小さい(0円に近い)下位の科目を抽出して入力漏れがないか確認したりする場面があります。どちらのケースも、表の並び順そのものを変えずに「上位・下位だけをピックアップして目立たせたい」というニーズにLARGE・SMALLがぴったり合います。
+    </p>
+
+    <h2>LARGE・SMALLでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#NUM! エラー（kがデータ件数を超えている）</span>
+      <p style="margin-bottom:6px;">最も多いパターンです。指定した範囲に存在するデータの個数より大きいkを指定するとエラーになります。</p>
+      <div class="code">例：=LARGE(B2:B10, 8) で、B2:B10のうち数値が入っているのは5件だけ（8番目に大きい値は存在しない）</div>
+      <p style="margin-bottom:0;">対処法として、対象件数が変動する表では<span style="font-family:var(--mono);">=IF(COUNT(範囲)&gt;=k, LARGE(範囲,k), "-")</span>のようにCOUNT関数でチェックしてから計算すると、データが少ない月でもエラー表示にならず安全です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">#NUM! エラー（kが0以下、または未入力に近い状態）</span>
+      <p style="margin-bottom:6px;">kは1以上の整数である必要があります。0やマイナスの値を指定するとエラーになります。</p>
+      <div class="code">例：=SMALL(B2:B20, 0) や =LARGE(B2:B20, -1)</div>
+      <p style="margin-bottom:0;">ROW関数などでkを自動生成している場合、数式を上方向にコピーしてしまい意図せずkが0や負の数になっていることがあります。数式をコピーした後は、先頭行のkが1になっているか確認しましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">データがあるはずなのに結果に反映されない</span>
+      <p style="margin-bottom:6px;">LARGE・SMALLは数値だけを集計対象とし、文字列や空白セルは自動的に無視する仕様です。この仕様を知らないと「データが消えた」と誤解しがちです。</p>
+      <div class="code">例：B2:B20の中に「未入金」「検討中」といった文字列や空白セルが混じっていると、そのセルはカウントも順位付けもされず読み飛ばされる</div>
+      <p style="margin-bottom:0;">対処法として、金額欄には数値のみを入力するルールを徹底するか、文字列扱いになっている数値がないかセルの左寄せ表示をチェックしてください。件数が想定より少ない場合は、COUNT関数で実際に数値として認識されている件数を確認すると原因の切り分けが早くなります。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>RANKとLARGE・SMALLの関係を混同しない。</b>「順位から値を求める」のがLARGE・SMALL、「値から順位を求める」のがRANKと覚えておくと、どちらを使うべきか迷いません。</li>
+      <li><b>範囲は絶対参照（$）で固定する。</b>ROW関数などと組み合わせてkを自動で増やす場合、範囲がずれてしまうと集計結果が崩れるため、範囲側は$B$2:$B$20のように固定しましょう。</li>
+      <li><b>文字列・空白セルは自動的に無視される仕様だと理解しておく。</b>データが反映されないときは、まずエラーではなく「数値として認識されていない」可能性を疑うと解決が早くなります。</li>
+      <li><b>同じ値が複数ある場合、LARGE・SMALLは同順位をそのまま重複して返す。</b>たとえば1位と2位が同額の場合、LARGE(範囲,1)とLARGE(範囲,2)は同じ値になります。重複を除いた「本当に異なる金額の3位」が欲しい場合は、別途工夫が必要です。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      LARGE・SMALL関数は、範囲内のk番目に大きい・小さい値をそのまま取り出せる、ランキング表作成の基本となる関数です。RANK関数とは入力と出力が逆の関係にあることを押さえ、「値から順位」ならRANK、「順位から値」ならLARGE・SMALLと使い分けましょう。kがデータ件数を超えたり0以下になったりすると#NUM!エラーになること、文字列や空白セルは自動的に無視される仕様であることの2点さえ押さえておけば、営業成績や経費精算の上位・下位抽出も安心して自動化できます。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">LARGE関数で#NUM!エラーが出るのはなぜですか？</div>
+        <div class="a">第2引数(k)に指定した順位が、範囲内のデータの個数を超えている場合に#NUM!エラーになります。たとえばデータが5件しかないのにk=8を指定すると、8番目に大きい値は存在しないためエラーになります。データ件数が可変の表では、k=COUNT(範囲)を超えないようIF関数などで上限をチェックすると安全です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">データがあるのにLARGEやSMALLの結果に反映されないのはなぜですか？</div>
+        <div class="a">LARGE・SMALLは数値だけを集計対象とし、文字列や空白セルは自動的に無視する仕様です。金額欄に「未確定」「-」といった文字列が混ざっていたり、数値が文字列として入力されていたりすると、そのセルは件数にも順位にもカウントされません。セルの表示が左寄せになっていないか確認し、文字列になっている場合は数値に変換してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">RANK関数とLARGE・SMALL関数はどう使い分ければよいですか？</div>
+        <div class="a">RANK関数は「特定の値が全体の中で何位か」を求める関数で、SMALL・LARGE関数は「何位の値がいくつか」を求める関数です。両者は入力と出力が逆の関係にあります。個々のデータの順位を一覧に表示したいならRANK、上位・下位だけを抜き出したランキング表を作りたいならLARGE・SMALLを使います。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ LARGE/SMALLの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

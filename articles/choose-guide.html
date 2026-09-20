@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CHOOSE関数で番号から値を選ぶ使い方｜曜日ラベル・歩合率の自動切り替え｜セルうめ</title>
+<meta name="description" content="CHOOSE関数の使い方を実務目線で解説。WEEKDAY関数と組み合わせて曜日番号から「月・火・水」を表示する方法、四半期番号で歩合率を切り替える方法、#VALUE!エラーの原因、VLOOKUP・INDEX+MATCHとの使い分けまで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/choose-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="CHOOSE関数で番号から値を選ぶ使い方｜セルうめ">
+<meta property="og:description" content="WEEKDAYと組み合わせた曜日ラベル表示、四半期の歩合率切り替え、#VALUE!エラーの原因、VLOOKUP・INDEX+MATCHとの使い分けを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/choose-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CHOOSE関数で番号から値を選ぶ使い方">
+<meta name="twitter:description" content="曜日ラベル表示、歩合率の切り替え、#VALUE!エラーの原因、VLOOKUP・INDEX+MATCHとの使い分けを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "CHOOSE関数で番号から値を選ぶ使い方｜曜日ラベル・歩合率の自動切り替え",
+  "description": "CHOOSE関数の使い方を実務目線で解説。WEEKDAY関数と組み合わせて曜日番号から「月・火・水」を表示する方法、四半期番号で歩合率を切り替える方法、#VALUE!エラーの原因、VLOOKUP・INDEX+MATCHとの使い分けを紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/choose-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "CHOOSEのindex_numに0を指定したら#VALUE!エラーになりました。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CHOOSEのindex_numは1から始まる番号だからです。0や負の数、あるいは並べた値の個数より大きい番号を指定すると#VALUE!エラーになります。SUMや配列のように0番目から数える感覚で入力すると1つズレるため、「1番目の値が値1」というルールを意識してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "選択肢が10個も20個もある場合、CHOOSEで書き続けるべきですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "選択肢が5〜6個を超えるようであれば、CHOOSEで1つの数式に詰め込み続けるのはおすすめしません。数式が横に長くなって読みにくくなるだけでなく、選択肢を1つ追加・変更するたびに数式そのものを編集する必要があり修正漏れのリスクも高まります。選択肢が多い、または今後増減する可能性がある場合は、別表にまとめてVLOOKUPやINDEX+MATCHで参照する形にした方が管理しやすくなります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "WEEKDAY関数と組み合わせたら曜日がひとつずれて表示されます。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WEEKDAY関数は種類（type）を省略すると、日曜日を1、月曜日を2として返す仕様になっているためです。CHOOSEの値のリストを「月,火,水,木,金,土,日」のように月曜始まりで書いてしまうと、番号と曜日名の対応がずれてしまいます。CHOOSEに渡すリストの並びは、必ずWEEKDAYが実際に返す番号の並び（種類を省略した場合は日曜始まり）に合わせてください。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>CHOOSE関数で番号から値を選ぶ使い方｜曜日ラベル・歩合率の自動切り替え</h1>
+  <p class="sub">「1なら月、2なら火……」というように、番号に応じて表示したい値をあらかじめ決めておける関数がCHOOSEです。WEEKDAY関数と組み合わせた曜日表示や、四半期に応じた歩合率の切り替えなど、実務でよくある使い方とつまずきポイントを整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 検索・参照関数</div>
+
+  <article class="article-body">
+    <p>
+      Excelの表を作っていると、「番号や区分に応じて、あらかじめ決まったいくつかの値の中から1つを表示したい」という場面によく出会います。曜日を表す1〜7の数字を「月・火・水……」という日本語に変換したり、四半期番号の1〜4に応じて歩合率を切り替えたりするケースです。こうした処理を簡潔に書けるのがCHOOSE関数です。VLOOKUPのような別表を用意しなくても数式1本で完結するのが特徴ですが、番号の数え方や選択肢が増えたときの管理方法でつまずく人も少なくありません。
+    </p>
+
+    <h2>CHOOSE関数の基本構文</h2>
+    <p>
+      CHOOSEは「index_num（何番目を選ぶか）」と、そこから選ばれる「値のリスト」を引数に取ります。値は数値でも文字列でもセル参照でも指定できます。
+    </p>
+    <div class="box">
+      <div class="code">=CHOOSE(index_num, 値1, 値2, 値3, ...)</div>
+      <p style="margin-bottom:0;">例：A1セルの数値（1〜3）に応じて「小・中・大」を表示する<br>
+        <span style="font-family:var(--mono);">=CHOOSE(A1,"小","中","大")</span></p>
+    </div>
+    <p>
+      A1が1なら「小」、2なら「中」、3なら「大」が返ります。単純な仕組みですが、index_numに別の関数の戻り値を組み合わせることで応用範囲が広がります。
+    </p>
+
+    <h2>WEEKDAY関数と組み合わせて曜日ラベルを表示する</h2>
+    <p>
+      CHOOSEの代表的な応用が、WEEKDAY関数と組み合わせて日付から「月・火・水・木・金・土・日」という日本語の曜日ラベルを表示する使い方です。WEEKDAY単体では1〜7の数値しか返らないため、そのままでは表として見づらく、CHOOSEで数値を日本語に変換します。
+    </p>
+    <div class="box">
+      <div class="code">=CHOOSE(WEEKDAY(A1),"日","月","火","水","木","金","土")</div>
+      <p style="margin-bottom:0;">A1に入っている日付の曜日を、日本語の漢字1文字で表示します。WEEKDAYの種類（第2引数）を省略した場合、日曜日が1、月曜日が2……土曜日が7として返るため、CHOOSEのリストも必ず「日」から書き始めるのがポイントです。</p>
+    </div>
+
+    <h2>四半期番号に応じた歩合率を切り替える</h2>
+    <p>
+      もう一つの典型的な使い方が、区分番号に応じて異なる料率・単価を切り替える計算です。たとえば四半期ごとに歩合率（ボーナス率）が変わる会社であれば、四半期番号（1〜4）をindex_numとしてCHOOSEに渡すことで、IFのネストを使わずに歩合率を一発で取得できます。
+    </p>
+    <div class="box">
+      <div class="code">=売上高 * CHOOSE(四半期番号,0.03,0.035,0.04,0.05)</div>
+      <p style="margin-bottom:0;">四半期番号(A1)が1なら3%、2なら3.5%、3なら4%、4なら5%の歩合率を掛けて歩合給を算出する数式です。</p>
+    </div>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、勤怠表や出勤簿の日付列からWEEKDAY関数で曜日番号を取り出し、CHOOSEで「月・火・水・木・金・土・日」という見出しを自動表示させる使い方が典型的です。土日を赤字にする条件付き書式と組み合わせれば、印刷用の出勤表が見やすくなります。<b>営業事務担当者</b>であれば、四半期ごとに歩合率や販売手数料率が変わる給与計算シートで、四半期番号(1〜4)をCHOOSEに渡して該当する料率を自動で切り替える使い方がよくあります。料率テーブルが改定された場合も、CHOOSEの値を書き換えるだけで対応できます。<b>経理担当者</b>であれば、支払サイト区分(1:即日、2:月末締め翌月払い、3:締め翌々月払い)の番号から、対応する支払条件の文言を表示させる使い方もあります。
+    </p>
+
+    <h2>CHOOSEでよくあるエラー・症状と対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー（index_numが値の個数を超えている）</span>
+      <p style="margin-bottom:6px;">曜日ラベルの数式で、値のリストを1つ書き忘れているのに気づかず使ってしまうと発生しやすいエラーです。</p>
+      <div class="code">例：=CHOOSE(WEEKDAY(A1),"日","月","火","水","木","金") と土曜日の値を書き忘れると、WEEKDAYが7（土曜日）を返した瞬間に#VALUE!になる</div>
+      <p style="margin-bottom:0;">対処法は、index_numが取り得る最大値とCHOOSEに並べた値の個数が一致しているか数え直すことです。曜日なら7個、四半期なら4個というように、範囲を先に確認してから値を並べましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー（index_numに0や負の数を指定している）</span>
+      <p style="margin-bottom:6px;">index_numは1から始まる番号である必要があります。0や負の数を指定すると、値のリストが正しくても必ずエラーになります。</p>
+      <div class="code">例：=CHOOSE(0,"小","中","大") → #VALUE!（1番目を指すつもりで0を入力してしまっている）</div>
+      <p style="margin-bottom:0;">対処法は、参照セルの数値が0や空欄になっていないか、計算結果が意図せず0になっていないかを確認することです。区分番号を別の計算式から取得している場合は、その計算式自体も検算しましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">曜日がひとつずれて表示される（エラーは出ない）</span>
+      <p style="margin-bottom:6px;">エラーメッセージは出ないため気づきにくいですが、CHOOSEとWEEKDAYの組み合わせで実際によく起こる症状です。</p>
+      <div class="code">例：=CHOOSE(WEEKDAY(A1),"月","火","水","木","金","土","日") のように月曜始まりでリストを書いてしまうと、実際の曜日より1つずれたラベルが表示される</div>
+      <p style="margin-bottom:0;">WEEKDAYは第2引数（種類）を省略すると日曜日を1として返すため、CHOOSEのリストも「日」から書き始める必要があります。月曜始まりにしたい場合は、WEEKDAY(A1,2)のように種類を2に指定し、リストも「月」から書き始めます。</p>
+    </div>
+
+    <h2>類似関数との使い分け（VLOOKUP・INDEX+MATCH）</h2>
+    <p>
+      CHOOSEは選択肢が少なく番号が1から連番になっている場合に威力を発揮します。選択肢が多い、または別のマスタ表としてすでに存在する場合は、VLOOKUPやINDEX+MATCHの方が管理しやすくなります。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>CHOOSE</h3>
+        <ul>
+          <li>選択肢が少ない(目安5〜6個以下)</li>
+          <li>番号が1からの連番</li>
+          <li>数式だけで完結し別表不要</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>VLOOKUP</h3>
+        <ul>
+          <li>選択肢が多い・増減しやすい</li>
+          <li>すでにマスタ表がある</li>
+          <li>表を直せば数式は直さなくてよい</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>INDEX+MATCH</h3>
+        <ul>
+          <li>検索キーが表の左端以外にある</li>
+          <li>行・列どちらの追加にも強い</li>
+          <li>大きな表で速度を保ちたい場合</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      歩合率が四半期の4区分だけならCHOOSEで数式1本にまとめる方が簡潔ですが、料率区分が10段階、20段階と増える、あるいは表の更新を数式に不慣れな人が行う運用であれば、別シートに料率テーブルを作りVLOOKUPで参照する形の方が安全です。
+    </p>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>index_numは1から始まる。</b>プログラミングの配列のように0番目から数えてしまうと、値が1つずつズレて表示されます。「1番目の値が値1」というルールを常に意識しましょう。</li>
+      <li><b>値の個数とindex_numの取り得る範囲を必ず一致させる。</b>WEEKDAYと組み合わせるなら7個、四半期番号なら4個というように、事前に「何番まで来る可能性があるか」を確認してから値を並べてください。</li>
+      <li><b>WEEKDAYの種類（第2引数）とCHOOSEのリストの並びをセットで管理する。</b>種類を省略・変更したら、CHOOSEの値の並び順も必ず一緒に見直す習慣をつけると、曜日がずれる症状を防げます。</li>
+      <li><b>選択肢が増えてきたら数式を伸ばす前に別表を検討する。</b>CHOOSEはカンマで値を並べるほど数式が横に長くなります。選択肢が6個を超える、または今後増える見込みがあるなら、VLOOKUPやINDEX+MATCH用の一覧表に切り出す判断も大切です。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      CHOOSEは、番号に応じて決まった値を1つ選ぶ処理を、IFのネストよりも簡潔に書ける関数です。WEEKDAYと組み合わせた曜日ラベル表示や、四半期番号に応じた歩合率の切り替えのように、選択肢が少なく番号が連番になっている場面で力を発揮します。index_numが1から始まること、値の個数と番号の範囲が一致していることさえ押さえれば、#VALUE!エラーの多くは防げます。選択肢が増えてきたら無理にCHOOSEで抱え込まず、VLOOKUPやINDEX+MATCHへの切り替えも検討しましょう。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">CHOOSEのindex_numに0を指定したら#VALUE!エラーになりました。なぜですか？</div>
+        <div class="a">CHOOSEのindex_numは1から始まる番号だからです。0や負の数、あるいは並べた値の個数より大きい番号を指定すると#VALUE!エラーになります。SUMや配列のように0番目から数える感覚で入力すると1つズレるため、「1番目の値が値1」というルールを意識してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">選択肢が10個も20個もある場合、CHOOSEで書き続けるべきですか？</div>
+        <div class="a">選択肢が5〜6個を超えるようであれば、CHOOSEで1つの数式に詰め込み続けるのはおすすめしません。数式が横に長くなって読みにくくなるだけでなく、選択肢を1つ追加・変更するたびに数式そのものを編集する必要があり修正漏れのリスクも高まります。選択肢が多い、または今後増減する可能性がある場合は、別表にまとめてVLOOKUPやINDEX+MATCHで参照する形にした方が管理しやすくなります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">WEEKDAY関数と組み合わせたら曜日がひとつずれて表示されます。なぜですか？</div>
+        <div class="a">WEEKDAY関数は種類（type）を省略すると、日曜日を1、月曜日を2として返す仕様になっているためです。CHOOSEの値のリストを「月,火,水,木,金,土,日」のように月曜始まりで書いてしまうと、番号と曜日名の対応がずれてしまいます。CHOOSEに渡すリストの並びは、必ずWEEKDAYが実際に返す番号の並び（種類を省略した場合は日曜始まり）に合わせてください。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ CHOOSEの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

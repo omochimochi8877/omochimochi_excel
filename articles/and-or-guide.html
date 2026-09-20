@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>AND・OR関数の使い分けと組み合わせ方｜TRUE/FALSEしか出ない原因｜セルうめ</title>
+<meta name="description" content="AND・OR関数の使い方と使い分けを実務目線で解説。単体で使うとTRUE/FALSEしか表示されない理由、「かつ」「または」の取り違えで判定ミスが起きる原因、総務・経理での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/and-or-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="AND・OR関数の使い分けと組み合わせ方｜セルうめ">
+<meta property="og:description" content="AND・OR関数を単体で使うとTRUE/FALSEしか出ない理由、「かつ」「または」の取り違えによる判定ミス、総務・経理での実務例を解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/and-or-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AND・OR関数の使い分けと組み合わせ方">
+<meta name="twitter:description" content="単体で使うとTRUE/FALSEしか出ない理由、ANDとORの取り違えによる判定ミス、総務・経理での実務例を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "AND・OR関数の使い分けと組み合わせ方｜TRUE/FALSEしか出ない原因",
+  "description": "AND・OR関数の使い方と使い分けを実務目線で解説。単体で使うとTRUE/FALSEしか表示されない理由、「かつ」「または」の取り違えで判定ミスが起きる原因、総務・経理での使用例を紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/and-or-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "AND関数やOR関数をそのままセルに入力すると、TRUEやFALSEしか表示されないのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AND関数・OR関数はそれ自体が「条件を満たすかどうか」をTRUE/FALSEの論理値で返す関数だからです。「条件を満たしたら特定の文字や数値を表示したい」場合は、AND関数・OR関数を単体で使うのではなく、IF関数の中に組み込み、=IF(AND(条件1,条件2),\"表示したい値\",\"それ以外の値\")のように記述する必要があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "「AかつB」と「AまたはB」、AND関数とOR関数のどちらに対応するのか混同してしまいます。",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "日本語の「かつ」はAND関数(すべての条件を満たす場合にTRUE)、「または」はOR関数(いずれか1つでも条件を満たせばTRUE)に対応します。逆に使うと、本来1人も対象にならないはずの条件で全員が対象になってしまう、あるいはその逆といった致命的な判定ミスにつながるため、数式を書く前に「すべて満たす必要があるのか」「どれか1つでよいのか」を日本語で確認する習慣をつけると安全です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AND関数・OR関数の条件を増やしすぎると、どこが間違っているか分かりにくくなります。対処法はありますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "条件が5個・6個と増えてくると、括弧の中に長い比較式が並び可読性が落ちます。対処法として、各条件をあらかじめ別のセルに分けてTRUE/FALSEを計算し、AND関数・OR関数ではそのセル参照だけを指定する方法があります。どの条件でFALSEになっているかをセル単位で確認できるため、原因の切り分けが格段に楽になります。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>AND・OR関数の使い分けと組み合わせ方｜TRUE/FALSEしか出ない原因</h1>
+  <p class="sub">「複数の条件をすべて満たす人だけ」「どちらか一方を満たせばOK」――こうした判定をしたいのに、AND・ORをそのまま使ってもTRUE/FALSEしか出てこない、あるいは想定と違う結果になる。そんなつまずきを、実務での使い方とあわせて整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 条件分岐</div>
+
+  <article class="article-body">
+    <p>
+      人事・総務・経理の仕事では、「条件Aと条件Bを両方満たす人だけを抽出したい」「条件Aか条件Bのどちらかを満たせばOKにしたい」といった、複数の条件を組み合わせた判定をする場面が数多くあります。条件が1つだけならIF関数だけで十分ですが、条件が2つ以上になった途端に「IFだけでどう書けばいいのか分からない」と手が止まる方は少なくありません。ここで登場するのがAND関数とOR関数です。この記事では、AND・ORの基本的な使い方から、IFと組み合わせずに使うと起きる「TRUE/FALSEしか出ない」問題、ANDとORを取り違えて起きる判定ミス、実務での具体的な使用例までをまとめて解説します。
+    </p>
+
+    <h2>AND・OR関数の基本とIFとの組み合わせ方</h2>
+    <p>
+      AND関数とOR関数は、どちらも複数の条件をまとめて1つの論理値(TRUE/FALSE)に変換する関数です。AND関数はすべての条件を満たしたときだけTRUEを返し、OR関数はいずれか1つでも条件を満たせばTRUEを返します。
+    </p>
+    <div class="box">
+      <div class="code">=AND(条件1, 条件2, ...)<br>=OR(条件1, 条件2, ...)</div>
+      <p style="margin-bottom:0;">例：勤続年数(A1)が3以上、かつ年齢(B1)が20以上の場合にTRUEを返す<br>
+        <span style="font-family:var(--mono);">=AND(A1&gt;=3,B1&gt;=20)</span></p>
+    </div>
+    <p>
+      ここで重要なのは、AND関数・OR関数はあくまで判定結果をTRUE/FALSEとして返すだけで、「対象」「対象外」のような任意の文字列を表示する機能は持っていないという点です。実務で使う数式のほとんどは、AND・ORをIF関数の条件式部分(第1引数)に組み込む形で使います。
+    </p>
+    <div class="box">
+      <div class="code">=IF(AND(A1&gt;=3,B1&gt;=20),"対象","対象外")</div>
+    </div>
+
+    <h2>ANDとORの違いを整理する</h2>
+    <div class="compare">
+      <div class="col">
+        <h3>AND（かつ）</h3>
+        <ul>
+          <li>すべての条件を満たす場合のみTRUE</li>
+          <li>1つでも満たさない条件があればFALSE</li>
+          <li>対象者を厳しく絞り込む判定に向く</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>OR（または）</h3>
+        <ul>
+          <li>いずれか1つの条件を満たせばTRUE</li>
+          <li>全部の条件を満たさない場合のみFALSE</li>
+          <li>該当者を広く拾う判定に向く</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>組み合わせ</h3>
+        <ul>
+          <li>AND関数の中にOR関数を入れ子にできる</li>
+          <li>例：部署が営業、かつ役職が課長または部長</li>
+          <li>カッコの範囲を意識して書く</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      AND関数とOR関数は組み合わせて使うこともできます。たとえば「部署が営業部で、かつ役職が課長または部長」という条件は、<span style="font-family:var(--mono);">=AND(C1="営業部",OR(D1="課長",D1="部長"))</span>のように、OR関数をAND関数の中に入れ子にして書きます。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、福利厚生制度の対象者を抽出する場面でAND関数がよく使われます。たとえば「勤続年数が3年以上、かつ年齢が20歳以上」という2つの条件を両方満たす社員だけを対象にしたい場合、<span style="font-family:var(--mono);">=IF(AND(勤続年数&gt;=3,年齢&gt;=20),"対象","対象外")</span>のように書けば、条件を1つでも満たさない社員は自動的に「対象外」と判定されます。名簿を1人ずつ目で見比べる必要がなくなり、数百人規模でもミスなく抽出できます。<b>経理担当者</b>であれば、稟議や支払いの承認フローで「上長Aまたは上長Bのどちらかが承認済みであれば次の処理に進める」という判定にOR関数を使います。<span style="font-family:var(--mono);">=IF(OR(上長A承認欄="承認",上長B承認欄="承認"),"処理可","未承認")</span>と書いておけば、どちらか一方が承認した時点で自動的に処理可能なステータスに切り替わり、承認待ちの案件を目視で追いかける手間が減ります。<b>営業事務担当者</b>であれば、受注案件のうち「見積金額が100万円以上、または特定の大口顧客からの注文」を上長確認案件として自動的にフラグ立てするような場面でOR関数を使うこともあります。
+    </p>
+
+    <h2>AND・ORでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">TRUE/FALSEしか表示されない</span>
+      <p style="margin-bottom:6px;">AND関数・OR関数をIFに組み込まず、セルに直接AND・ORだけを入力すると、セルには「対象」でも「対象外」でもなく、TRUEまたはFALSEという論理値がそのまま表示されます。「思っていた表示にならない」と戸惑う初心者が非常に多いポイントです。</p>
+      <div class="code">例：=AND(A1&gt;=3,B1&gt;=20) → セルには TRUE としか表示されない</div>
+      <p style="margin-bottom:0;">対処法は、AND・ORを単体で使うのではなく、必ずIF関数の条件式部分に組み込むことです。=IF(AND(A1&gt;=3,B1&gt;=20),"対象","対象外")のように書き換えれば、任意の文字列を表示できます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">判定結果が想定と違う（ANDとORの取り違え）</span>
+      <p style="margin-bottom:6px;">「複数の条件を同時に満たす人だけを抽出したい」つもりでOR関数を使ってしまい、実際にはどれか1つ満たすだけで対象になってしまうミスがよく起こります。</p>
+      <div class="code">例：本来はAND(勤続年数&gt;=3,年齢&gt;=20)とすべきところをOR(勤続年数&gt;=3,年齢&gt;=20)と書いてしまい、勤続1年でも21歳なら「対象」と判定されてしまう</div>
+      <p style="margin-bottom:0;">対処法として、数式を書く前に「かつ(すべて満たす)」なのか「または(1つでもよい)」なのかを日本語で確認してから、それぞれAND・ORに置き換える習慣をつけましょう。数式を作った後は、条件のどちらか一方だけを満たすテストデータで検算すると取り違えに気づきやすくなります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">条件が多すぎて、どこで間違っているか分からない</span>
+      <p style="margin-bottom:6px;">AND・ORの引数に5個、6個と比較式を詰め込むと、1つの数式が横に長くなり、どの条件でFALSEになっているのかをぱっと見で判断できなくなります。</p>
+      <div class="code">例：=IF(AND(A1&gt;=3,B1&gt;=20,C1="在籍中",D1&lt;&gt;"休職",E1&gt;=80),"対象","対象外") のように条件が並ぶと見直しが困難</div>
+      <p style="margin-bottom:0;">対処法として、各条件をあらかじめ別々のセルに分けてTRUE/FALSEを計算しておき、AND・ORの引数にはそのセル参照だけを並べる方法がおすすめです。どの条件がFALSEになっているかをセル単位で一目で確認でき、修正すべき箇所をすぐに特定できます。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>AND・ORは単体で使わず、IFに組み込む。</b>TRUE/FALSEのまま利用したい特別な場合を除き、必ずIF関数とセットで使うと覚えておきましょう。</li>
+      <li><b>「かつ」はAND、「または」はORと日本語で対応づける。</b>条件を書く前に日本語で整理してから数式に落とし込むと、取り違えによる判定ミスを減らせます。</li>
+      <li><b>条件が多いときは補助列に分けて計算する。</b>1つの数式に条件を詰め込みすぎず、判定用の列を作っておくと、後から原因調査がしやすくなります。</li>
+      <li><b>カッコの対応に注意する。</b>AND・ORを入れ子にする場合、閉じカッコの数が合っているか数式バーで確認しましょう。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      AND関数は複数の条件をすべて満たすかどうか、OR関数はいずれか1つでも満たすかどうかを判定する関数で、どちらもIF関数と組み合わせて初めて実務で使える数式になります。「かつ」はAND、「または」はORという対応関係を意識し、条件が増えてきたら補助列に分けて可読性を保つことが、判定ミスを防ぐ一番の近道です。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">AND関数やOR関数をそのままセルに入力すると、TRUEやFALSEしか表示されないのはなぜですか？</div>
+        <div class="a">AND関数・OR関数はそれ自体が「条件を満たすかどうか」をTRUE/FALSEの論理値で返す関数だからです。「条件を満たしたら特定の文字や数値を表示したい」場合は、AND関数・OR関数を単体で使うのではなく、IF関数の中に組み込み、=IF(AND(条件1,条件2),"表示したい値","それ以外の値")のように記述する必要があります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">「AかつB」と「AまたはB」、AND関数とOR関数のどちらに対応するのか混同してしまいます。</div>
+        <div class="a">日本語の「かつ」はAND関数(すべての条件を満たす場合にTRUE)、「または」はOR関数(いずれか1つでも条件を満たせばTRUE)に対応します。逆に使うと、本来1人も対象にならないはずの条件で全員が対象になってしまう、あるいはその逆といった致命的な判定ミスにつながるため、数式を書く前に「すべて満たす必要があるのか」「どれか1つでよいのか」を日本語で確認する習慣をつけると安全です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">AND関数・OR関数の条件を増やしすぎると、どこが間違っているか分かりにくくなります。対処法はありますか？</div>
+        <div class="a">条件が5個・6個と増えてくると、括弧の中に長い比較式が並び可読性が落ちます。対処法として、各条件をあらかじめ別のセルに分けてTRUE/FALSEを計算し、AND関数・OR関数ではそのセル参照だけを指定する方法があります。どの条件でFALSEになっているかをセル単位で確認できるため、原因の切り分けが格段に楽になります。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ AND/ORの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CONCAT・TEXTJOIN関数で文字列を結合する方法｜区切り文字が連続する原因と対処法｜セルうめ</title>
+<meta name="description" content="CONCAT・TEXTJOIN関数を使って複数セルの文字列を結合する方法を実務目線で解説。&演算子やCONCATENATEとの違い、区切り文字だけが連続してしまう原因、日付・数値がシリアル値のまま結合される問題、総務・営業事務での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/concat-textjoin-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="CONCAT・TEXTJOIN関数で文字列を結合する方法｜セルうめ">
+<meta property="og:description" content="&演算子・CONCATENATE・CONCAT・TEXTJOINの違い、区切り文字が連続する原因、日付・数値がシリアル値のまま結合される問題を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/concat-textjoin-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CONCAT・TEXTJOIN関数で文字列を結合する方法">
+<meta name="twitter:description" content="区切り文字が連続する原因、日付・数値がシリアル値のまま結合される問題、総務・営業事務での実務例を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "CONCAT・TEXTJOIN関数で文字列を結合する方法｜区切り文字が連続する原因と対処法",
+  "description": "CONCAT・TEXTJOIN関数を使って複数セルの文字列を結合する方法を実務目線で解説。&演算子やCONCATENATEとの違い、区切り文字だけが連続してしまう原因、日付・数値がシリアル値のまま結合される問題も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/concat-textjoin-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "CONCATENATEとCONCAT、TEXTJOINは何が違うのですか、どれを使えばいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CONCATENATEは古いバージョンとの互換のために残されている関数で、Excelの公式ヘルプでも将来的に廃止される可能性がある「互換性関数」として案内されています。後継のCONCATは基本的にCONCATENATEと同じ働きをしますが、セル範囲をそのまま指定できる点が異なります。区切り文字を挟みたい、空白セルを自動でスキップしたいという場合はTEXTJOINが最も便利なので、新しく数式を組むときはTEXTJOINを基本に、区切り文字が不要な単純な連結だけならCONCATを使うのがおすすめです。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "TEXTJOINで結合すると区切り文字だけ連続してしまいます。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "結合対象の範囲に空白セルが含まれていて、TEXTJOINの第2引数（空白を無視するかどうか）にFALSEを指定している、または&演算子やCONCATENATEで結合しているのが原因です。TEXTJOINの第2引数にTRUEを指定すると、空白セルを自動的にスキップして区切り文字だけが連続することを防げます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "日付や数値のセルを結合すると「45932」のような見慣れない数字になってしまいます。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Excelは日付や時刻を裏側でシリアル値という通し番号として管理しており、&演算子やCONCAT・TEXTJOINで結合すると、セルに表示されている「2026/9/20」ではなく裏側のシリアル値がそのまま連結されてしまうためです。表示通りの文字列として結合したい場合は、結合前にTEXT関数で書式を指定し、TEXT(A1,\"yyyy/m/d\")のようにテキスト化してから結合します。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>CONCAT・TEXTJOIN関数で文字列を結合する方法｜区切り文字が連続する原因と対処法</h1>
+  <p class="sub">都道府県・市区町村・番地をひとつのセルにまとめたい、会社名の後ろに「様」を自動で付けたい――そんな文字列結合の場面で、&やCONCATENATEでは区切り文字だけが連なって不格好になることがあります。TEXTJOINを中心に、結合でよくあるつまずきを整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 文字列操作</div>
+
+  <article class="article-body">
+    <p>
+      複数のセルに分かれた文字列をひとつにまとめる作業は、名簿作成や差し込み文書の準備など、事務職の日常業務でひんぱんに登場します。「姓」と「名」を結合して氏名にする、都道府県・市区町村・番地を結合して住所欄をひとつにする、会社名に「様」を付けて宛名を作るといった作業です。&演算子で済ませている人も多いと思いますが、空白セルが混ざったとたんに区切り文字だけが連続する不格好な文字列になったり、日付や数値のセルを結合すると見慣れない数字の羅列になったりと、意外なつまずきが多い領域でもあります。この記事では、&演算子・CONCATENATE・CONCAT・TEXTJOINの違いを整理しながら、実務でのつまずきどころを解説します。
+    </p>
+
+    <h2>文字列を結合する4つの方法とその違い</h2>
+    <p>
+      Excelで複数の文字列を結合する方法は、大きく分けて4つあります。歴史的な経緯から似た名前の関数が複数存在するため、まずは違いを整理しておきましょう。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>&演算子</h3>
+        <ul>
+          <li>=A1&amp;A2 のように記号でつなぐ</li>
+          <li>区切り文字は自分で1つずつ挟む必要がある</li>
+          <li>空白セルの自動スキップはできない</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>CONCATENATE / CONCAT</h3>
+        <ul>
+          <li>CONCATENATEは旧式、CONCATが後継</li>
+          <li>CONCATはセル範囲をまとめて指定できる</li>
+          <li>いずれも区切り文字の自動挿入や空白スキップはできない</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>TEXTJOIN</h3>
+        <ul>
+          <li>区切り文字をあらかじめ1回だけ指定できる</li>
+          <li>空白セルを自動でスキップできる</li>
+          <li>セル範囲をそのまま指定できる</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      なかでもTEXTJOINは「区切り文字」と「空白セルを無視するかどうか」を最初に指定できる点が最大の強みです。結合したい項目のどこかが空欄でも、区切り文字だけが連続して残ってしまう事故を防げます。
+    </p>
+
+    <h2>TEXTJOINの基本の書き方</h2>
+    <p>
+      TEXTJOINは「区切り文字」「空白を無視するか」「結合したい範囲」の3つを基本の引数として指定します。範囲は複数まとめて指定することもできます。
+    </p>
+    <div class="box">
+      <div class="code">=TEXTJOIN(区切り文字, 空白を無視するか, 範囲1, [範囲2], ...)</div>
+      <p style="margin-bottom:0;">例：A1に都道府県、B1に市区町村、C1に番地が入っており、空白セルがあっても読点だけを連続させずに住所欄をひとつにまとめる場合<br>
+        <span style="font-family:var(--mono);">=TEXTJOIN("",TRUE,A1:C1)</span></p>
+    </div>
+    <p>
+      第2引数をTRUEにしておけば、C1（番地）が未入力の段階でも「東京都渋谷区,」のように区切り文字だけが末尾に残ることなく、入力済みの項目だけがつながります。区切り文字を空文字（""）にすれば、住所のように項目間に記号を挟まずそのまま連結することも可能です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、社員名簿や取引先マスタで都道府県・市区町村・番地・建物名が別々の列に分かれているデータを、宛名ラベルや郵送物のために1つの住所セルへ結合する場面が典型的です。列によっては建物名が空欄のケースも多く、&演算子で結合していると「東京都渋谷区〇〇1-2-3,」のように末尾に余計なカンマや読点が残りがちですが、TEXTJOINなら空白列を自動でスキップしてくれるため、見た目が整った住所欄をそのまま作成できます。<b>営業事務担当者</b>であれば、見積書や請求書のあて名を「会社名+様」の形で自動生成するために結合式を使う場面がよくあります。会社名のセルに部署名や担当者名を追加したい場合も、CONCATやTEXTJOINで結合しておけば、差し込み文書の作成やメール本文への貼り付けがぐっと楽になります。
+    </p>
+
+    <h2>CONCAT・TEXTJOINでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">区切り文字だけが連続して不格好な文字列になる</span>
+      <p style="margin-bottom:6px;">&演算子やCONCATENATEで区切り文字を1つずつ手作業で挟んでいる場合、範囲の途中に空白セルがあると区切り文字だけがそのまま残ってしまいます。</p>
+      <div class="code">例：=A1&"、"&B1&"、"&C1 でB1が空欄の場合、「東京都渋谷区、、1-2-3」のように読点が連続する</div>
+      <p style="margin-bottom:0;">対処法として、&演算子やCONCATENATEではなくTEXTJOINに切り替え、第2引数（空白を無視するか）にTRUEを指定してください。=TEXTJOIN("、",TRUE,A1:C1)とすれば、B1が空欄でも読点が連続することなく自動でスキップされます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">日付や数値を結合すると「45932」のような数字になる</span>
+      <p style="margin-bottom:6px;">Excelは日付や時刻をシリアル値（1900年1月1日を1とした通し番号）として内部で管理しているため、そのまま結合すると表示上の日付ではなくシリアル値が連結されてしまいます。</p>
+      <div class="code">例：A1が「2026/9/20」の日付セルの場合、="発注日："&A1 とすると「発注日：45932」のように意味の分からない数字になる</div>
+      <p style="margin-bottom:0;">対処法として、結合する前にTEXT関数で表示形式を指定してからつなげます。="発注日："&TEXT(A1,"yyyy/m/d")のように書けば、「発注日：2026/9/20」と表示どおりの文字列になります。数値に単位や桁区切りを付けたい場合も同様に、TEXT(A1,"#,##0")のようにTEXT関数を経由させるのが基本です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">TEXTJOINの結果が#VALUE!や#N/Aになる</span>
+      <p style="margin-bottom:6px;">TEXTJOINで結合しようとしている範囲の中に、もともとエラー値を返しているセルが含まれていると、TEXTJOIN自体もそのエラーをそのまま返してしまいます。</p>
+      <div class="code">例：=TEXTJOIN("・",TRUE,A1:C1) でB1がVLOOKUPの結果として#N/Aを返している場合、結合結果全体が#N/Aになる</div>
+      <p style="margin-bottom:0;">対処法として、まず結合対象の範囲内にエラー値が出ているセルがないか確認しましょう。エラーの原因となっている数式側をIFERRORなどで先に処理しておくか、TEXTJOIN自体もIFERRORで包んで代替表示を用意しておくと安全です。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>日付・数値のセルはそのまま結合しない。</b>見た目は「2026/9/20」でも裏側の実体はシリアル値です。文字列として結合したい場合は必ずTEXT関数で書式を指定してから結合します。</li>
+      <li><b>TEXTJOINの引数の順番を覚える。</b>「区切り文字→空白を無視するか→範囲」の順です。区切り文字を先に、空白の扱いを次に指定するという順序を意識すると迷いにくくなります。</li>
+      <li><b>CONCATENATEは新しい数式では使わない。</b>Excelの公式ヘルプでも将来的に廃止される可能性がある互換性関数として案内されています。単純な連結ならCONCAT、区切り文字が必要ならTEXTJOINを使いましょう。</li>
+      <li><b>"様"のような固定の文字列は必ずダブルクォーテーションで囲む。</b>=A1&様 のようにクォーテーションを忘れると、セル参照や名前と誤認識されエラーになります。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      文字列結合は&演算子でも一応できますが、空白セルが混ざる住所データや、区切り文字を挟みたい宛名データではTEXTJOINが圧倒的に扱いやすい関数です。区切り文字と空白セルの扱いを最初にまとめて指定できるため、後から列が増えても数式を大きく書き直す必要がありません。日付や数値を結合する際はシリアル値がそのまま連結されてしまう点にだけ注意し、TEXT関数で書式を指定してからつなげる習慣をつけておきましょう。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">CONCATENATEとCONCAT、TEXTJOINは何が違うのですか、どれを使えばいいですか？</div>
+        <div class="a">CONCATENATEは古いバージョンとの互換のために残されている関数で、Excelの公式ヘルプでも将来的に廃止される可能性がある「互換性関数」として案内されています。後継のCONCATは基本的にCONCATENATEと同じ働きをしますが、セル範囲をそのまま指定できる点が異なります。区切り文字を挟みたい、空白セルを自動でスキップしたいという場合はTEXTJOINが最も便利なので、新しく数式を組むときはTEXTJOINを基本に、区切り文字が不要な単純な連結だけならCONCATを使うのがおすすめです。</div>
+      </div>
+      <div class="qa">
+        <div class="q">TEXTJOINで結合すると区切り文字だけ連続してしまいます。なぜですか？</div>
+        <div class="a">結合対象の範囲に空白セルが含まれていて、TEXTJOINの第2引数（空白を無視するかどうか）にFALSEを指定している、または&演算子やCONCATENATEで結合しているのが原因です。TEXTJOINの第2引数にTRUEを指定すると、空白セルを自動的にスキップして区切り文字だけが連続することを防げます。</div>
+      </div>
+      <div class="qa">
+        <div class="q">日付や数値のセルを結合すると「45932」のような見慣れない数字になってしまいます。なぜですか？</div>
+        <div class="a">Excelは日付や時刻を裏側でシリアル値という通し番号として管理しており、&演算子やCONCAT・TEXTJOINで結合すると、セルに表示されている「2026/9/20」ではなく裏側のシリアル値がそのまま連結されてしまうためです。表示通りの文字列として結合したい場合は、結合前にTEXT関数で書式を指定し、TEXT(A1,"yyyy/m/d")のようにテキスト化してから結合します。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ CONCAT・TEXTJOINの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

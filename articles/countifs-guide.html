@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>COUNTIFS関数で複数条件を数える方法｜COUNTIFとの違いとよくあるエラー｜セルうめ</title>
+<meta name="description" content="COUNTIFS関数で複数条件を満たすデータを数える方法を実務目線で解説。COUNTIFとの違い、範囲サイズ不一致で#VALUE!になる原因、日付・文字列条件の書き方、総務・営業事務での使用例も紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/countifs-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="COUNTIFS関数で複数条件を数える方法｜セルうめ">
+<meta property="og:description" content="COUNTIFとの違い、範囲サイズ不一致で#VALUE!になる原因、日付・文字列条件の書き方を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/countifs-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="COUNTIFS関数で複数条件を数える方法">
+<meta name="twitter:description" content="COUNTIFとの違い、#VALUE!の原因、日付・文字列条件の書き方を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "COUNTIFS関数で複数条件を数える方法｜COUNTIFとの違いとよくあるエラー",
+  "description": "COUNTIFS関数で複数条件を満たすデータを数える方法を実務目線で解説。COUNTIFとの違い、#VALUE!エラーの原因、日付・文字列条件の書き方を紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/countifs-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "COUNTIFとCOUNTIFS、条件が1つならどちらを使うべきですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "条件が1つだけならCOUNTIFで十分ですが、後から条件が増える可能性がある場合は最初からCOUNTIFSで組んでおくと、あとで関数を書き換える手間が省けます。COUNTIFSは条件が1つでも正しく動作するため、実務ではCOUNTIFSに統一している方も多くいます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "COUNTIFSで#VALUE!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "最も多い原因は、条件範囲と条件範囲の行数・列数が一致していないことです。COUNTIFSはすべての範囲が同じ形（同じ行数・列数）である必要があるため、片方の範囲だけ1行多い・少ないといった状態だと#VALUE!エラーになります。範囲をコピーする際に行数がずれていないか確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "日付で「9月のデータだけ数える」条件はどう書けばよいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "日付は等号での完全一致が難しいため、比較演算子を使って範囲で指定します。たとえば9月1日から9月30日までを数えたい場合は、COUNTIFS(日付範囲,\">=2026/9/1\",日付範囲,\"<=2026/9/30\")のように、同じ範囲に対して開始日以上・終了日以下という2つの条件を組み合わせて指定します。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>COUNTIFS関数で複数条件を数える方法｜COUNTIFとの違いとよくあるエラー</h1>
+  <p class="sub">「A部署で、かつ出勤ステータスの人数を数えたい」――条件が1つなら簡単なのに、2つ以上重なると急に難しく感じるカウント集計。COUNTIFSの書き方とよくあるエラーを整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 集計・計算</div>
+
+  <article class="article-body">
+    <p>
+      「特定の条件に合うデータが何件あるか」を数える場面は、総務の勤怠集計から営業事務の受注件数集計まで幅広くあります。条件が1つならCOUNTIFで足りますが、「A部署で、かつ出勤ステータスが『出勤』の人数」のように条件が2つ以上重なった途端、多くの人がCOUNTIFを2回使って引き算するなど遠回りな方法をとりがちです。この記事ではCOUNTIFSの正しい書き方と、範囲の形が合わずに起こるエラーへの対処法を解説します。
+    </p>
+
+    <h2>COUNTIFとCOUNTIFSの違い</h2>
+    <p>
+      COUNTIFは条件を1つしか指定できませんが、COUNTIFSは条件範囲と条件のペアを複数指定でき、すべての条件をAND条件（同時に満たす）でカウントします。
+    </p>
+    <div class="box">
+      <div class="code">=COUNTIFS(条件範囲1, 条件1, 条件範囲2, 条件2, ...)</div>
+      <p style="margin-bottom:0;">例：部署列(B列)が「営業部」、かつステータス列(C列)が「出勤」の人数を数える<br>
+        <span style="font-family:var(--mono);">=COUNTIFS(B:B,"営業部",C:C,"出勤")</span></p>
+    </div>
+    <p>
+      「または（OR条件）」で数えたい場合はCOUNTIFSだけでは1つの数式にまとまらず、複数のCOUNTIFSを足し算する、あるいはSUM関数と配列を組み合わせる必要があります。実務では「AND条件で数える」ケースが圧倒的に多いため、まずはAND条件の書き方をしっかり押さえておくと応用が利きます。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、勤怠表から「部署別・ステータス別の出勤者数」を集計する場面や、アンケート回答データから「特定の年代かつ特定の回答」の件数を数える場面が典型的です。<b>営業事務担当者</b>であれば、受注データから「担当者別・商品カテゴリ別」の受注件数を数えて営業成績の基礎資料にするケースがよくあります。<b>経理担当者</b>であれば、経費精算データから「勘定科目別・かつ承認済み」の件数を数えて処理漏れがないかチェックする場面もあります。ピボットテーブルでも同様の集計はできますが、他の数式と組み合わせて1枚のシートに結果を表示したい場合はCOUNTIFSが便利です。
+    </p>
+
+    <h2>COUNTIFSでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー</span>
+      <p style="margin-bottom:6px;">COUNTIFSで最もよく遭遇するエラーです。原因は条件範囲同士の行数・列数が一致していないことです。</p>
+      <ul>
+        <li>片方の範囲は100行、もう片方は99行など、範囲のサイズが違う</li>
+        <li>列全体(B:B)と特定行の範囲(C2:C100)を混在させて指定している</li>
+      </ul>
+      <div class="code">例：=COUNTIFS(B2:B100,"営業部",C2:C99,"出勤") と範囲の終わりの行がずれている</div>
+      <p style="margin-bottom:0;">対処法として、条件範囲はすべて同じ開始行・終了行で揃えるのが基本です。行数が変動するデータであれば、B:BやC:Cのように列全体を範囲指定しておくと、後で行が増減してもずれる心配がありません。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">カウント結果が0件になる（本当はデータがあるのに）</span>
+      <p style="margin-bottom:6px;">条件に指定した文字列が、セルの実際の値と完全一致していないことが原因です。</p>
+      <div class="code">例："出勤"で検索しているのに、セルには「出勤 」と末尾に半角スペースが入っている</div>
+      <p style="margin-bottom:0;">対処法として、参照元データに余分な空白や全角・半角の表記ゆれがないか確認してください。他システムから取り込んだデータは見えない空白が混在しやすいため、TRIM関数で整えてから集計すると安定します。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">日付や数値の条件がうまく効かない</span>
+      <p style="margin-bottom:6px;">等号（=）だけで日付を指定しようとして、時刻情報のズレなどで一致しないケースです。</p>
+      <div class="code">例：=COUNTIFS(A:A,"2026/9/20") で本来あるはずのデータがヒットしない</div>
+      <p style="margin-bottom:0;">セルに時刻情報が含まれている場合、見た目が同じ日付でも内部値が一致しないことがあります。日付は"&gt;="と"&lt;="を組み合わせた範囲指定にすると、時刻の有無に影響されず安定して集計できます。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>条件範囲と条件の順番はセット。</b>「範囲1・条件1・範囲2・条件2」のように、範囲と条件を交互に並べる順番を崩すと正しく集計できません。</li>
+      <li><b>文字列条件は必ずダブルクォーテーションで囲む。</b>"営業部"のようにクォーテーションを忘れるとエラーや意図しない結果になります。</li>
+      <li><b>ワイルドカードが使える。</b>"営業*"と書けば「営業」で始まるすべての文字列を対象にできます。部分一致で数えたいときに便利です。</li>
+      <li><b>空白セルは条件次第で結果が変わる。</b>「空白ではない」を数えたい場合は条件に"&lt;&gt;"を指定します。単に何も指定しないと意図と違う結果になることがあります。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      COUNTIFSは複数条件を同時に満たすデータの件数を1つの数式で数えられる、実務で非常に出番の多い関数です。エラーの多くは条件範囲のサイズ不一致や、見えない空白による不一致が原因なので、範囲の指定方法とデータのクレンジングを意識すれば安定して使えるようになります。条件が1つのときはCOUNTIF、2つ以上ならCOUNTIFSと覚えておけば迷いません。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">COUNTIFとCOUNTIFS、条件が1つならどちらを使うべきですか？</div>
+        <div class="a">条件が1つだけならCOUNTIFで十分ですが、後から条件が増える可能性がある場合は最初からCOUNTIFSで組んでおくと、あとで関数を書き換える手間が省けます。COUNTIFSは条件が1つでも正しく動作するため、実務ではCOUNTIFSに統一している方も多くいます。</div>
+      </div>
+      <div class="qa">
+        <div class="q">COUNTIFSで#VALUE!エラーが出るのはなぜですか？</div>
+        <div class="a">最も多い原因は、条件範囲と条件範囲の行数・列数が一致していないことです。COUNTIFSはすべての範囲が同じ形（同じ行数・列数）である必要があるため、片方の範囲だけ1行多い・少ないといった状態だと#VALUE!エラーになります。範囲をコピーする際に行数がずれていないか確認してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">日付で「9月のデータだけ数える」条件はどう書けばよいですか？</div>
+        <div class="a">日付は等号での完全一致が難しいため、比較演算子を使って範囲で指定します。たとえば9月1日から9月30日までを数えたい場合は、COUNTIFS(日付範囲,">=2026/9/1",日付範囲,"<=2026/9/30")のように、同じ範囲に対して開始日以上・終了日以下という2つの条件を組み合わせて指定します。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ COUNTIFSの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
