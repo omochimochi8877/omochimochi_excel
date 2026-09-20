@@ -2,6 +2,9 @@ name: Create Children's Animation (Free MVP)
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - video-automation-mvp
 
 permissions:
   contents: read
