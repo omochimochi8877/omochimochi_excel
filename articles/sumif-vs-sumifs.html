@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>SUMIFとSUMIFSの違いは？条件付き集計でよくあるエラーと使い分け｜セルうめ</title>
+<meta name="description" content="SUMIFとSUMIFSは何が違うのか、条件が1つか複数かでどう使い分けるのかを実務目線で解説。0になってしまう・意図した金額と合わないなど条件付き集計でよくあるトラブルの原因と対処法、経理・営業事務での使用例も紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/sumif-vs-sumifs.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="SUMIFとSUMIFSの違いは？条件付き集計の使い分け｜セルうめ">
+<meta property="og:description" content="SUMIFとSUMIFSの違い、条件付き集計でよくあるエラー（0になる・金額が合わない）の原因と対処法、経理・営業事務での実務例を解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/sumif-vs-sumifs.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SUMIFとSUMIFSの違いは？条件付き集計の使い分け">
+<meta name="twitter:description" content="条件付き集計でよくあるトラブルの原因と対処法、SUMIFとSUMIFSの使い分けを実務目線で解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "SUMIFとSUMIFSの違いは？条件付き集計でよくあるエラーと使い分け",
+  "description": "SUMIFとSUMIFSは何が違うのか、条件が1つか複数かでどう使い分けるのかを実務目線で解説。条件付き集計でよくあるトラブルの原因と対処法も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/sumif-vs-sumifs.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "SUMIFで合計が0になってしまいます。原因は何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "多くの場合、条件に指定した文字列がセルの内容と完全に一致していないか、合計範囲の中に数値ではなく文字列として入力された数字が混ざっています。条件セルの表記ゆれ（全角半角・余分な空白）と、合計範囲の数値が「文字列扱い」になっていないかを確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SUMIFとSUMIFS、結局どちらを覚えればいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "条件が1つだけならSUMIFでも十分ですが、実務では『部署が営業部、かつ月が4月』のように条件が複数になることが多いため、最初からSUMIFSで覚えてしまう方が後で困りません。SUMIFSは条件が1つのときもそのまま使えます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "日付の範囲（〇月〇日から〇月〇日まで）で合計したい場合はどうすればいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SUMIFSであれば同じ日付列に対して『以上』と『以下』の2つの条件を指定できます。SUMIFSの2組目・3組目の条件範囲に同じ日付列を指定し、比較演算子付きで開始日と終了日を条件にすることで期間集計ができます。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:560px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>SUMIFとSUMIFSの違いは？条件付き集計でよくあるエラーと使い分け</h1>
+  <p class="sub">「条件に合う数字だけを合計したい」という場面で登場するSUMIFとSUMIFS。名前が似ていて何が違うのか分かりにくい2つの関数を、実務でつまずきやすいポイントとあわせて整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 集計・関数の使い分け</div>
+
+  <article>
+    <p>
+      月次の売上集計、部署別の経費集計、担当者別の件数集計など、「表の中から条件に合う行だけを取り出して合計する」作業は経理・営業事務の定番業務です。この作業を手作業でやろうとすると、フィルターをかけて範囲選択して合計、という手順を条件の数だけ繰り返すことになり、時間もかかれば範囲選択ミスも起きやすくなります。SUMIF関数とSUMIFS関数を使えば、この集計を数式1本で自動化できますが、名前が似ているため「どちらを使えばいいのか」「引数の順番が覚えられない」と迷う方が多い関数でもあります。
+    </p>
+
+    <h2>SUMIFとSUMIFSの基本的な違い</h2>
+    <p>
+      どちらも「条件に合う行の数値を合計する」という目的は同じですが、対応できる条件の数と引数の並び順が異なります。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>SUMIF</h3>
+        <ul>
+          <li>条件は1つだけ指定できる</li>
+          <li>引数の順番は「条件範囲・条件・合計範囲」</li>
+          <li>合計範囲を省略すると条件範囲自体を合計する</li>
+          <li>複数条件（AND条件）には対応できない</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>SUMIFS</h3>
+        <ul>
+          <li>条件を複数（2つ以上）指定できる</li>
+          <li>引数の順番は「合計範囲」が先頭に来る</li>
+          <li>条件範囲と条件のペアを増やせばAND条件を追加できる</li>
+          <li>条件が1つのときもそのまま使える</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      特に注意したいのが引数の順番です。SUMIFは「条件範囲、条件、合計範囲」の順ですが、SUMIFSは「合計範囲、条件範囲1、条件1、条件範囲2、条件2…」と、合計範囲が先頭に来ます。SUMIFの感覚のままSUMIFSを書こうとすると、合計したい列と条件の列を逆に指定してしまうミスが起きやすいので、この順番の違いは意識しておく価値があります。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば「勘定科目が『交通費』の行だけを合計して月次の交通費総額を出す」場面ではSUMIFで十分ですが、「部署が『営業部』、かつ月が『4月』の行だけを合計する」というように条件が2つ以上になるとSUMIFSが必要になります。<b>営業事務</b>であれば「担当者ごと・商品カテゴリごとの売上を集計する」場面、<b>総務担当者</b>であれば「申請区分が『承認済み』、かつ支払月が今月の経費だけを合計する」場面などが典型例です。実務では条件が1つで済むケースより、複数条件になるケースのほうが多いため、最初からSUMIFSに慣れておくと応用が利きます。
+    </p>
+
+    <h2>条件付き集計でよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">合計結果が0になる</span>
+      <p style="margin-bottom:6px;">エラー表示は出ないのに答えが0になるケースで、原因は主に次の2つです。</p>
+      <ul>
+        <li>条件に指定した文字列が、表側のセルの内容と完全に一致していない（表記ゆれ、全角半角、余分な空白）</li>
+        <li>合計したい範囲の数値が、実は「文字列としての数字」になっている（他システムから取り込んだデータに多い）</li>
+      </ul>
+      <p style="margin-bottom:0;">対処法として、条件側の文字列はセルを直接参照する形にして手入力の表記ゆれを防ぐこと、また合計範囲の数値がセル左寄せで表示されていないか（＝文字列扱いになっていないか）を確認し、必要であれば「区切り位置」機能や「値を数値に変換」の操作で数値化してから集計してください。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー</span>
+      <p style="margin-bottom:6px;">SUMIFS特有のエラーで、条件範囲と合計範囲の行数（サイズ）が一致していない場合に発生します。</p>
+      <div class="code">例：=SUMIFS(C2:C100, A2:A100, "営業部", B2:B99, "4月") ← B列の範囲だけ99行までになっている</div>
+      <p style="margin-bottom:0;">複数の範囲をコピー＆修正しながら数式を組み立てるときに起きやすいミスです。すべての範囲（合計範囲・条件範囲1・条件範囲2…）の行数がそろっているか、数式バーで見比べて確認しましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">思ったより多い／少ない金額が合計される</span>
+      <p style="margin-bottom:6px;">条件の書き方が原因で、想定と違う範囲が集計対象になっているケースです。特に日付やワイルドカードを使うときに起きやすくなります。</p>
+      <div class="code">例：="4月"で完全一致させたつもりが、セル側は日付データで「2026/4/1」のように入っている → 一致せず0件</div>
+      <p style="margin-bottom:0;">日付を条件にする場合は、文字列としての「4月」ではなく、日付の範囲（4月1日以上、4月30日以下など）として比較演算子付きで条件を指定する必要があります。SUMIFSであれば同じ日付列に対して「以上」「以下」の2条件を追加することで期間集計ができます。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>SUMIFSは「合計範囲」が一番最初にくることを覚える。</b>SUMIFとは引数の並びが違うため、混同しないよう意識するだけでミスがかなり減ります。</li>
+      <li><b>条件範囲・合計範囲は絶対参照（$）で固定する。</b>数式を他のセルにコピーしたときに範囲がズレるのを防げます。</li>
+      <li><b>条件が今後増える可能性があるなら、最初からSUMIFSで作っておく。</b>あとからSUMIFに条件を追加することはできないため、SUMIFSへの書き換えが必要になります。</li>
+      <li><b>ワイルドカード（*や?）は文字列の条件にのみ使える。</b>「営業*」のように部分一致で集計したい場合に便利ですが、数値や日付の条件には使えません。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      SUMIFとSUMIFSはどちらも「条件に合う数値だけを合計する」関数ですが、条件が1つならSUMIF、2つ以上ならSUMIFSという使い分けが基本です。ただしSUMIFSは条件が1つのときもそのまま使えるため、実務では最初からSUMIFSで統一してしまう方が、後から条件を追加する際に数式を書き直さずに済みます。引数の並び順の違い（合計範囲が先頭に来るかどうか）だけ意識しておけば、複雑な条件付き集計も自動化できます。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">SUMIFで合計が0になってしまいます。原因は何ですか？</div>
+        <div class="a">多くの場合、条件に指定した文字列がセルの内容と完全に一致していないか、合計範囲の中に数値ではなく文字列として入力された数字が混ざっています。条件セルの表記ゆれ（全角半角・余分な空白）と、合計範囲の数値が「文字列扱い」になっていないかを確認してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">SUMIFとSUMIFS、結局どちらを覚えればいいですか？</div>
+        <div class="a">条件が1つだけならSUMIFでも十分ですが、実務では「部署が営業部、かつ月が4月」のように条件が複数になることが多いため、最初からSUMIFSで覚えてしまう方が後で困りません。SUMIFSは条件が1つのときもそのまま使えます。</div>
+      </div>
+      <div class="qa">
+        <div class="q">日付の範囲（〇月〇日から〇月〇日まで）で合計したい場合はどうすればいいですか？</div>
+        <div class="a">SUMIFSであれば同じ日付列に対して「以上」と「以下」の2つの条件を指定できます。SUMIFSの2組目・3組目の条件範囲に同じ日付列を指定し、比較演算子付きで開始日と終了日を条件にすることで期間集計ができます。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ SUMIF・SUMIFSの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
