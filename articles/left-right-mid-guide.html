@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>LEFT・RIGHT・MID関数で文字列を切り出す方法｜#VALUE!エラーと桁数ズレの対処法｜セルうめ</title>
+<meta name="description" content="LEFT・RIGHT・MID関数を使って電話番号や商品コードから一部の文字を切り出す方法を実務目線で解説。MIDの#VALUE!エラーの原因、桁数がバラバラなデータで起きる「エラーにならないズレ」、FIND関数と組み合わせる動的な切り出し方まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/left-right-mid-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="LEFT・RIGHT・MID関数で文字列を切り出す方法｜セルうめ">
+<meta property="og:description" content="MIDの#VALUE!エラーの原因、桁数がバラバラなデータで起きるズレ、FIND関数と組み合わせる動的な切り出し方を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/left-right-mid-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LEFT・RIGHT・MID関数で文字列を切り出す方法">
+<meta name="twitter:description" content="MIDの#VALUE!エラーの原因、桁数がバラバラなデータで起きるズレ、FIND関数との組み合わせ方を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "LEFT・RIGHT・MID関数で文字列を切り出す方法｜#VALUE!エラーと桁数ズレの対処法",
+  "description": "LEFT・RIGHT・MID関数を使って電話番号や商品コードから一部の文字を切り出す方法を実務目線で解説。MIDの#VALUE!エラーの原因、桁数がバラバラなデータで起きるズレ、FIND関数との組み合わせ方も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/left-right-mid-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "MIDで#VALUE!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "文字数の引数を省略した場合や、マイナスの数値を指定した場合に#VALUE!エラーになります。MIDは「文字列、開始位置、文字数」の3つの引数がすべて必須のため、開始位置以降に何文字取り出すかを必ず指定してください。開始位置が文字列の長さより大きい場合はエラーにはならず空文字が返る点にも注意が必要です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "電話番号から市外局番だけを取り出したいのですが、LEFTで固定文字数を指定するとうまくいきません。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "市外局番の桁数は2桁・3桁・4桁とデータによってばらつきがあるため、LEFTで固定の文字数を指定すると一部のデータだけ余分な数字を含んだり途中で切れたりします。ハイフンの位置をFIND関数で探してから、その位置までをMIDやLEFTで切り出すようにすると、桁数が異なるデータが混在していても正しく取り出せます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "LEFT・RIGHT・MIDの違いは何ですか？使い分け方を教えてください。",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "LEFTは文字列の左端（先頭）から、RIGHTは右端（末尾）から、MIDは文字列の途中の指定した位置から、それぞれ文字を切り出す関数です。切り出したい範囲が先頭であればLEFT、末尾であればRIGHT、先頭でも末尾でもない途中の位置であればMIDを使うのが基本の使い分けです。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>LEFT・RIGHT・MID関数で文字列を切り出す方法｜#VALUE!エラーと桁数ズレの対処法</h1>
+  <p class="sub">商品コードの先頭だけ、電話番号の市外局番だけを取り出したいのに、一部のデータだけなぜか値がずれる――そんな「エラーにならないのに間違っている」落とし穴を中心に、LEFT・RIGHT・MIDの使い方を整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 文字列操作</div>
+
+  <article class="article-body">
+    <p>
+      経理・総務・営業事務の現場では、1つのセルに入っている文字列から一部分だけを取り出したい場面が頻繁にあります。「商品コードの先頭3桁だけを見てカテゴリ別に集計したい」「電話番号から市外局番だけを抜き出したい」といったケースです。こうした「文字列の一部を切り出す」処理を担当するのがLEFT・RIGHT・MIDの3関数ですが、構文自体は単純な反面、実際のデータは思っているほど桁数や形式が統一されておらず、エラーにはならないのに値だけがズレるという厄介な事故が起きやすい関数でもあります。
+    </p>
+
+    <h2>LEFT・RIGHT・MIDの基本構文</h2>
+    <p>
+      3つとも「元になる文字列」と「何文字取り出すか」を指定する点は共通していますが、切り出す位置がそれぞれ異なります。
+    </p>
+    <div class="box">
+      <div class="code">=LEFT(文字列, 文字数)　左端から指定文字数を取り出す</div>
+      <div class="code">=RIGHT(文字列, 文字数)　右端から指定文字数を取り出す</div>
+      <div class="code">=MID(文字列, 開始位置, 文字数)　指定した位置から指定文字数を取り出す</div>
+      <p style="margin-bottom:0;">例：A1セルに「TKY-2026-0931」という商品コードが入っている場合<br>
+        <span style="font-family:var(--mono);">=LEFT(A1,3)</span> → "TKY"（先頭3文字）<br>
+        <span style="font-family:var(--mono);">=MID(A1,5,4)</span> → "2026"（5文字目から4文字）</p>
+    </div>
+    <div class="compare">
+      <div class="col">
+        <h3>LEFT</h3>
+        <ul>
+          <li>左端（先頭）から切り出す</li>
+          <li>商品コードの先頭カテゴリ記号など</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>RIGHT</h3>
+        <ul>
+          <li>右端（末尾）から切り出す</li>
+          <li>ファイル名の拡張子、末尾のチェック桁など</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>MID</h3>
+        <ul>
+          <li>途中の指定位置から切り出す</li>
+          <li>コードの中間にある年月・連番部分など</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>位置が固定でない場合はFIND関数と組み合わせる</h2>
+    <p>
+      LEFT・RIGHT・MIDは「何文字目から」を数値で指定する関数のため、対象文字列の長さや構造がすべて同じであることが前提になります。しかし実際のデータでは、ハイフンや記号の位置が一定でないことが少なくありません。そこで役立つのがFIND関数です。FIND関数で「-（ハイフン）」など目印になる文字が何文字目にあるかを調べ、その結果をMIDやLEFTの文字数・開始位置の引数に渡すことで、桁数が異なるデータにも対応できる「動的な切り出し」が可能になります。
+    </p>
+    <div class="box">
+      <div class="code">例：A1に「03-1234-5678」（市外局番2桁）とA2に「0942-12-3456」（市外局番4桁）が混在する場合<br>
+=LEFT(A1,FIND("-",A1)-1)</div>
+      <p style="margin-bottom:0;">最初のハイフンの位置を都度FIND関数で調べてから、その手前までをLEFTで切り出すため、市外局番の桁数がセルごとに違っても正しく取り出せます。文字列全体の長さを使いたい場合はLEN関数も組み合わせます。</p>
+    </div>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、取引先リストや社員名簿の電話番号列から市外局番だけを抜き出して、地域別の連絡先一覧を作る場面があります。ところが電話番号は「03」「0942」のように市外局番の桁数が地域によって異なり、さらに入力者によってハイフンの有無や全角・半角がバラバラなことも多く、LEFTで一律に文字数を固定すると一部の行だけ数字が欠けたり余分な数字が混ざったりします。<b>経理担当者</b>であれば、商品コードの先頭3桁が商品カテゴリを表しているような社内ルールがある場合に、LEFT関数でカテゴリコードを抽出し、それをキーにSUMIFやCOUNTIFSでカテゴリ別集計を行うという使い方が典型的です。この場合はコードの桁数が社内で厳密に統一されていることが前提になるため、実際にすべてのコードが本当に同じ桁数か、イレギュラーなコードが紛れていないかを事前に確認しておく必要があります。
+    </p>
+
+    <h2>LEFT・RIGHT・MIDでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー（MID関数）</span>
+      <p style="margin-bottom:6px;">MID関数で特に起きやすいエラーです。主な原因は次の2つです。</p>
+      <ul>
+        <li>3番目の引数「文字数」を省略している</li>
+        <li>「文字数」や「開始位置」にマイナスの数値を指定している</li>
+      </ul>
+      <div class="code">例：=MID(A1,5) と文字数の引数を書き忘れている（正しくは=MID(A1,5,4)のように3つ目の引数が必須）</div>
+      <p style="margin-bottom:0;">対処法として、MID関数は「文字列・開始位置・文字数」の3つの引数がすべて必須であることを確認してください。特にLEFT・RIGHTは引数が2つで動くため、同じ感覚でMIDを2引数だけで書いてしまうミスが多く見られます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">エラーにはならないが値がズレる（桁数のばらつき）</span>
+      <p style="margin-bottom:6px;">最も気づきにくいトラブルです。数式自体は正常に動作しエラー表示も出ないため、目視で気づくまで誤ったデータが集計・出力され続けます。</p>
+      <div class="code">例：商品コードの先頭3桁をLEFT(A1,3)でカテゴリ抽出しているが、一部の商品だけコードが4桁で始まっており、本来のカテゴリの途中までしか取れていない</div>
+      <p style="margin-bottom:0;">対処法として、固定位置で切り出す数式を組む前に、対象データの桁数・形式が本当にすべて統一されているかをLEN関数などで一度チェックする習慣をつけましょう。桁数が完全に統一されていない場合は、前述のFIND関数と組み合わせた動的な切り出しに切り替えるのが安全です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">全角・半角の混在でハイフンの位置がズレる</span>
+      <p style="margin-bottom:6px;">FIND関数と組み合わせて動的に切り出す場合、目印にしている記号自体の表記が統一されていないとうまく機能しません。</p>
+      <div class="code">例：一部のセルは半角の「-」、別のセルは全角の「－」でハイフンが入力されており、FIND("-",A1)が全角ハイフンのセルだけ#VALUE!エラーになる</div>
+      <p style="margin-bottom:0;">対処法として、事前にSUBSTITUTE関数で全角ハイフンを半角に統一してからFIND・LEFT・MIDを実行する、または入力規則で記号の入力方法を統一しておくことをおすすめします。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>「文字数はすべて同じ」という思い込みを疑う。</b>電話番号・商品コード・住所などは一見同じ形式に見えても、桁数やハイフンの有無が微妙に異なるデータが混在していることが非常に多いです。固定位置で切り出す前に、必ずLEN関数などで実際の桁数を確認しましょう。</li>
+      <li><b>MIDの文字数指定を忘れない。</b>LEFT・RIGHTと違い、MIDは開始位置と文字数の両方を指定する必要があります。「そこから最後まで」を取りたい場合は、文字数に十分大きな数値（例：100など）を指定しておけば、実際の文字列がそれより短くても問題なく動作します。</li>
+      <li><b>開始位置が文字列の長さを超えてもエラーにならない。</b>MIDの開始位置が文字列の長さを超えている場合、エラーではなく空文字（""）が返るため、エラー表示だけを頼りに不具合を見つけようとすると見落としてしまいます。</li>
+      <li><b>全角・半角、スペースの有無も「桁数」に影響する。</b>目に見えないスペースが混入しているデータでは、見た目の桁数と実際の文字数がずれることがあります。TRIM関数で余分なスペースを除去してから切り出すと安定します。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      LEFT・RIGHT・MIDは構文自体はシンプルですが、実務で扱うデータは「本当にすべて同じ桁数・同じ形式か」を疑ってかかる必要があります。固定の文字数で切り出す前にLEN関数で桁数を確認し、桁数や記号の位置がバラバラなデータにはFIND関数と組み合わせた動的な切り出しを使う、というのが事故を防ぐ基本方針です。MID関数は文字数の指定を忘れずに、エラーが出ないからといって値が正しいとは限らない点にも注意しましょう。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">MIDで#VALUE!エラーが出るのはなぜですか？</div>
+        <div class="a">文字数の引数を省略した場合や、マイナスの数値を指定した場合に#VALUE!エラーになります。MIDは「文字列、開始位置、文字数」の3つの引数がすべて必須のため、開始位置以降に何文字取り出すかを必ず指定してください。開始位置が文字列の長さより大きい場合はエラーにはならず空文字が返る点にも注意が必要です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">電話番号から市外局番だけを取り出したいのですが、LEFTで固定文字数を指定するとうまくいきません。なぜですか？</div>
+        <div class="a">市外局番の桁数は2桁・3桁・4桁とデータによってばらつきがあるため、LEFTで固定の文字数を指定すると一部のデータだけ余分な数字を含んだり途中で切れたりします。ハイフンの位置をFIND関数で探してから、その位置までをMIDやLEFTで切り出すようにすると、桁数が異なるデータが混在していても正しく取り出せます。</div>
+      </div>
+      <div class="qa">
+        <div class="q">LEFT・RIGHT・MIDの違いは何ですか？使い分け方を教えてください。</div>
+        <div class="a">LEFTは文字列の左端（先頭）から、RIGHTは右端（末尾）から、MIDは文字列の途中の指定した位置から、それぞれ文字を切り出す関数です。切り出したい範囲が先頭であればLEFT、末尾であればRIGHT、先頭でも末尾でもない途中の位置であればMIDを使うのが基本の使い分けです。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ LEFT・RIGHT・MIDの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

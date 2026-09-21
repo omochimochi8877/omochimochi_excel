@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>NETWORKDAYS関数で稼働日数(営業日数)を計算する方法｜祝日リストが反映されない原因と対処法｜セルうめ</title>
+<meta name="description" content="NETWORKDAYS関数を使って土日・祝日を除いた稼働日数（営業日数）を計算する方法を実務目線で解説。祝日リストが文字列になっていて反映されないトラブル、開始日・終了日を両方含む仕様の落とし穴、総務・経理での使用例、NETWORKDAYS.INTLとの使い分けまで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/networkdays-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="NETWORKDAYS関数で稼働日数(営業日数)を計算する方法｜セルうめ">
+<meta property="og:description" content="祝日リストが反映されないトラブル、開始日・終了日を両方含む仕様の落とし穴、総務・経理での使用例を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/networkdays-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NETWORKDAYS関数で稼働日数(営業日数)を計算する方法">
+<meta name="twitter:description" content="祝日リストが反映されないトラブル、両端を含む仕様の落とし穴、総務・経理での使用例を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "NETWORKDAYS関数で稼働日数(営業日数)を計算する方法｜祝日リストが反映されない原因と対処法",
+  "description": "NETWORKDAYS関数を使って土日・祝日を除いた稼働日数（営業日数）を計算する方法を実務目線で解説。祝日リストが文字列になっていて反映されないトラブル、開始日・終了日を両方含む仕様の落とし穴、総務・経理での使用例を紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/networkdays-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "祝日リストのセルに日付を入れているのに、祝日が稼働日数から除外されません。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "祝日リストのセルが「日付」ではなく「文字列」として入力されている場合によく起こるトラブルです。見た目は「2026/1/1」のように普通の日付に見えても、セルが左寄せで表示されている（文字列扱いのサイン)場合、NETWORKDAYSはその日を祝日として認識できません。該当セルを選択して表示形式や配置を確認し、必要であればDATE関数で入力し直すか、区切り位置機能を使って日付データに変換してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "開始日と終了日、どちらも稼働日数としてカウントされますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。NETWORKDAYSは開始日・終了日がどちらも平日であれば、両方の日付を稼働日数に含めて数える「両端含む」仕様です。例えば月曜日を開始日、金曜日を終了日にすると、稼働日数は5日と計算されます。「起算日の翌日から数える」といった運用にしたい場合は、結果から1を引くなど別途の調整が必要です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "土曜日は出勤で日曜日だけ休みのような会社の場合、NETWORKDAYSは使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "NETWORKDAYS単体では休日を「土日固定」でしか指定できないため、このケースにはそのまま使えません。土日以外の曜日を休日にしたい場合や、土曜のみ出勤のような変則的な勤務体系の場合は、休日パターンを番号で指定できるNETWORKDAYS.INTL関数を使うと、曜日ごとの休日設定を柔軟に行えます。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>NETWORKDAYS関数で稼働日数(営業日数)を計算する方法｜祝日リストが反映されない原因と対処法</h1>
+  <p class="sub">「契約書の提出期限は起算日から10営業日以内」「請求書の支払期日は発行日から30営業日後」――土日と祝日を除いた稼働日数を手作業で数えるのは大変です。NETWORKDAYS関数の使い方と、実務で本当によく起きるつまずきを整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 日付関数</div>
+
+  <article class="article-body">
+    <p>
+      総務や経理の仕事では「土日と祝日を除いた稼働日数」を基準に期限を計算する場面が数多くあります。カレンダーを見ながら指折り数えることもできますが、対象件数が増えるほど手間もミスも増えていきます。この計算をワンステップで行ってくれるのがNETWORKDAYS関数です。ただし「祝日リストを用意したのに反映されない」「なぜか1日ズレる」といった、この関数ならではのつまずきが多いのも事実です。この記事では基本の使い方から、実務でありがちなエラーと対処法までまとめて解説します。
+    </p>
+
+    <h2>NETWORKDAYSの基本構文と「両端含む」仕様</h2>
+    <p>
+      NETWORKDAYSは「開始日」「終了日」、そして任意で「祝日リストのセル範囲」の3つの引数を取り、その間にある土日・祝日を除いた稼働日数（営業日数）を返します。
+    </p>
+    <div class="box">
+      <div class="code">=NETWORKDAYS(開始日, 終了日, [祝日])</div>
+      <p style="margin-bottom:0;">例：A1セルの契約開始日からB1セルの契約満了日までの稼働日数を、祝日リスト（D列）を除いて求める場合<br>
+        <span style="font-family:var(--mono);">=NETWORKDAYS(A1, B1, D1:D20)</span></p>
+    </div>
+    <p>
+      特に押さえておきたいのが、開始日・終了日がどちらも平日であれば、その両方を稼働日数に含めて数える「両端含む」仕様だという点です。例えば月曜日を開始日、金曜日を終了日にすると、稼働日数は「5日」と計算されます。「開始日の翌日から数え始めたい」というケースでは、この仕様を知らないまま使うと結果が1日多くなるので注意が必要です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、契約書に定められた「営業日ベースでの提出期限」を起算日から逆算・順算するときにNETWORKDAYSがよく使われます。例えば「契約締結日から起算して5営業日以内に必要書類を提出する」といった条項がある場合、締結日と提出予定日の間の稼働日数をNETWORKDAYSで検算し、期限内に収まっているかをすぐに確認できます。<b>経理担当者</b>であれば、請求書の支払期日を「発行日から起算して30営業日後」のように計算する場面が典型例です。この場合はNETWORKDAYSそのものより、後述するWORKDAY関数と組み合わせて使うことが多くなります。いずれの場合も、自社カレンダー通りの祝日リストを事前に整備しておくことが正確な計算の前提になります。
+    </p>
+
+    <h2>NETWORKDAYSでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">祝日リストを指定しているのに祝日が除外されない</span>
+      <p style="margin-bottom:6px;">見た目は同じ日付に見えるのに、計算結果に祝日が反映されないという相談が非常に多いトラブルです。原因のほとんどは、祝日リストのセルが「日付」ではなく「文字列」として入力されていることにあります。</p>
+      <div class="code">例：祝日リストD1セルに「2026/1/1」と表示されているが、実際はメモ帳や他システムからコピーした際に文字列として貼り付けられている</div>
+      <p style="margin-bottom:0;">対処法として、該当セルをクリックし、セル内の文字が左寄せになっていないか（＝文字列扱いのサイン）を確認してください。文字列になっている場合は、セルを選択して「データ」タブの区切り位置機能を実行するか、DATE関数で日付を作り直して置き換えると、正しく日付データとして認識され祝日が除外されるようになります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">稼働日数が実際より多く計算されてしまう</span>
+      <p style="margin-bottom:6px;">祝日リストに国民の祝日は入れていても、会社独自の夏季休暇や年末年始休暇を追加し忘れているケースです。土日・祝日は除外されていても、これらの休業日は稼働日としてカウントされてしまいます。</p>
+      <div class="code">例：祝日リストに元日・成人の日などは登録済みだが、12/29〜1/3の年末年始休暇や8月のお盆休みが未登録のため、その期間が営業日として計算されてしまう</div>
+      <p style="margin-bottom:0;">対処法は、国民の祝日だけでなく、就業規則で定められた夏季休暇・年末年始休暇・創立記念日などの会社独自の休業日もすべて祝日リストに追加しておくことです。年が変わるたびに祝日リストを更新する運用ルールを決めておくと、この漏れを防げます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">土曜出勤・変則勤務の会社で数値が合わない</span>
+      <p style="margin-bottom:6px;">NETWORKDAYSは休日を「土曜・日曜」固定でしか判定できません。そのため、土曜日も出勤日として扱いたい会社や、火曜・水曜が定休日のシフト制の職場でこの関数を使うと、実態と合わない稼働日数が出てしまいます。</p>
+      <p style="margin-bottom:0;">対処法として、このようなケースでは次の見出しで紹介するNETWORKDAYS.INTL関数に切り替えてください。休日として扱う曜日をパターン番号で指定できるため、土日以外の休日体系にも対応できます。</p>
+    </div>
+
+    <h2>類似関数との使い分け</h2>
+    <p>
+      NETWORKDAYSと合わせて覚えておきたいのが、休日パターンを柔軟に指定できるNETWORKDAYS.INTLと、稼働日数から日付そのものを逆算するWORKDAYです。目的に応じて使い分けましょう。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>NETWORKDAYS</h3>
+        <ul>
+          <li>2つの日付の間の稼働日「数」を求める</li>
+          <li>休日は土曜・日曜固定</li>
+          <li>祝日リストは任意で追加指定</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>NETWORKDAYS.INTL</h3>
+        <ul>
+          <li>2つの日付の間の稼働日「数」を求める</li>
+          <li>休日の曜日パターンを番号で指定可能</li>
+          <li>土曜のみ休業などの変則勤務に対応</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>WORKDAY</h3>
+        <ul>
+          <li>起算日からN稼働日後の「日付」を求める</li>
+          <li>支払期日・提出期限の算出に使用</li>
+          <li>NETWORKDAYSとは逆方向の計算</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      「稼働日数が何日あるか知りたい」ときはNETWORKDAYS（または土日以外の休日体系ならNETWORKDAYS.INTL）、「発行日から30営業日後の日付そのものを知りたい」ときはWORKDAYと覚えておくと、迷わず選べます。
+    </p>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>祝日リストを用意せずに使ってしまう。</b>NETWORKDAYSは祝日リストを省略しても動作しますが、その場合は土日しか除外されません。「祝日を除いたはず」と思い込んで結果を信じてしまわないよう、祝日リストの列を必ず用意しましょう。</li>
+      <li><b>開始日・終了日を両方カウントする仕様を知らずに1日ズレる。</b>月曜開始・金曜終了で「5日」と出るのは正しい仕様です。「開始日を含めたくない」場合は、結果から1を引くなど自分で調整する必要があります。</li>
+      <li><b>祝日リストの範囲参照を相対参照のままコピーしてしまう。</b>数式を他の行にコピーすると祝日リストの範囲がずれてしまうため、D1:D20のような祝日リストの範囲は$D$1:$D$20のように絶対参照にしておくと安全です。</li>
+      <li><b>祝日リストのセルは「表示上」ではなく「実体」が日付である必要がある。</b>セルの表示形式を日付に変えただけでは文字列は日付にならないため、DATE関数での入力し直しや区切り位置機能での変換が必要になる点を覚えておきましょう。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      NETWORKDAYSは、開始日・終了日の間にある土日・祝日を除いた稼働日数を1本の数式で求められる便利な関数です。ただし「祝日リストのセルが文字列になっていて反映されない」「会社独自の休業日を追加し忘れて稼働日数が実際より多く出る」「開始日・終了日を両方カウントする仕様を知らずに1日ズレる」という3つのつまずきが実務では特に多く見られます。土日以外の曜日を休日にしたい場合はNETWORKDAYS.INTL、稼働日数から期限日そのものを逆算したい場合はWORKDAYと、目的に応じて関数を使い分けることも忘れないでください。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">祝日リストのセルに日付を入れているのに、祝日が稼働日数から除外されません。なぜですか？</div>
+        <div class="a">祝日リストのセルが「日付」ではなく「文字列」として入力されている場合によく起こるトラブルです。見た目は「2026/1/1」のように普通の日付に見えても、セルが左寄せで表示されている（文字列扱いのサイン)場合、NETWORKDAYSはその日を祝日として認識できません。該当セルを選択して表示形式や配置を確認し、必要であればDATE関数で入力し直すか、区切り位置機能を使って日付データに変換してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">開始日と終了日、どちらも稼働日数としてカウントされますか？</div>
+        <div class="a">はい。NETWORKDAYSは開始日・終了日がどちらも平日であれば、両方の日付を稼働日数に含めて数える「両端含む」仕様です。例えば月曜日を開始日、金曜日を終了日にすると、稼働日数は5日と計算されます。「起算日の翌日から数える」といった運用にしたい場合は、結果から1を引くなど別途の調整が必要です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">土曜日は出勤で日曜日だけ休みのような会社の場合、NETWORKDAYSは使えますか？</div>
+        <div class="a">NETWORKDAYS単体では休日を「土日固定」でしか指定できないため、このケースにはそのまま使えません。土日以外の曜日を休日にしたい場合や、土曜のみ出勤のような変則的な勤務体系の場合は、休日パターンを番号で指定できるNETWORKDAYS.INTL関数を使うと、曜日ごとの休日設定を柔軟に行えます。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ NETWORKDAYSの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

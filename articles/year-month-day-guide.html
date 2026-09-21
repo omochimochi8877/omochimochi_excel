@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>YEAR・MONTH・DAY関数の使い方｜年度集計がずれる原因と直し方｜セルうめ</title>
+<meta name="description" content="YEAR・MONTH・DAY関数で日付から年・月・日を取り出す方法を実務目線で解説。文字列日付で#VALUE!になる原因、4月始まりの年度集計がずれる理由と調整式、COUNTIFS・SUMIFSとの組み合わせ方まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/year-month-day-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="YEAR・MONTH・DAY関数の使い方｜年度集計がずれる原因と直し方｜セルうめ">
+<meta property="og:description" content="YEAR・MONTH・DAY関数の基本と、文字列日付での#VALUE!エラー、4月始まり年度集計のズレを直す調整式、COUNTIFS・SUMIFSとの組み合わせを解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/year-month-day-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="YEAR・MONTH・DAY関数の使い方と年度集計のズレ対処法">
+<meta name="twitter:description" content="文字列日付での#VALUE!エラー、4月始まり年度集計のズレを直す調整式、COUNTIFS・SUMIFSとの組み合わせを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "YEAR・MONTH・DAY関数の使い方｜年度集計がずれる原因と直し方",
+  "description": "YEAR・MONTH・DAY関数で日付から年・月・日を取り出す方法を実務目線で解説。文字列日付で#VALUE!になる原因、4月始まりの年度集計がずれる理由と調整式、COUNTIFS・SUMIFSとの組み合わせ方を紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/year-month-day-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "YEAR関数で日付から年を取り出したのに、なぜか#VALUE!エラーになります。原因は何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "参照しているセルの日付が、Excelが日付として認識できない「文字列」になっているのが原因です。他システムから取り込んだデータや、「2026.9.20」のようにピリオドで区切られた日付は、見た目は日付でも実際は文字列として扱われ、YEAR・MONTH・DAY関数に渡すと#VALUE!エラーになります。対処法として、セルが左寄せ表示になっていないか確認し、区切り文字をスラッシュに統一するか、DATEVALUE関数で日付値に変換してから使用してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "YEAR関数で年度別に集計すると、1月〜3月のデータが前年の実績としてカウントされてしまいます。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "YEAR関数はあくまで「西暦年」をそのまま返す関数であり、日本企業に多い4月始まりの「年度(会計年度)」とは基準が異なるためです。たとえば2026年1月〜3月のデータは、多くの企業では「2025年度」に属しますが、YEAR関数だけで集計すると「2026年」として扱われてしまい、年度集計がずれます。年度を正しく求めるには、IF(MONTH(日付)<=3,YEAR(日付)-1,YEAR(日付))のように、1月〜3月かどうかをMONTH関数で判定し、年を1つ差し引く調整が必要です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "「〇月のデータだけ集計したい」場合、MONTH関数とCOUNTIFS・SUMIFSはどう組み合わせればよいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MONTH関数で月を取り出した作業列(補助列)を用意し、その列を条件にCOUNTIFS・SUMIFSを使うのが基本です。ただしCOUNTIFS・SUMIFSの条件範囲に直接MONTH関数の数式を書くことはできないため、日付データの横に「=MONTH(日付セル)」の列を追加してから、その列を条件範囲として指定してください。年をまたいで「毎年9月の合計」を求めたい場合にも、この作業列方式が確実です。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>YEAR・MONTH・DAY関数の使い方｜年度集計がずれる原因と直し方</h1>
+  <p class="sub">日付データから「年だけ」「月だけ」を取り出して集計したいのに、なぜか1〜3月のデータが前の年度に計上されてしまう――そんな年度集計のズレの原因と、YEAR・MONTH・DAY関数の実務的な使い方を整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 日付関数</div>
+
+  <article class="article-body">
+    <p>
+      経理担当者が月次レポートを作るとき、総務担当者が年度ごとの人事データを集計するとき、営業事務担当者が受注日から締め月を判定するとき――いずれの場面でも「日付から年・月・日だけを取り出したい」というニーズが出てきます。この作業を1つの関数で済ませてくれるのがYEAR・MONTH・DAY関数です。書き方自体は非常にシンプルですが、実務で使うと「文字列扱いの日付でエラーになる」「西暦年と会計年度がずれる」といった、関数の構文だけでは分からないつまずきに必ずと言っていいほど遭遇します。
+    </p>
+
+    <h2>YEAR・MONTH・DAYの基本の書き方</h2>
+    <p>
+      YEAR・MONTH・DAYはいずれも引数を1つだけ取り、指定した日付から年・月・日に対応する数値を返します。
+    </p>
+    <div class="box">
+      <div class="code">=YEAR(日付)　=MONTH(日付)　=DAY(日付)</div>
+      <p style="margin-bottom:0;">例：A1セルに「2026/9/20」が入っている場合<br>
+        <span style="font-family:var(--mono);">=YEAR(A1)</span> → 2026　　<span style="font-family:var(--mono);">=MONTH(A1)</span> → 9　　<span style="font-family:var(--mono);">=DAY(A1)</span> → 20</p>
+    </div>
+    <p>
+      返ってくるのは日付ではなく「数値」である点が重要です。この数値をそのままCOUNTIFSやSUMIFSの条件に使えるため、「9月のデータだけ集計する」「特定の日だけ抽出する」といった月次・日次の集計作業に応用できます。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば、取引データの日付列からMONTH関数で作業列を作り、COUNTIFSやSUMIFSと組み合わせて「9月に発生した経費だけ」「今月の売上合計」といった月次レポートを自動集計する場面が典型的です。手作業でフィルタをかけて集計するよりも、月が変わるたびに数式が自動で対象を切り替えてくれるため、月次締め作業の手間が大きく減ります。<b>総務担当者</b>であれば、社員の入社日や異動日を集計する際に「4月始まりの年度」で人事データをまとめるケースが頻出します。この場合は単純なYEAR関数だけでは正しく集計できず、後述するMONTH関数を使った年度調整の数式が必須になります。<b>営業事務担当者</b>であれば、受注日のDAY関数の値から「20日締め」「月末締め」のどちらの請求サイクルに乗せるかを判定する場面でも使われます。
+    </p>
+
+    <h2>暦年と「年度」がずれる問題と調整の考え方</h2>
+    <p>
+      日本企業の多くは4月始まり3月終わりの「年度(会計年度)」で予算や実績を管理していますが、YEAR関数が返すのはあくまで暦の上での西暦年です。この2つの基準の違いが、年度集計のズレという実務でつまずきやすいポイントになります。
+    </p>
+    <div class="box">
+      <div class="code">例：2026年1月20日の売上を「2025年度」として集計したいのに、単純に=YEAR(A1)とすると「2026」が返ってきてしまう</div>
+      <p style="margin-bottom:0;">4月始まりの年度では、1月〜3月は前年度扱いになります。この調整をMONTH関数で行うのが実務での定石です。</p>
+    </div>
+    <div class="box">
+      <div class="code">=IF(MONTH(A1)&lt;=3,YEAR(A1)-1,YEAR(A1))</div>
+      <p style="margin-bottom:0;">A1の月が1〜3月であれば西暦年から1を引き、4月以降であればそのままの西暦年を返す数式です。この結果を作業列にしておけば、年度単位のCOUNTIFS・SUMIFS集計にそのまま条件として使えます。</p>
+    </div>
+
+    <h2>YEAR・MONTH・DAYでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー</span>
+      <p style="margin-bottom:6px;">参照している日付が、Excel上で「日付」ではなく「文字列」として入力されている場合に発生します。</p>
+      <ul>
+        <li>他のシステムやCSVから取り込んだ日付データが、文字列のまま貼り付けられている</li>
+        <li>「2026.9.20」のように、スラッシュやハイフンではなくピリオドで区切られている</li>
+      </ul>
+      <div class="code">例：A1に文字列としての「2026.9.20」が入っている状態で=YEAR(A1)とすると#VALUE!</div>
+      <p style="margin-bottom:0;">対処法として、まずセルの表示が左寄せになっていないか確認してください(日付が左寄せなら文字列扱いのサインです)。区切り文字をスラッシュに置換するか、=YEAR(DATEVALUE(A1))のようにDATEVALUE関数で一度日付値に変換してからYEAR・MONTH・DAYに渡すとエラーを回避できます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">年度集計がずれる（西暦年と会計年度の違い）</span>
+      <p style="margin-bottom:6px;">エラーメッセージは出ないため気づきにくいですが、実務上もっとも起こりやすいトラブルです。</p>
+      <div class="code">例：=SUMIFS(売上,日付,"&gt;="&DATE(YEAR(A1),4,1)) のように単純にYEARだけを基準にすると、1〜3月のデータが翌年度側に混入する</div>
+      <p style="margin-bottom:0;">対処法は前述の通り、MONTH関数で1〜3月かどうかを判定し、該当する場合は年を1つ差し引いた「年度列」を作業列として用意することです。集計の条件範囲にはこの年度列を使うようにしてください。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">COUNTIFS・SUMIFSの条件範囲にMONTHを直接書いてエラーになる</span>
+      <p style="margin-bottom:6px;">「9月のデータだけ集計したい」という発想から、条件範囲に直接MONTH関数を書いてしまうミスもよく見られます。</p>
+      <div class="code">例：=COUNTIFS(MONTH(日付範囲),9,担当者,"山田") のように条件範囲へ直接関数を書くと正しく機能しない</div>
+      <p style="margin-bottom:0;">COUNTIFS・SUMIFSの条件範囲には、実際のセル範囲を指定する必要があります。日付データの隣に「=MONTH(日付セル)」の作業列を追加し、その作業列全体を条件範囲として指定してください。</p>
+    </div>
+
+    <h2>似た関数との使い分け</h2>
+    <p>
+      YEAR・MONTH・DAYは日付から数値を取り出す関数ですが、目的によっては別の関数の方が適しています。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>YEAR・MONTH・DAY</h3>
+        <ul>
+          <li>年・月・日を「数値」で取得</li>
+          <li>COUNTIFS/SUMIFSの条件作成や年度計算に向く</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>TEXT関数</h3>
+        <ul>
+          <li>日付を「文字列」に整形</li>
+          <li>「2026年9月」のような表示用ラベル作成に向く</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>EDATE・EOMONTH</h3>
+        <ul>
+          <li>日付そのものを月単位でずらす</li>
+          <li>支払期日・契約更新日の計算に向く</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      「集計の条件として使いたい」ならYEAR・MONTH・DAY、「見た目のラベルとして表示したい」ならTEXT関数、「日付そのものを○ヶ月後にずらしたい」ならEDATE・EOMONTHというように、欲しい結果が数値か・文字列か・日付かで使い分けるのがコツです。
+    </p>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>日付が本当に「日付形式」か必ず確認する。</b>セルが右寄せで表示されていれば日付・数値、左寄せなら文字列の可能性が高いというExcelの基本ルールを覚えておくと、#VALUE!エラーの原因調査が早くなります。</li>
+      <li><b>YEAR関数の結果は「西暦年」であって「年度」ではない。</b>会計年度・事業年度で集計する場合は、必ずMONTH関数で1〜3月かどうかを判定する調整を挟みましょう。</li>
+      <li><b>COUNTIFS・SUMIFSの条件範囲には作業列を使う。</b>関数を条件範囲に直接書くのではなく、MONTHやYEARの結果を並べた列をあらかじめ作ってから、その列を条件範囲に指定します。</li>
+      <li><b>戻り値は数値なので表示形式に注意する。</b>YEAR・MONTH・DAYの結果セルが日付形式のまま残っていると、「2026」ではなく日付として表示されてしまうことがあるため、必要に応じて「標準」に変更してください。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      YEAR・MONTH・DAYは構文自体はシンプルですが、実務で使いこなすには「文字列扱いの日付でエラーになる」ことと「暦年と会計年度は別物である」ことの2点を理解しておく必要があります。文字列日付にはDATEVALUE関数での変換、年度集計にはMONTH関数を使った調整式を組み合わせれば、月次レポートや年度別の人事集計もぐっと組みやすくなります。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">YEAR関数で日付から年を取り出したのに、なぜか#VALUE!エラーになります。原因は何ですか？</div>
+        <div class="a">参照しているセルの日付が、Excelが日付として認識できない「文字列」になっているのが原因です。他システムから取り込んだデータや、「2026.9.20」のようにピリオドで区切られた日付は、見た目は日付でも実際は文字列として扱われ、YEAR・MONTH・DAY関数に渡すと#VALUE!エラーになります。対処法として、セルが左寄せ表示になっていないか確認し、区切り文字をスラッシュに統一するか、DATEVALUE関数で日付値に変換してから使用してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">YEAR関数で年度別に集計すると、1月〜3月のデータが前年の実績としてカウントされてしまいます。なぜですか？</div>
+        <div class="a">YEAR関数はあくまで「西暦年」をそのまま返す関数であり、日本企業に多い4月始まりの「年度(会計年度)」とは基準が異なるためです。たとえば2026年1月〜3月のデータは、多くの企業では「2025年度」に属しますが、YEAR関数だけで集計すると「2026年」として扱われてしまい、年度集計がずれます。年度を正しく求めるには、IF(MONTH(日付)<=3,YEAR(日付)-1,YEAR(日付))のように、1月〜3月かどうかをMONTH関数で判定し、年を1つ差し引く調整が必要です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">「〇月のデータだけ集計したい」場合、MONTH関数とCOUNTIFS・SUMIFSはどう組み合わせればよいですか？</div>
+        <div class="a">MONTH関数で月を取り出した作業列(補助列)を用意し、その列を条件にCOUNTIFS・SUMIFSを使うのが基本です。ただしCOUNTIFS・SUMIFSの条件範囲に直接MONTH関数の数式を書くことはできないため、日付データの横に「=MONTH(日付セル)」の列を追加してから、その列を条件範囲として指定してください。年をまたいで「毎年9月の合計」を求めたい場合にも、この作業列方式が確実です。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ YEAR・MONTH・DAYの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>HLOOKUP関数で横方向の表を検索する方法｜#REF!・#N/Aエラーの原因と対処法｜セルうめ</title>
+<meta name="description" content="HLOOKUP関数を使って月別・店舗別のような横方向の表から値を取り出す方法を実務目線で解説。row_index_numが#REF!になる原因、検索方法(range_lookup)省略時の落とし穴、#N/Aエラーの直し方、VLOOKUPとの使い分けまで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/hlookup-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="HLOOKUP関数で横方向の表を検索する方法｜セルうめ">
+<meta property="og:description" content="row_index_numが#REF!になる原因、range_lookup省略時の落とし穴、#N/Aエラーの直し方、VLOOKUPとの使い分けを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/hlookup-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HLOOKUP関数で横方向の表を検索する方法">
+<meta name="twitter:description" content="row_index_numが#REF!になる原因、range_lookup省略時の落とし穴、#N/Aエラーの直し方を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "HLOOKUP関数で横方向の表を検索する方法｜#REF!・#N/Aエラーの原因と対処法",
+  "description": "HLOOKUP関数を使って月別・店舗別のような横方向の表から値を取り出す方法を実務目線で解説。row_index_numが#REF!になる原因、検索方法(range_lookup)省略時の落とし穴、#N/Aエラーの直し方も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/hlookup-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "HLOOKUPとVLOOKUP、どちらを使えばいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "表の作りで判断します。検索したい項目(社員番号や商品コードなど)が表の1列目に縦に並んでいる表はVLOOKUP、月や四半期などの項目が表の1行目に横に並んでいる表はHLOOKUPを使います。店舗別×月別の売上表のように、月が列見出しとして横方向に並んでいる表から特定の月の実績を取り出したい場合はHLOOKUPが適しています。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "HLOOKUPで#REF!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "行番号(row_index_num)に、指定した範囲の行数を超える数値を入力しているのが原因です。HLOOKUPの行番号は「シートの行番号」ではなく「範囲の1行目(見出し行)を1とした場合の何行目か」を表すため、範囲の行数と行番号がずれていないか数式バーで確認してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "HLOOKUPで見出しが存在するはずなのに#N/Aエラーになります。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "検索値と見出しセルの表記が完全に一致していないのが原因です。全角と半角の違い、余分な半角スペース、「7月」と「07月」のような表記ゆれ、見出しが日付データとして入力されている場合の表示形式の違いなどが典型的な原因です。見出しセルをクリックして数式バーに表示される実際の内容を確認しましょう。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>HLOOKUP関数で横方向の表を検索する方法｜#REF!・#N/Aエラーの原因と対処法</h1>
+  <p class="sub">店舗別・月別の実績表のように、月や四半期が列見出しとして横に並ぶ表から特定の月の数値だけを取り出したい――そんなときに使うHLOOKUP関数の使い方と、#REF!・#N/Aエラーの原因、VLOOKUPとの使い分けを実務目線で整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 検索・参照関数</div>
+
+  <article class="article-body">
+    <p>
+      経理・営業事務の仕事では、店舗別や部門別の実績を月ごとに横並びで集計した表を扱う場面がよくあります。A列に店舗名や勘定科目名、B列以降に「4月」「5月」「6月」……と月見出しが横方向に並ぶ売上表や試算表がその典型です。この表から「渋谷店の7月の売上だけを取り出したい」「現金残高の7月時点の数値だけを確認したい」というとき、縦方向に検索するVLOOKUPでは対応できません。このような横方向の表から値を検索して取り出すのがHLOOKUP関数です。この記事ではHLOOKUPの基本の書き方、VLOOKUPとの使い分け、そして実務でよく出会う#REF!・#N/Aエラーの原因と対処法をまとめます。
+    </p>
+
+    <h2>HLOOKUPとは何か・VLOOKUPとの違い</h2>
+    <p>
+      HLOOKUP(Horizontal Lookup)は、表の一番上の行(見出し行)を横方向に検索し、そこから指定した行数だけ下にずれたセルの値を返す関数です。実務で使用頻度の高いVLOOKUP(Vertical Lookup)が表の1列目を「縦方向」に検索するのに対し、HLOOKUPは表の1行目を「横方向」に検索する点が最大の違いです。どちらを使うべきかは検索する項目の並び方、つまり表の作りによって決まります。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>VLOOKUPが向く表</h3>
+        <ul>
+          <li>検索したい項目が1列目に縦に並ぶ</li>
+          <li>例：社員番号順の名簿、商品コード順の商品マスタ</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>HLOOKUPが向く表</h3>
+        <ul>
+          <li>検索したい項目が1行目に横に並ぶ</li>
+          <li>例：月別・四半期別の売上表、月が列見出しの試算表</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>共通点</h3>
+        <ul>
+          <li>表の先頭(1列目/1行目)を検索する</li>
+          <li>検索値と見出しが完全一致している必要がある</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>基本の書き方</h2>
+    <p>
+      HLOOKUPは「検索値」「範囲」「行番号」「検索方法」の4つの引数を取ります。
+    </p>
+    <div class="box">
+      <div class="code">=HLOOKUP(検索値, 範囲, 行番号, 検索方法)</div>
+      <p style="margin-bottom:0;">例：A1:M4セルに店舗別×月別売上表があり、1行目が月見出し(4月・5月・6月……)、2行目が渋谷店の実績の場合。渋谷店の7月の売上を取り出すには<br>
+        <span style="font-family:var(--mono);">=HLOOKUP("7月",$A$1:$M$4,2,FALSE)</span></p>
+    </div>
+    <p>
+      「行番号」は表のシート上の行番号ではなく、選択した範囲の1行目(見出し行)を1と数えたときの「何行目か」を指します。上の例であれば渋谷店のデータは範囲の2行目にあるため、行番号は2になります。検索方法にFALSE(完全一致)を指定することで、見出しと検索値が完全に一致するセルだけを探しに行きます。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば、月次試算表で科目(現金・売掛金・買掛金など)を行に、月を列見出しとして並べた表から、特定の科目の特定月の残高だけをHLOOKUPで横引きし、月次レポートや決算資料に転記する場面が典型的です。<b>営業事務担当者</b>であれば、店舗別×月別の売上実績表から「今月の各店舗の実績」を集計シートに引っ張ってくる際に、月見出しをHLOOKUPで検索して該当店舗の行の数値だけを取り出すという使い方をよくします。どちらのケースも、表そのものは維持したまま「見たい月だけ」を別シートに抽出できるのがHLOOKUPの強みです。
+    </p>
+
+    <h2>HLOOKUPでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#REF! エラー</span>
+      <p style="margin-bottom:6px;">行番号(row_index_num)が、指定した範囲の実際の行数を超えているときに発生します。</p>
+      <div class="code">例：=HLOOKUP("7月",A1:M4,5,FALSE) だが範囲A1:M4は4行しかないため、行番号5は範囲外</div>
+      <p style="margin-bottom:0;">対処法として、範囲の行数と行番号が対応しているか数式バーで確認してください。よくある原因は、後から表の行を削除・並べ替えたにもかかわらず行番号を修正し忘れているケースです。行を追加・削除した後は、関係する数式のrow_index_numも必ず見直しましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">検索方法を省略して意図しない値が返る</span>
+      <p style="margin-bottom:6px;">4番目の引数「検索方法」を省略すると、自動的にTRUE(近似一致)として処理されます。VLOOKUPと同じ感覚で完全一致のつもりで省略すると、見出しの並び順によっては全く違う列の値が返ってきます。</p>
+      <div class="code">例：=HLOOKUP("7月",A1:M4,2) と検索方法を省略。月見出しが五十音順や登録順でバラバラに並んでいると、"7月"に一致しない列の値が返ることがある</div>
+      <p style="margin-bottom:0;">対処法は、実務でHLOOKUPを使う場合は基本的に検索方法にFALSE(完全一致)を明示的に指定することです。近似一致は見出しが昇順に並んだ数値表など限られた場面でのみ使う特殊な機能だと考え、迷ったらFALSEを書く習慣にしましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">#N/A エラー</span>
+      <p style="margin-bottom:6px;">検索値と見出しセルの表記が完全に一致していないときに発生します。見た目は同じ「7月」でも、内部的には別物として扱われていることがあります。</p>
+      <div class="code">例：検索値は"7月"なのに、見出しセルには"7月 "(末尾に半角スペース)や"07月"、あるいは日付データとして入力された値が入っている</div>
+      <p style="margin-bottom:0;">対処法として、見出しセルをクリックして数式バーに表示される実際の内容を確認してください。全角・半角の違い、余分なスペース、他システムからの貼り付けによる表記ゆれが典型的な原因です。見出し行自体を検索範囲に含め忘れているケースもあるため、範囲の1行目がきちんと見出し行になっているかも合わせて確認しましょう。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>検索方法(range_lookup)を省略しない。</b>省略すると自動的にTRUE(近似一致)になり、見出しの並び順次第で誤った値が返ってきます。迷ったら必ずFALSEを明示しましょう。</li>
+      <li><b>検索範囲に見出し行自体を含める。</b>範囲指定の1行目が見出し行になっていないと、そもそも検索対象が見つからずエラーになります。見出し行を範囲の先頭に含めてください。</li>
+      <li><b>行番号は「シートの行番号」ではなく「範囲内の何行目か」。</b>選択した範囲の1行目(見出し行)を1として数えるため、シート上の行番号とずれないよう注意しましょう。</li>
+      <li><b>表全体を絶対参照($)で固定してからコピーする。</b>複数の店舗や科目に数式をコピーする際、範囲がずれると意図しない行を参照してしまい、エラーや誤った値の原因になります。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      HLOOKUPは、月や四半期が列見出しとして横に並ぶ表から値を取り出したいときに頼りになる関数です。縦方向の表にはVLOOKUP、横方向の表にはHLOOKUPという使い分けをまず押さえ、検索方法には必ずFALSE(完全一致)を指定すること、行番号は範囲内の相対的な位置であることを意識すれば、#REF!や#N/Aといったエラーの大半は防げます。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">HLOOKUPとVLOOKUP、どちらを使えばいいですか？</div>
+        <div class="a">表の作りで判断します。検索したい項目(社員番号や商品コードなど)が表の1列目に縦に並んでいる表はVLOOKUP、月や四半期などの項目が表の1行目に横に並んでいる表はHLOOKUPを使います。店舗別×月別の売上表のように、月が列見出しとして横方向に並んでいる表から特定の月の実績を取り出したい場合はHLOOKUPが適しています。</div>
+      </div>
+      <div class="qa">
+        <div class="q">HLOOKUPで#REF!エラーが出るのはなぜですか？</div>
+        <div class="a">行番号(row_index_num)に、指定した範囲の行数を超える数値を入力しているのが原因です。HLOOKUPの行番号は「シートの行番号」ではなく「範囲の1行目(見出し行)を1とした場合の何行目か」を表すため、範囲の行数と行番号がずれていないか数式バーで確認してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">HLOOKUPで見出しが存在するはずなのに#N/Aエラーになります。なぜですか？</div>
+        <div class="a">検索値と見出しセルの表記が完全に一致していないのが原因です。全角と半角の違い、余分な半角スペース、「7月」と「07月」のような表記ゆれ、見出しが日付データとして入力されている場合の表示形式の違いなどが典型的な原因です。見出しセルをクリックして数式バーに表示される実際の内容を確認しましょう。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ HLOOKUPの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
