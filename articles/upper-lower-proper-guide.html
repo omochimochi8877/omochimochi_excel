@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>UPPER・LOWER・PROPER関数の使い方｜日本語に効かない理由と実務での使い所｜セルうめ</title>
+<meta name="description" content="UPPER・LOWER・PROPER関数を使って英字の大文字・小文字を統一する方法を実務目線で解説。日本語には一切効かない理由、Excelの検索・比較はもともと大文字・小文字を区別しない仕様であること、営業事務・総務での実務例、PROPERで人名表記が崩れる注意点まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/upper-lower-proper-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="UPPER・LOWER・PROPER関数の使い方｜セルうめ">
+<meta property="og:description" content="英字の大文字・小文字を統一するUPPER・LOWER・PROPER関数の使い方、日本語に効かない理由、営業事務・総務での実務例を解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/upper-lower-proper-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="UPPER・LOWER・PROPER関数の使い方">
+<meta name="twitter:description" content="日本語に効かない理由、Excelの検索が大文字小文字を区別しない仕様との関係、営業事務・総務での実務例を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "UPPER・LOWER・PROPER関数の使い方｜日本語に効かない理由と実務での使い所",
+  "description": "UPPER・LOWER・PROPER関数を使って英字の大文字・小文字を統一する方法を実務目線で解説。日本語には一切効かない理由、Excelの検索・比較はもともと大文字・小文字を区別しない仕様であること、PROPERで人名表記が崩れる注意点も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/upper-lower-proper-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "UPPER関数やLOWER関数を使っても、ひらがなや漢字の部分が変わりません。壊れていますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "壊れていません。UPPER・LOWER・PROPERはいずれも半角の英字（A〜Z）だけを対象にした関数で、ひらがな・カタカナ・漢字はもちろん、全角文字にも一切影響しません。英字と日本語が混在するセルにUPPERを使うと、英字の部分だけが大文字になり、日本語の部分はそのまま表示されるのが正しい動作です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "VLOOKUPで大文字・小文字が違う文字列を探したら見つかりませんでした。UPPER関数で統一すれば直りますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "その原因はおそらく大文字・小文字の違いではありません。ExcelのVLOOKUPやCOUNTIFSなどの検索・比較系の関数は、もともと大文字・小文字を区別せずに一致判定を行う仕様です。見つからない場合は、余分な半角・全角スペースや改行、全角と半角の英数字の違いなど、別の原因を疑ってください。UPPER・LOWERは検索を直すための関数ではなく、表示やCSV出力の見た目を統一するための関数です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "PROPER関数で人名を整えたら「McDonald」が「Mcdonald」になってしまいました。なぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "PROPER関数は、スペース・ハイフン・アポストロフィなど文字以外の記号の直後の1文字だけを機械的に大文字にする仕組みで、「Mc」で始まる姓や複合ミドルネームのような英語圏の命名ルールまでは理解していません。そのため「McDonald」のような単語内の2つ目の大文字は再現されず「Mcdonald」になってしまいます。人名を扱う場合はPROPERを適用したあとに目視で確認し、必要な箇所だけ手作業で修正することをおすすめします。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>UPPER・LOWER・PROPER関数の使い方｜日本語に効かない理由と実務での使い所</h1>
+  <p class="sub">取引先からバラバラの表記で届いたメールアドレスや、社員コードの大文字・小文字を統一したい――そんなときに使うのがUPPER・LOWER・PROPER関数です。日本語には効かない理由や、検索・比較の仕様との関係も含めて整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 文字列操作</div>
+
+  <article class="article-body">
+    <p>
+      名刺やWebフォームから集めた顧客情報を一覧にまとめていると、同じ会社のメールアドレスなのに「Tanaka@example.com」と「tanaka@example.com」のように大文字・小文字の表記がバラバラなことがよくあります。見た目の統一感を整えたい、あるいは外部システムに取り込む前に表記ルールを揃えたい――そうした場面で使うのがUPPER・LOWER・PROPERの3つの関数です。いずれも英字の大文字・小文字を変換するだけのシンプルな関数ですが、日本語には一切効かない、検索には直接関係しないなど、仕様を誤解したまま使うと遠回りをしてしまうポイントがいくつかあります。
+    </p>
+
+    <h2>UPPER・LOWER・PROPERの基本</h2>
+    <p>
+      3つとも引数はセル参照ひとつだけというシンプルな構文です。
+    </p>
+    <div class="box">
+      <div class="code">=UPPER(文字列)　=LOWER(文字列)　=PROPER(文字列)</div>
+      <p style="margin-bottom:0;">例：A1セルに「tanaka taro」と入力されている場合<br>
+        <span style="font-family:var(--mono);">=UPPER(A1) → TANAKA TARO</span><br>
+        <span style="font-family:var(--mono);">=LOWER(A1) → tanaka taro</span><br>
+        <span style="font-family:var(--mono);">=PROPER(A1) → Tanaka Taro</span></p>
+    </div>
+    <div class="compare">
+      <div class="col">
+        <h3>UPPER</h3>
+        <ul>
+          <li>英字をすべて大文字に統一</li>
+          <li>社員コード・型番の表記統一</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>LOWER</h3>
+        <ul>
+          <li>英字をすべて小文字に統一</li>
+          <li>メールアドレスの表記統一</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>PROPER</h3>
+        <ul>
+          <li>単語の先頭だけ大文字に</li>
+          <li>人名・住所英語表記の整形</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>日本語には一切効かない</h2>
+    <p>
+      UPPER・LOWER・PROPERはいずれも半角のアルファベット（A〜Z、a〜z）だけを対象にした関数です。ひらがな・カタカナ・漢字はもちろん、全角のアルファベットや数字にも影響しません。「タナカ タロウ」のようなカタカナのセルにUPPERを適用しても文字列は一切変化せず、「田中 太郎」と半角英字が混在するセルであれば、英字の部分だけが変換され、漢字の部分はそのまま残ります。日本語の表記ゆれ（全角・半角、ひらがな・カタカナなど）を統一したい場合は、これらの関数ではなくASC関数やJIS関数、あるいはSUBSTITUTE関数による個別の置換が必要になる点を押さえておきましょう。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>営業事務担当者</b>であれば、展示会やWebフォームで集めた顧客のメールアドレスを名簿にまとめる際、大文字・小文字の表記がバラバラなまま登録されているケースがよくあります。これをそのまま大文字・小文字を区別する外部の配信システムやCRMに取り込むと、同一人物のアドレスが別データとして重複登録されてしまうことがあるため、LOWERで小文字に統一してから取り込むのが実務上の定石です。<b>総務担当者</b>であれば、部署ごとにバラバラな入力ルールで登録されてきた英字入り社員コード（例：「a-1023」「A-2044」）をUPPERで大文字に統一し、一覧表の見た目と検索性を高める場面で使われます。<b>経理担当者</b>であれば、海外取引先とのやり取りで英語の社名・担当者名を請求書に印字する前に、PROPERで先頭だけ大文字の体裁に整えるといった使い方もあります。
+    </p>
+
+    <h2>「検索・比較には効果がない」という誤解に注意</h2>
+    <p>
+      UPPER・LOWERを学んだばかりの人が陥りやすいのが、「VLOOKUPやCOUNTIFSで大文字・小文字が違うために検索が一致しない」という思い込みです。実はExcelのVLOOKUP・COUNTIFS・MATCHといった検索・比較系の関数は、もともと大文字・小文字を区別せずに一致判定を行う仕様になっています。つまり「Tanaka」と「tanaka」は、これらの関数にとっては最初から同じ文字列として扱われるため、UPPER・LOWERで大文字・小文字を揃えても検索結果は変わりません。UPPER・LOWER・PROPERの実務上の役割は「検索を直す」ことではなく、「人が見たときの表示を統一する」「他システムへ渡すCSVの表記ルールを整える」という、あくまで整形・出力目的で使うのが正しい理解です。
+    </p>
+
+    <h2>UPPER・LOWER・PROPERでよくあるつまずきと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">VLOOKUPが見つからない原因を大文字小文字のせいだと思い込んで遠回りする</span>
+      <p style="margin-bottom:6px;">検索が一致しない原因を大文字・小文字の違いだと決めつけ、UPPER・LOWERで両方を統一しても症状が直らず時間を浪費してしまうケースです。</p>
+      <div class="code">例：=VLOOKUP(A1,商品マスタ,2,FALSE) が「ABC-100」でも「abc-100」でもヒットしない</div>
+      <p style="margin-bottom:0;">前述の通りVLOOKUPは大文字・小文字を区別しないため、原因は別にあります。多くの場合は文字列末尾の余分な半角スペース、全角・半角の違い、改行コードの混入が本当の原因です。TRIM関数やCLEAN関数で不可視文字を取り除いてから再検索してみましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">PROPERで人名を整形すると「McDonald」が「Mcdonald」になる</span>
+      <p style="margin-bottom:6px;">PROPERはスペースやハイフン、アポストロフィなど文字以外の記号の直後だけを大文字にする単純な仕組みです。英語圏特有の命名ルールまでは考慮されません。</p>
+      <div class="code">例：=PROPER("mcdonald") → Mcdonald（本来はMcDonaldとしたい）</div>
+      <p style="margin-bottom:0;">「Mc」から始まる姓や、複合ミドルネームを含む人名をPROPERで一括変換すると、単語の途中にある大文字が再現されず意図しない表記になります。海外の人名を扱うリストでは、PROPER適用後に必ず目視でチェックし、該当箇所だけ手作業で修正する運用にしましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">日本語と英字が混在するセルで「一部しか変わらない」と戸惑う</span>
+      <p style="margin-bottom:6px;">UPPER・LOWER・PROPERは半角英字だけに反応する仕様のため、日本語部分が変化しないのは不具合ではありません。</p>
+      <div class="code">例：=UPPER("田中taro") → 田中TARO（漢字部分はそのまま）</div>
+      <p style="margin-bottom:0;">日本語部分まで変換されると期待していると「関数が壊れている」と誤解しがちですが、これは仕様通りの正しい結果です。英字と日本語が混在するデータの整形には、この特性を前提に数式を設計しましょう。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>UPPER・LOWERは検索の一致率を上げるための関数ではない。</b>ExcelのVLOOKUPやCOUNTIFSはもともと大文字・小文字を区別しないため、これらの関数は表示やCSV出力の整形目的で使うのが実務上の正しい使い方です。</li>
+      <li><b>日本語（ひらがな・カタカナ・漢字）には一切効果がない。</b>半角の英字だけが変換対象です。全角の表記ゆれを直したい場合はASC関数やJIS関数を検討しましょう。</li>
+      <li><b>PROPERは万能の人名整形ツールではない。</b>「McDonald」のような単語内に2つ目の大文字を含む姓は正しく再現されないため、人名リストに使う際は適用後の目視確認を前提にしましょう。</li>
+      <li><b>変換結果は新しいセルに表示される。</b>UPPER・LOWER・PROPERは元のセルの文字列を書き換えるわけではなく、別セルに変換後の文字列を返す関数です。元データを置き換えたい場合は、変換結果を値貼り付けしてから元の列を削除する必要があります。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      UPPER・LOWER・PROPERは、英字の大文字・小文字の表記を統一するためのシンプルな関数です。ただし日本語には一切効かないこと、そしてExcelの検索・比較関数はもともと大文字・小文字を区別しないため、これらの関数は「検索を直す」ためではなく「表示や外部システムへの出力を整える」ために使うものだと理解しておくと、余計なトラブルシューティングに時間を取られずに済みます。PROPERを人名に使う場合は、特殊な命名ルールまでは再現できない点を踏まえ、適用後の確認を習慣にしましょう。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">UPPER関数やLOWER関数を使っても、ひらがなや漢字の部分が変わりません。壊れていますか？</div>
+        <div class="a">壊れていません。UPPER・LOWER・PROPERはいずれも半角の英字（A〜Z）だけを対象にした関数で、ひらがな・カタカナ・漢字はもちろん、全角文字にも一切影響しません。英字と日本語が混在するセルにUPPERを使うと、英字の部分だけが大文字になり、日本語の部分はそのまま表示されるのが正しい動作です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">VLOOKUPで大文字・小文字が違う文字列を探したら見つかりませんでした。UPPER関数で統一すれば直りますか？</div>
+        <div class="a">その原因はおそらく大文字・小文字の違いではありません。ExcelのVLOOKUPやCOUNTIFSなどの検索・比較系の関数は、もともと大文字・小文字を区別せずに一致判定を行う仕様です。見つからない場合は、余分な半角・全角スペースや改行、全角と半角の英数字の違いなど、別の原因を疑ってください。UPPER・LOWERは検索を直すための関数ではなく、表示やCSV出力の見た目を統一するための関数です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">PROPER関数で人名を整えたら「McDonald」が「Mcdonald」になってしまいました。なぜですか？</div>
+        <div class="a">PROPER関数は、スペース・ハイフン・アポストロフィなど文字以外の記号の直後の1文字だけを機械的に大文字にする仕組みで、「Mc」で始まる姓や複合ミドルネームのような英語圏の命名ルールまでは理解していません。そのため「McDonald」のような単語内の2つ目の大文字は再現されず「Mcdonald」になってしまいます。人名を扱う場合はPROPERを適用したあとに目視で確認し、必要な箇所だけ手作業で修正することをおすすめします。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ UPPER・LOWER・PROPERの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

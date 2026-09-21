@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>TRIM・SUBSTITUTE関数で全角スペースが消えない原因と対処法｜セルうめ</title>
+<meta name="description" content="TRIM関数だけでは全角スペースが消えない理由と、SUBSTITUTEと組み合わせて確実に除去する方法を実務目線で解説。VLOOKUPが一致しない、COUNTIFSで重複が検出されないトラブルの原因と対処法、総務・経理での使用例も紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/trim-substitute-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="TRIM・SUBSTITUTE関数で全角スペースが消えない原因と対処法｜セルうめ">
+<meta property="og:description" content="TRIMだけでは全角スペースが消えない理由、SUBSTITUTEとの組み合わせ方、VLOOKUP・COUNTIFSが一致しない原因を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/trim-substitute-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TRIM・SUBSTITUTE関数で全角スペースが消えない原因と対処法">
+<meta name="twitter:description" content="TRIMだけでは全角スペースが消えない理由と、SUBSTITUTEで確実に除去する方法、VLOOKUP・COUNTIFSの不一致原因を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "TRIM・SUBSTITUTE関数で全角スペースが消えない原因と対処法",
+  "description": "TRIM関数だけでは全角スペースが消えない理由と、SUBSTITUTEと組み合わせて確実に除去する方法を実務目線で解説。VLOOKUPが一致しない、COUNTIFSで重複が検出されないトラブルの原因と対処法も紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/trim-substitute-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-20"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "TRIM関数を使ったのに全角スペースが消えないのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TRIM関数が取り除くのは半角スペースのみで、全角スペース（　）は仕様上対象外だからです。全角スペースまで取り除きたい場合は、SUBSTITUTE(TRIM(文字列),\"　\",\"\")のように、TRIMで半角スペースを整えたあとにSUBSTITUTEで全角スペースを空文字列に置き換える必要があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SUBSTITUTE関数の引数はどの順番で指定すればよいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SUBSTITUTE関数は「対象文字列」「検索文字列」「置換文字列」「置換対象（省略可）」の順に指定します。最初に置き換えたい元の文字列、次に探したい文字、最後に置き換え後の文字を書きます。この順番を逆にすると、意図しない文字列が置換されたり、置換自体が行われなかったりするため注意してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "見た目は同じデータなのに、VLOOKUPやCOUNTIFSで一致しないことがあるのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "一方のセルにだけ全角スペースなど目に見えにくい空白文字が含まれており、Excel上は文字列として「違うデータ」と判定されていることが主な原因です。TRIMだけでは全角スペースは消えないため、SUBSTITUTE(TRIM(文字列),\"　\",\"\")で空白を完全に取り除いた作業列を用意し、その列を検索キーや比較対象として使うと不一致を解消できます。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>TRIM・SUBSTITUTE関数で全角スペースが消えない原因と対処法</h1>
+  <p class="sub">TRIMで空白を整えたはずなのに、VLOOKUPが一致しない・COUNTIFSで重複が検出されない――その原因は、TRIMでは消えない「全角スペース」かもしれません。SUBSTITUTEとの組み合わせ方を実務目線で整理します。</p>
+  <div class="meta">2026-09-20更新 ｜ 文字列操作</div>
+
+  <article class="article-body">
+    <p>
+      総務担当者や経理担当者にとって、他部署やWebシステムからコピー＆ペーストしてきたデータに含まれる「見えない空白」ほど厄介なものはありません。TRIM関数を使えば前後の余分なスペースや連続するスペースはきれいに整えられますが、実はTRIMには大きな落とし穴があります。それが「全角スペースは消えない」という仕様です。見た目には空白が消えたように見えても、実際には全角スペースがしぶとく残っていて、VLOOKUPやCOUNTIFSで一致しない、重複しているはずのデータが重複チェックに引っかからない、といったトラブルの原因になります。この記事ではTRIMとSUBSTITUTEを組み合わせて全角スペースまで確実に除去する方法と、実務でのよくある使用シーンを解説します。
+    </p>
+
+    <h2>TRIMが「半角スペースしか消せない」仕様であることを理解する</h2>
+    <p>
+      TRIM関数は、文字列の先頭と末尾にある余分なスペースを取り除き、さらに単語の間に連続して入っているスペースを1つにまとめてくれる関数です。他システムからエクスポートしたデータや、Webページ・PDFからコピーしてきたテキストには、目に見えない余分なスペースが紛れ込んでいることが多く、TRIMはそうしたデータを整形する定番の関数として広く使われています。ところが、TRIMが取り除いてくれるのはあくまで半角スペースだけです。日本語の入力でよく使われる全角スペースは、TRIMをかけても一切削除されません。セルの表示上は空白がなくなったように見えても、実際には全角スペースがそのまま残っており、この「見えているのに数式上は消えていない」状態が、後述するVLOOKUPやCOUNTIFSの不一致トラブルの温床になります。
+    </p>
+    <div class="box">
+      <div class="code">=TRIM(A1)</div>
+      <p style="margin-bottom:0;">例：A1に「　山田　太郎　」（前後・途中に全角スペースを含む文字列）が入っている場合、TRIMをかけても全角スペースは残ったまま。半角スペースだけを想定した処理では取り切れません。</p>
+    </div>
+
+    <h2>SUBSTITUTE関数で全角スペースまで確実に除去・統一する</h2>
+    <p>
+      SUBSTITUTE関数は、文字列の中から指定した文字を検索し、別の文字列に置き換える関数です。引数は「対象文字列」「検索文字列」「置換文字列」「置換対象（省略可）」の順に指定し、置換対象を省略するとヒットしたすべての文字が置き換えられます。全角スペースはTRIMの対象外ですが、SUBSTITUTEを使えば「全角スペースを検索して、空文字列に置き換える」という指定ができるため、TRIMと組み合わせることで半角・全角どちらのスペースも確実に取り除くことができます。
+    </p>
+    <div class="box">
+      <div class="code">=SUBSTITUTE(TRIM(A1),"　","")</div>
+      <p style="margin-bottom:0;">まずTRIMで半角スペースの前後・連続分を整えたうえで、SUBSTITUTEで全角スペースを検索し空文字列に置き換えます。VLOOKUPやCOUNTIFSの照合キーとして使うデータは、スペースを完全にゼロにしてしまうこの形が安全です。表示用に区切りとしてスペースを残したい場合は、<span style="font-family:var(--mono);">=TRIM(SUBSTITUTE(A1,"　"," "))</span>のように、全角スペースを先に半角スペースへ変換してからTRIMで整形する順番も便利です。</p>
+    </div>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、他部署やグループ会社から送られてくる社員名簿・取引先名簿をVLOOKUPの検索キーとして使う前に、TRIMとSUBSTITUTEでスペースを完全にそろえるクレンジング作業が欠かせません。氏名の姓と名の間に全角スペースが入っているか、半角スペースが入っているか、あるいはスペースなしかがファイルごとにバラバラなことが多く、そのままVLOOKUPすると一致しない行が大量に発生します。<b>経理担当者</b>であれば、Webの受発注システムや会計システムからダウンロードした取引先データの表記ゆれ――全角・半角の混在、電話番号のハイフン（－と-）の不統一――を、SUBSTITUTEで一括統一してから突合作業を行う場面が典型的です。<span style="font-family:var(--mono);">=SUBSTITUTE(A1,"－","-")</span>のように全角ハイフンを半角に置き換えるだけでも、他システムとの照合精度は大きく向上します。<b>営業事務担当者</b>であれば、複数の担当者が入力した見積書控えの品名欄をコピーして集計表に貼り付ける際、全角・半角スペースが混在したままSUMIFSの条件に使ってしまい、本来合算されるべき品目が別々に集計されてしまうトラブルを防ぐためにも、あらかじめSUBSTITUTEで空白を統一しておく習慣が役立ちます。
+    </p>
+
+    <h2>TRIM・SUBSTITUTEでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">VLOOKUPで#N/Aが出る・一致しないように見えて実は空白が原因</span>
+      <p style="margin-bottom:6px;">TRIMで整形したはずのデータをVLOOKUPの検索値に使っているのに#N/Aが返ってくる場合、検索対象の文字列に全角スペースが残っているケースが非常に多くあります。</p>
+      <div class="code">例：=VLOOKUP(TRIM(A1),顧客マスタ,2,FALSE) でA1が「　株式会社サンプル」（先頭に全角スペース）の場合、TRIMをかけても全角スペースは消えないためマスタ側の「株式会社サンプル」と一致せず#N/A</div>
+      <p style="margin-bottom:0;">対処法として、検索値をTRIMだけでなくSUBSTITUTE(TRIM(A1),"　","")のように全角スペースの置換も加えることで、見た目には同じでも一致しなかった行を解消できます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">COUNTIFSで重複しているはずのデータが検出されない</span>
+      <p style="margin-bottom:6px;">重複チェックのためにCOUNTIFSやCOUNTIFで件数を数えても、本来2件あるはずの同一データが「1」としてカウントされてしまうことがあります。これは、一方のセルにだけ全角スペースが含まれているために、Excel上は「違う文字列」として扱われているのが原因です。</p>
+      <div class="code">例：A1「田中太郎」、A2「田中　太郎」（全角スペースあり）はセル上の見た目はほぼ同じでも、COUNTIF(A1:A2,"田中太郎")は1しか返さない</div>
+      <p style="margin-bottom:0;">対処法として、比較用の作業列にSUBSTITUTE(TRIM(A1),"　","")で空白を完全に除去した文字列を作り、その列同士で重複チェックを行うと、見えない空白に惑わされずに正しい件数を集計できます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">SUBSTITUTEの引数の順番を間違えて置換されない・意図と逆の結果になる</span>
+      <p style="margin-bottom:6px;">SUBSTITUTE関数は「対象文字列」「検索文字列」「置換文字列」の順に引数を指定しますが、この順番を逆にしてしまい、置換したい文字列自体を検索対象に指定してしまうミスがよく見られます。</p>
+      <div class="code">例：A1の全角スペースを置換したいつもりで =SUBSTITUTE("　",A1,"") のように書いてしまうと、対象文字列が全角スペース1文字だけになり、A1の内容は正しく置換されない</div>
+      <p style="margin-bottom:0;">対処法は、必ず「元の文字列（対象）→探したい文字（検索）→置き換えたい文字（置換）」の順で引数を並べることです。慣れないうちは数式バーで各引数にカーソルを合わせ、ツールチップに表示される引数名を確認する習慣をつけましょう。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>TRIMだけで全角スペースも消えると思い込まない。</b>TRIMが処理するのは半角スペースのみで、全角スペースの除去には別途SUBSTITUTEを組み合わせる必要があります。</li>
+      <li><b>SUBSTITUTEの引数の順番（対象文字列, 検索文字列, 置換文字列）を正確に覚える。</b>「何を」「何から」「何に」変えるのかを声に出して確認すると間違えにくくなります。</li>
+      <li><b>全角スペースと半角スペースは見た目では判別しにくい。</b>LEN(A1)で文字数を数えたり、A1の一部をCODE関数やUNICODE関数で確認したりすると、どちらのスペースが紛れ込んでいるかを客観的に判断できます。</li>
+      <li><b>SUBSTITUTEの第4引数（置換対象）を省略すると該当するすべての文字が置換される。</b>文字列中の特定の1か所だけを置き換えたい場合は、第4引数に何番目に出現する文字かを数値で指定する必要があります。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      TRIM関数は非常に便利ですが、「半角スペースしか取り除けない」という制約を知らずに使うと、全角スペースが原因のVLOOKUP不一致やCOUNTIFSの重複漏れに気づかないまま作業を進めてしまうことがあります。全角スペースまで確実に処理したい場合は、SUBSTITUTE(TRIM(文字列),"　","")のようにSUBSTITUTEを組み合わせ、照合や重複チェックの前に文字列を完全にそろえておくことが重要です。他部署やシステムから届いたデータをそのまま使わず、一度クレンジングを挟む習慣をつけるだけで、原因不明の不一致エラーはぐっと減らせます。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">TRIM関数を使ったのに全角スペースが消えないのはなぜですか？</div>
+        <div class="a">TRIM関数が取り除くのは半角スペースのみで、全角スペース（　）は仕様上対象外だからです。全角スペースまで取り除きたい場合は、SUBSTITUTE(TRIM(文字列),"　","")のように、TRIMで半角スペースを整えたあとにSUBSTITUTEで全角スペースを空文字列に置き換える必要があります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">SUBSTITUTE関数の引数はどの順番で指定すればよいですか？</div>
+        <div class="a">SUBSTITUTE関数は「対象文字列」「検索文字列」「置換文字列」「置換対象（省略可）」の順に指定します。最初に置き換えたい元の文字列、次に探したい文字、最後に置き換え後の文字を書きます。この順番を逆にすると、意図しない文字列が置換されたり、置換自体が行われなかったりするため注意してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">見た目は同じデータなのに、VLOOKUPやCOUNTIFSで一致しないことがあるのはなぜですか？</div>
+        <div class="a">一方のセルにだけ全角スペースなど目に見えにくい空白文字が含まれており、Excel上は文字列として「違うデータ」と判定されていることが主な原因です。TRIMだけでは全角スペースは消えないため、SUBSTITUTE(TRIM(文字列),"　","")で空白を完全に取り除いた作業列を用意し、その列を検索キーや比較対象として使うと不一致を解消できます。</div>
+      </div>
+    </div>
+
+    <a class="cta" href="/index.html">→ TRIM・SUBSTITUTEの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
