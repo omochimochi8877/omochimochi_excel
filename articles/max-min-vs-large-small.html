@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>MAX・MINとLARGE・SMALLの違いは？最大値・最小値を求める関数の使い分けガイド｜セルうめ</title>
+<meta name="description" content="MAX・MIN関数とLARGE・SMALL関数の違いを実務目線で解説。範囲が空欄や文字列だけのときにMAXが0を返してしまう落とし穴、エラー値が混ざると#N/Aになる原因と対処法、条件付きで最大値を求めるMAXIFS・MINIFSとの使い分けまで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/max-min-vs-large-small.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="MAX・MINとLARGE・SMALLの違いは？最大値・最小値を求める関数の使い分けガイド｜セルうめ">
+<meta property="og:description" content="MAX・MIN関数とLARGE・SMALL関数の違い、空欄範囲でMAXが0を返す落とし穴、エラー値混入時の対処法、MAXIFS・MINIFSとの使い分けを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/max-min-vs-large-small.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MAX・MINとLARGE・SMALLの違いは？最大値・最小値を求める関数の使い分けガイド">
+<meta name="twitter:description" content="空欄範囲でMAXが0を返す落とし穴、エラー値混入時の対処法、MAXIFS・MINIFSとの使い分けを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "MAX・MINとLARGE・SMALLの違いは？最大値・最小値を求める関数の使い分けガイド",
+  "description": "MAX・MIN関数とLARGE・SMALL関数の違いを実務目線で解説。範囲が空欄や文字列だけのときにMAXが0を返してしまう落とし穴、エラー値が混ざると#N/Aになる原因と対処法、条件付きで最大値を求めるMAXIFS・MINIFSとの使い分けを紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/max-min-vs-large-small.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-24"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "MAX関数の結果が0になってしまうのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MAX・MIN関数は、指定した範囲に数値が1つも入っていない（すべて空欄、または文字列だけ）場合、エラーではなく0を返す仕様になっています。数式そのものは正しく組めていても、参照先の表がまだ未入力だったり、金額欄が文字列として入力されていたりすると、あたかも「最高額が0円」であるかのような結果になってしまいます。範囲内にCOUNT関数を組み合わせて、データ件数が0でないかを確認する一手間を入れると安全です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "範囲にエラー値が混ざっているとMAXも#N/Aになりますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。MAX・MIN関数は、参照範囲の中に#N/Aや#DIV/0!などのエラー値が1つでも含まれていると、結果全体がそのエラー値になってしまいます。VLOOKUPなどの結果を集計している範囲でよく発生します。対処法としては、AGGREGATE関数（第2引数でエラー値を無視するオプションを指定）を使うか、集計元の数式側にIFERRORを組み込んでエラーが表に出ないようにしておくと安定します。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "MAX・MINとLARGE・SMALLはどちらを使えばいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "「範囲の中でいちばん大きい・小さい値を1つだけ」知りたいならMAX・MINで十分です。「2位」「3位」まで含めた上位・下位のランキング表を作りたい場合や、何位まで見るかを後から調整したい場合はLARGE・SMALLが向いています。MAX(範囲)とLARGE(範囲,1)、MIN(範囲)とSMALL(範囲,1)はそれぞれ同じ結果になりますが、空欄範囲での挙動が異なる点には注意してください。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>MAX・MINとLARGE・SMALLの違いは？最大値・最小値を求める関数の使い分けガイド</h1>
+  <p class="sub">「今月いちばん売上が高かった金額を知りたいだけなのに、なぜか0円と表示される」――そんな経験はありませんか。MAX・MIN関数とLARGE・SMALL関数の違い、そして見落としがちな落とし穴を整理します。</p>
+  <div class="meta">2026-09-24更新 ｜ 集計・計算</div>
+
+  <article class="article-body">
+    <p>
+      「範囲の中でいちばん大きい・小さい値を知りたい」という場面では、MAX関数・MIN関数を使うのが一般的です。一方で、このサイトの記事でも紹介しているLARGE関数・SMALL関数も「大きい方・小さい方から順に値を取り出す」関数として似た用途で使われます。どちらも最大値・最小値がらみの関数ですが、実は空欄や文字列が混じったときの挙動がまったく異なり、この違いを知らないまま使うと「エラーにはならないのに集計結果が間違っている」という、原因に気づきにくいトラブルにつながります。この記事では両者の違いと、実務で安全に使うためのポイントを解説します。
+    </p>
+
+    <h2>MAX・MIN関数の基本構文</h2>
+    <p>
+      MAX関数は指定した範囲の中の最大値を、MIN関数は最小値を返す関数です。引数は範囲(または数値)だけで、LARGE・SMALLのように「何番目か」を指定する必要がありません。
+    </p>
+    <div class="box">
+      <div class="code">=MAX(範囲)　/　=MIN(範囲)</div>
+      <p style="margin-bottom:0;">例：B2:B31の日別売上のうち、最も売上が高かった日の金額を求める場合<br>
+        <span style="font-family:var(--mono);">=MAX(B2:B31)</span><br>
+        最も売上が低かった日の金額を求める場合<br>
+        <span style="font-family:var(--mono);">=MIN(B2:B31)</span></p>
+    </div>
+    <p>
+      「1位の値だけ」でよいのであれば、MAX・MINはLARGE(範囲,1)・SMALL(範囲,1)とまったく同じ結果になります。引数もシンプルなので、単純に最大値・最小値を知りたいだけの場面ではMAX・MINを使うのが素直な選択です。
+    </p>
+
+    <h2>LARGE・SMALLとの使い分け</h2>
+    <p>
+      MAX・MINとLARGE・SMALLは、どちらも「範囲内の大きい方・小さい方の値」を扱う点では共通していますが、求められる情報の幅が違います。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>MAX・MIN関数</h3>
+        <ul>
+          <li>範囲内の最大値・最小値を1つだけ返す</li>
+          <li>「何番目か」は指定できない</li>
+          <li>データが0件だとエラーにならず0を返す</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>LARGE・SMALL関数</h3>
+        <ul>
+          <li>k番目に大きい・小さい値を指定して取り出せる</li>
+          <li>1位・2位・3位のランキング表を作れる</li>
+          <li>kがデータ件数を超えると#NUM!エラーになる</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      「今月の最高売上・最低売上だけ知りたい」という単発の集計ならMAX・MINで十分ですが、「上位3件を一覧表にしたい」「下から2番目までチェックしたい」という場合はLARGE・SMALLの出番です。逆に言えば、LARGE・SMALLで k=1 だけを使う運用は、そのままMAXやMINに置き換えたほうが数式がシンプルになります。LARGE・SMALLの詳しい使い方や、RANK関数との関係については別記事「<a href="/articles/large-small-guide.html">LARGE・SMALL関数で上位・下位ランキングを抽出する方法</a>」でも解説しています。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>営業事務担当者</b>であれば、日別・担当者別の売上一覧からMAX関数で「今月の最高売上額」を表の隅に自動表示させ、朝礼や月次報告の資料にそのまま使う、という使い方がよくあります。<b>経理担当者</b>であれば、経費精算の申請一覧からMAX関数で突出して金額の大きい申請を素早く見つけたり、逆にMIN関数で0円に近い(入力漏れの疑いがある)申請がないかをチェックしたりする場面があります。<b>総務担当者</b>であれば、勤続年数の一覧からMAX・MINで最も勤続年数が長い社員・短い社員を確認する、といった人事データの集計にも使われます。
+    </p>
+
+    <h2>MAX・MINでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">エラーにならず0が返ってくる（空欄・文字列だけの範囲）</span>
+      <p style="margin-bottom:6px;">MAX・MINは、範囲内に数値が1つも見つからない場合、エラーではなく0を返します。LARGE・SMALLなら#NUM!エラーになる場面でも、MAX・MINは何事もなかったかのように0を返すため、集計ミスに気づきにくいのが厄介な点です。</p>
+      <div class="code">例：まだ売上データが入力されていない来月分のB列に=MAX(B2:B31)を組んでおくと、実際には「データなし」なのに「最高売上0円」と表示されてしまう</div>
+      <p style="margin-bottom:0;">対処法として、<span style="font-family:var(--mono);">=IF(COUNT(範囲)=0, "データなし", MAX(範囲))</span>のように、COUNT関数でデータ件数を先に確認してから結果を出す形にしておくと、0円なのか未入力なのかを見分けられます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">#N/A・#VALUE!エラー（範囲にエラー値が混ざっている）</span>
+      <p style="margin-bottom:6px;">VLOOKUPやXLOOKUPの結果を集計している列など、範囲内に1つでもエラー値が含まれていると、MAX・MINの結果全体がそのエラー値になってしまいます。</p>
+      <div class="code">例：B2:B31にVLOOKUPの結果が並んでおり、そのうち1件が検索対象なしで#N/Aになっている場合、=MAX(B2:B31)自体も#N/Aになる</div>
+      <p style="margin-bottom:0;">対処法としては、AGGREGATE関数を使い<span style="font-family:var(--mono);">=AGGREGATE(4, 6, B2:B31)</span>（4はMAX相当、6はエラー値を無視するオプション）のようにするとエラー値を無視して集計できます。集計元の数式側にIFERRORを組み込み、そもそもエラーを表に出さないようにしておく方法も有効です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">条件付きで最大値・最小値を求めたい場合に迷う</span>
+      <p style="margin-bottom:6px;">「部署ごとの最高売上」「正社員だけの最長勤続年数」のように、条件を絞った上で最大値・最小値を求めたい場合、MAX・MIN単体では対応できません。</p>
+      <div class="code">例：営業部だけの最高売上を求めたい場合 → =MAXIFS(売上範囲, 部署範囲, "営業部")</div>
+      <p style="margin-bottom:0;">Excel 2019以降・Microsoft 365であれば、SUMIFSと同じ引数の並び方でMAXIFS・MINIFS関数が使えます。古いバージョンのExcelでは、配列数式として<span style="font-family:var(--mono);">{=MAX(IF(部署範囲="営業部", 売上範囲))}</span>をCtrl+Shift+Enterで確定する方法もありますが、可能であればMAXIFS・MINIFSを使ったほうが数式がシンプルで壊れにくくなります。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>0という結果を鵜呑みにしない。</b>MAX・MINで0が返ってきたときは、「本当に最小値が0だったのか」「そもそもデータが入っていないのか」を一度疑う習慣をつけましょう。</li>
+      <li><b>単発の最大値・最小値ならMAX・MIN、順位付きの一覧ならLARGE・SMALL。</b>作りたい表が「1つの値」なのか「複数件のランキング」なのかで、使う関数を最初に決めておくと数式選びで迷いません。</li>
+      <li><b>条件付きの最大値・最小値は素直にMAXIFS・MINIFSを使う。</b>配列数式で無理に組もうとすると、後から見た人(未来の自分も含む)が理解しづらい数式になりがちです。</li>
+      <li><b>エラー値が混ざりやすい範囲では、あらかじめIFERRORで防御しておく。</b>MAX・MINをかける前の集計段階でエラーを潰しておけば、後工程の数式がシンプルに保てます。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      MAX・MIN関数は、範囲内の最大値・最小値をシンプルに1つだけ取り出せる基本の関数です。LARGE・SMALL関数と役割が重なる部分もありますが、「順位を指定できるか」「データが0件のときにエラーになるかどうか」という2点が大きな違いです。特にMAX・MINが空欄や文字列だけの範囲で黙って0を返す仕様は、エラー表示が出ない分だけ見逃しやすい落とし穴なので、COUNT関数などでデータの有無を確認する癖をつけておくと安心です。条件を絞った最大値・最小値が必要な場合は、配列数式に頼らずMAXIFS・MINIFSを使うことも覚えておきましょう。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">MAX関数の結果が0になってしまうのはなぜですか？</div>
+        <div class="a">MAX・MIN関数は、指定した範囲に数値が1つも入っていない（すべて空欄、または文字列だけ）場合、エラーではなく0を返す仕様になっています。数式そのものは正しく組めていても、参照先の表がまだ未入力だったり、金額欄が文字列として入力されていたりすると、あたかも「最高額が0円」であるかのような結果になってしまいます。範囲内にCOUNT関数を組み合わせて、データ件数が0でないかを確認する一手間を入れると安全です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">範囲にエラー値が混ざっているとMAXも#N/Aになりますか？</div>
+        <div class="a">はい。MAX・MIN関数は、参照範囲の中に#N/Aや#DIV/0!などのエラー値が1つでも含まれていると、結果全体がそのエラー値になってしまいます。VLOOKUPなどの結果を集計している範囲でよく発生します。対処法としては、AGGREGATE関数（第2引数でエラー値を無視するオプションを指定）を使うか、集計元の数式側にIFERRORを組み込んでエラーが表に出ないようにしておくと安定します。</div>
+      </div>
+      <div class="qa">
+        <div class="q">MAX・MINとLARGE・SMALLはどちらを使えばいいですか？</div>
+        <div class="a">「範囲の中でいちばん大きい・小さい値を1つだけ」知りたいならMAX・MINで十分です。「2位」「3位」まで含めた上位・下位のランキング表を作りたい場合や、何位まで見るかを後から調整したい場合はLARGE・SMALLが向いています。MAX(範囲)とLARGE(範囲,1)、MIN(範囲)とSMALL(範囲,1)はそれぞれ同じ結果になりますが、空欄範囲での挙動が異なる点には注意してください。</div>
+      </div>
+    </div>
+
+    <h2>関連記事</h2>
+    <ul>
+      <li><a href="/articles/large-small-guide.html">LARGE・SMALL関数で上位・下位ランキングを抽出する方法｜#NUM!エラーの原因と対処法</a></li>
+      <li><a href="/articles/rank-guide.html">RANK・RANK.EQ関数で売上や点数の順位をつける方法｜同順位で順位が飛ぶ理由と対処法</a></li>
+      <li><a href="/articles/countifs-guide.html">COUNTIFS関数で複数条件を数える方法｜COUNTIFとの違いとよくあるエラー</a></li>
+    </ul>
+
+    <a class="cta" href="/index.html">→ MAX/MINの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
