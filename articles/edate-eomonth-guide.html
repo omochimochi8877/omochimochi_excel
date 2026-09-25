@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>EDATE・EOMONTH関数で契約更新日・支払期日を自動計算する方法｜#NUM!エラーの原因と対処法｜セルうめ</title>
+<meta name="description" content="EDATE・EOMONTH関数を使って契約更新日や月末締めの支払期日を自動計算する方法を実務目線で解説。「30日後」で計算すると月によってずれる原因、#NUM!エラーが出る理由、DATE関数との違い、総務・経理での使用例まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/edate-eomonth-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="EDATE・EOMONTH関数で契約更新日・支払期日を自動計算する方法｜#NUM!エラーの原因と対処法｜セルうめ">
+<meta property="og:description" content="EDATE・EOMONTH関数を使って契約更新日や月末締めの支払期日を自動計算する方法を実務目線で解説。「30日後」計算で月がずれる原因、#NUM!エラーの対処法、DATE関数との違いを紹介します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/edate-eomonth-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="EDATE・EOMONTH関数で契約更新日・支払期日を自動計算する方法">
+<meta name="twitter:description" content="「30日後」計算で月がずれる原因、#NUM!エラーの対処法、DATE関数との違いを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "EDATE・EOMONTH関数で契約更新日・支払期日を自動計算する方法｜#NUM!エラーの原因と対処法",
+  "description": "EDATE・EOMONTH関数を使って契約更新日や月末締めの支払期日を自動計算する方法を実務目線で解説。「30日後」で計算すると月によってずれる原因、#NUM!エラーが出る理由、DATE関数との違い、総務・経理での使用例まで紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/edate-eomonth-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-25"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "EDATE関数で#NUM!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "EDATE関数は、計算結果がExcelで扱える日付の範囲（1900年1月1日以降）を外れると#NUM!エラーになります。よくあるのは、第1引数の基準日を空欄セルのまま参照してしまい、0（1900年1月0日扱い）から大きくマイナスの月数を引いてしまうケースです。基準日のセルが本当に日付として入力されているか、参照先が空欄になっていないかを確認してください。また、第2引数に日付そのものを入れてしまう誤りもよく見られます。第2引数は「何ヶ月分ずらすか」という数値です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "「30日後」を+30で計算するのとEDATEで1ヶ月後を計算するのは何が違いますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "日付に30を足す方法は、月によって日数が28日から31日までばらつくため、基準日によって「1ヶ月後」からずれてしまいます。たとえば1月31日に30を足すと3月2日になり、1ヶ月後のつもりが翌々月にずれ込みます。EDATE関数は暦の上での「同じ日にちの1ヶ月後」を正しく計算するため、契約更新日や支払期日のように暦月単位で管理したい日付にはEDATEを使うべきです。日数単位で厳密に管理したい場合（納期を30日後にするなど）は、そのまま+30の加算で問題ありません。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "月末が31日の月と30日の月が混在していても、EOMONTHなら正しく計算できますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。EOMONTH関数は、指定した月の実際の末日（28日・29日・30日・31日のいずれか）を自動で判定して返します。うるう年の2月末（29日）も正しく計算されるため、DATE関数で「翌月の1日から1日引く」といった手動計算をする必要がありません。月末締め・翌月末払いのような支払条件を数式化する際は、EOMONTHを使うことでうるう年や月ごとの日数差を意識せずに済みます。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>EDATE・EOMONTH関数で契約更新日・支払期日を自動計算する方法｜#NUM!エラーの原因と対処法</h1>
+  <p class="sub">「契約開始日に30を足せば1ヶ月後になるはず」と思って数式を組んだら、月によって日付がずれてしまった――そんな経験はありませんか。EDATE・EOMONTH関数を使えば、暦の上で正しい「〇ヶ月後」「月末日」を一発で求められます。</p>
+  <div class="meta">2026-09-25更新 ｜ 日付関数</div>
+
+  <article class="article-body">
+    <p>
+      契約更新日や支払期日、サブスクリプションの次回請求日など、「基準日から何ヶ月後」「その月の末日」を求める場面は事務作業の中でとても多くあります。こうした計算をDATE関数や単純な足し算で組もうとすると、月によって日数が違う（28日・30日・31日）ことや、うるう年の存在が原因で、意図しない日付になってしまうことがあります。EDATE関数とEOMONTH関数は、この「暦月単位の計算」を正確かつ簡単に行うための関数です。この記事では、両関数の使い方と、実務でつまずきやすいポイントを解説します。
+    </p>
+
+    <h2>EDATE・EOMONTHの基本構文</h2>
+    <p>
+      EDATE関数は、基準日から指定した月数だけ前後にずらした「同じ日にち」の日付を返します。EOMONTH関数は、基準日から指定した月数だけ前後にずらした月の「末日」を返します。
+    </p>
+    <div class="box">
+      <div class="code">=EDATE(開始日, 月数)　/　=EOMONTH(開始日, 月数)</div>
+      <p style="margin-bottom:0;">例：契約開始日が2026年4月15日で、1年後の契約更新日を求める場合<br>
+        <span style="font-family:var(--mono);">=EDATE(A2, 12)</span> → 2027年4月15日<br>
+        契約開始月の末日（月末締め日）を求める場合<br>
+        <span style="font-family:var(--mono);">=EOMONTH(A2, 0)</span> → 2026年4月30日<br>
+        翌月末を支払期日にする場合<br>
+        <span style="font-family:var(--mono);">=EOMONTH(A2, 1)</span> → 2026年5月31日</p>
+    </div>
+    <p>
+      月数にはマイナスの値も指定できます。<span style="font-family:var(--mono);">=EDATE(A2, -3)</span>とすれば「3ヶ月前」の日付が求められるため、契約の更新案内を送るタイミングを逆算する（更新日の1ヶ月前にアラートを出すなど）用途にも使えます。
+    </p>
+
+    <h2>「日数を足す」計算との使い分け</h2>
+    <p>
+      EDATE・EOMONTHのような暦月単位の関数と、単純に日数を加算する方法は、どちらも「先の日付」を求める点は同じですが、適した場面が異なります。
+    </p>
+    <div class="compare">
+      <div class="col">
+        <h3>EDATE・EOMONTH（暦月単位）</h3>
+        <ul>
+          <li>「1ヶ月後」「3ヶ月後」など暦の月数で計算</li>
+          <li>契約更新日・請求サイクル・月末締めに向く</li>
+          <li>月の日数差・うるう年を自動で吸収する</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>日付+日数（例：+30）</h3>
+        <ul>
+          <li>「〇日後」という厳密な日数で計算</li>
+          <li>納期・保証期間・配送予定日に向く</li>
+          <li>月をまたぐと基準日によって着地月がずれる</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      たとえば「契約は1年ごとに自動更新」という条件であれば、365を足すのではなくEDATE(開始日, 12)を使うべきです。うるう年をまたぐ契約では365日と1年（12ヶ月）が一致しないため、+365で計算すると更新日が本来より1日ずれてしまう年が出てきます。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、賃貸契約やリース契約の一覧表で、契約開始日からEDATE関数を使って自動更新日・満了日を算出し、更新案内を出すべき時期をIF関数と組み合わせて自動でハイライトする、という運用がよく見られます。<b>経理担当者</b>であれば、「月末締め・翌月末払い」という取引条件をEOMONTH(請求日, 1)で自動計算し、支払期日を手入力せずに請求書発行日から自動で算出する場面で重宝します。<b>人事担当者</b>であれば、試用期間の満了日（入社日からEDATEで3ヶ月後を計算)や、資格の有効期限管理にも応用できます。
+    </p>
+
+    <h2>EDATE・EOMONTHでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#NUM!エラー（基準日セルが空欄・文字列のまま）</span>
+      <p style="margin-bottom:6px;">基準日として参照しているセルが空欄だと、Excel内部では「0」（1900年1月0日相当）として扱われ、そこから月数を引き算すると日付の下限を超えて#NUM!エラーになることがあります。基準日が文字列として入力されている（セルの左寄せで表示されている）場合も、正しく計算されずエラーや誤った結果になります。</p>
+      <div class="code">例：まだ契約開始日が未入力のA2セルに対して=EDATE(A2, 12)を組むと#NUM!エラーになる</div>
+      <p style="margin-bottom:0;">対処法として、<span style="font-family:var(--mono);">=IF(A2="", "", EDATE(A2, 12))</span>のように、IF関数で空欄チェックをしてからEDATEを実行する形にしておくと安全です。基準日が文字列扱いになっている場合は、DATEVALUE関数で日付値に変換してから渡すか、そもそも日付として入力し直しましょう。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">第2引数に日付を入れてしまう間違い</span>
+      <p style="margin-bottom:6px;">EDATE・EOMONTHの第2引数は「何ヶ月分ずらすか」を表す数値であり、日付ではありません。初めて使う際に、うっかり比較先の日付セルをそのまま第2引数に入れてしまい、意図しない大きな数値として扱われて極端に離れた日付が返ってくることがあります。</p>
+      <div class="code">誤り例：=EDATE(A2, B2)　※B2に日付が入っていると数万ヶ月分ずれた日付になる</div>
+      <p style="margin-bottom:0;">第2引数には「12」「-3」「1」のような整数の月数を指定してください。2つの日付の間が何ヶ月あるかを求めたい場合は、EDATEではなくDATEDIF関数の"m"単位を使うのが適切です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">結果がシリアル値（数値）のまま表示される</span>
+      <p style="margin-bottom:6px;">EDATE・EOMONTHの計算結果は日付のシリアル値として返されますが、セルの表示形式が「標準」のままだと、45678のような数値のまま表示されてしまい、日付だと気づかれないことがあります。</p>
+      <div class="code">例：=EDATE(A2, 12)の結果セルが「2027/4/15」ではなく「46127」と表示される</div>
+      <p style="margin-bottom:0;">結果セルの表示形式を「日付」に変更してください。数式を入力した直後に自動で日付形式になることもありますが、あらかじめ表示形式を日付に設定してから数式を入力すると確実です。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>「暦月」か「日数」かを最初に決める。</b>契約更新日や支払期日のように「同じ日にちの◯ヶ月後」を求めたいのか、納期のように「◯日後」を求めたいのかで、使うべき方法（EDATEか単純な加算か）が変わります。</li>
+      <li><b>月末を求めたいときは手計算せずEOMONTHに任せる。</b>「翌月1日から1日引く」という手動計算は、月によって結果が変わる分、数式が複雑になりミスの元です。EOMONTH(基準日, 月数)で一発で求められます。</li>
+      <li><b>2つの日付の差（間隔）を知りたいときはDATEDIFやYEARFRACを使う。</b>EDATE・EOMONTHは「基準日からずらした日付」を求める関数であり、2つの日付の間隔を求める用途には向いていません。</li>
+      <li><b>結果セルの表示形式を必ず確認する。</b>数値のまま表示されていないか、入力後に一度目視で確認する癖をつけると、後工程での見落としを防げます。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      EDATE関数は「基準日から〇ヶ月後・〇ヶ月前」の同じ日にちを、EOMONTH関数は「基準日から〇ヶ月後・〇ヶ月前」の月末日を、それぞれ暦の日数差やうるう年を意識せずに正しく計算してくれる関数です。契約更新日や月末締めの支払期日のように、暦月単位で管理すべき日付を単純な日数の足し算で組んでしまうと、月によって結果がずれる原因になります。基準日セルの空欄チェックと、第2引数に月数の整数を渡すという2点さえ押さえておけば、総務・経理の日付管理業務を大きく効率化できる関数です。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">EDATE関数で#NUM!エラーが出るのはなぜですか？</div>
+        <div class="a">EDATE関数は、計算結果がExcelで扱える日付の範囲（1900年1月1日以降）を外れると#NUM!エラーになります。よくあるのは、第1引数の基準日を空欄セルのまま参照してしまい、0（1900年1月0日扱い）から大きくマイナスの月数を引いてしまうケースです。基準日のセルが本当に日付として入力されているか、参照先が空欄になっていないかを確認してください。また、第2引数に日付そのものを入れてしまう誤りもよく見られます。第2引数は「何ヶ月分ずらすか」という数値です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">「30日後」を+30で計算するのとEDATEで1ヶ月後を計算するのは何が違いますか？</div>
+        <div class="a">日付に30を足す方法は、月によって日数が28日から31日までばらつくため、基準日によって「1ヶ月後」からずれてしまいます。たとえば1月31日に30を足すと3月2日になり、1ヶ月後のつもりが翌々月にずれ込みます。EDATE関数は暦の上での「同じ日にちの1ヶ月後」を正しく計算するため、契約更新日や支払期日のように暦月単位で管理したい日付にはEDATEを使うべきです。日数単位で厳密に管理したい場合（納期を30日後にするなど）は、そのまま+30の加算で問題ありません。</div>
+      </div>
+      <div class="qa">
+        <div class="q">月末が31日の月と30日の月が混在していても、EOMONTHなら正しく計算できますか？</div>
+        <div class="a">はい。EOMONTH関数は、指定した月の実際の末日（28日・29日・30日・31日のいずれか）を自動で判定して返します。うるう年の2月末（29日）も正しく計算されるため、DATE関数で「翌月の1日から1日引く」といった手動計算をする必要がありません。月末締め・翌月末払いのような支払条件を数式化する際は、EOMONTHを使うことでうるう年や月ごとの日数差を意識せずに済みます。</div>
+      </div>
+    </div>
+
+    <h2>関連記事</h2>
+    <ul>
+      <li><a href="/articles/datedif-guide.html">DATEDIF関数で勤続年数・年齢を計算する方法｜#NUM!エラーの原因と対処法</a></li>
+      <li><a href="/articles/year-month-day-guide.html">YEAR・MONTH・DAY関数の使い方｜年度集計がずれる原因と直し方</a></li>
+      <li><a href="/articles/networkdays-guide.html">NETWORKDAYS関数で稼働日数(営業日数)を計算する方法｜祝日リストが反映されない原因と対処法</a></li>
+    </ul>
+
+    <a class="cta" href="/index.html">→ 日付関数の数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
