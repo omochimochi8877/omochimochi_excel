@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>セルうめ｜填空造句產生Excel函數的免費工具</title>
+<meta name="description" content="只要在填空句中填入儲存格編號，就能自動產生Excel公式（SUM、AVERAGE、COUNTIF、IF、VLOOKUP等）。同時附上函數說明，完全免費使用。">
+<link rel="canonical" href="https://www.omochimochis.com/zh/">
+<link rel="alternate" hreflang="ja" href="https://www.omochimochis.com/">
+<link rel="alternate" hreflang="en" href="https://www.omochimochis.com/en/">
+<link rel="alternate" hreflang="zh-Hant" href="https://www.omochimochis.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://www.omochimochis.com/">
+
+<!-- OGP（社群分享時顯示的樣式） -->
+<meta property="og:title" content="セルうめ｜填空造句產生Excel函數">
+<meta property="og:description" content="只要在填空句中填入儲存格編號，就能自動產生Excel公式，還能同時了解函數的意思，完全免費。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.omochimochis.com/zh/">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="セルうめ｜填空造句產生Excel函數">
+<meta name="twitter:description" content="只要在填空句中填入儲存格編號，就能自動產生Excel公式，完全免費的工具。">
+
+<!-- 結構化資料（告訴Google這是什麼網站） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "セルうめ",
+  "url": "https://www.omochimochis.com/zh/",
+  "description": "一款免費工具，只要填寫填空句就能自動產生Excel公式，並說明該函數的意思。",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TWD"
+  },
+  "inLanguage": "zh-Hant"
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7308YW3KGH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7308YW3KGH');
+</script>
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1561794241850305"
+     crossorigin="anonymous"></script>
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0;
+    --ink:#20281F;
+    --line:#D8D0BE;
+    --forest:#2F6F5E;
+    --forest-deep:#1E4A3E;
+    --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Shippori Mincho', serif;
+    --sans: 'Noto Sans JP', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+    color:var(--ink);
+    font-family:var(--sans);
+    padding: 40px 20px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  header{margin-bottom:30px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--forest-deep);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{content:"fx";font-weight:700;background:var(--forest);color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;}
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(26px,5vw,38px);
+    margin:10px 0 8px;
+    line-height:1.3;
+  }
+  .sub{color:#5b6459;font-size:14.5px;line-height:1.7;max-width:56ch;}
+
+  /* 分類選擇 */
+  .category-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .category-btn{
+    font-family:var(--sans);
+    font-size:13.5px;
+    font-weight:700;
+    padding:9px 14px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    background:#fff;
+    cursor:pointer;
+    color:#5b6459;
+  }
+  .category-btn.active{
+    background:var(--forest-deep);
+    color:#fff;
+    border-color:var(--forest-deep);
+  }
+
+  /* 函數選擇（分類內） */
+  .fn-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .fn-btn{
+    font-family:var(--mono);
+    font-size:12.5px;
+    padding:7px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    cursor:pointer;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .fn-btn.active{background:var(--forest);color:#fff;border-color:var(--forest);}
+  .fn-btn .lv{
+    font-size:9.5px;
+    padding:1px 5px;
+    border-radius:8px;
+    background:rgba(0,0,0,.12);
+  }
+  .fn-btn.active .lv{background:rgba(255,255,255,.25);}
+
+  .card{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow: 0 1px 0 var(--line);
+    padding:28px;
+    margin-bottom:22px;
+    position:relative;
+    transition: box-shadow .3s ease;
+  }
+  .card::before{
+    content:attr(data-cellref);
+    position:absolute;
+    top:-11px;
+    left:20px;
+    background:var(--forest);
+    color:#fff;
+    font-family:var(--mono);
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:3px;
+    letter-spacing:.05em;
+  }
+  .card.highlight{
+    box-shadow: 0 0 0 3px var(--amber), 0 1px 0 var(--line);
+  }
+
+  /* 分頁 */
+  .pager{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    margin:-6px 0 30px;
+    flex-wrap:wrap;
+  }
+  .pager-btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:700;
+    background:var(--amber);
+    color:#3A2A0A;
+    border:none;
+    border-radius:3px;
+    padding:9px 18px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .pager-btn:active{transform:translateY(1px);}
+  .pager-btn:disabled{
+    background:#E5E1D3;
+    color:#9aa093;
+    cursor:not-allowed;
+  }
+  .pager-info{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:#5b6459;
+    letter-spacing:.05em;
+  }
+
+  .scene{
+    font-size:12.5px;
+    font-family:var(--mono);
+    color:var(--forest-deep);
+    background:#F0F7F3;
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:3px;
+    margin-bottom:14px;
+  }
+
+  .sentence{
+    font-size:16.5px;
+    line-height:2.5;
+    font-family:var(--sans);
+  }
+  .blank{
+    display:inline-block;
+    min-width:44px;
+    padding:3px 6px;
+    border:none;
+    border-bottom:2px solid var(--amber);
+    background:#FFF8EA;
+    font-family:var(--mono);
+    font-size:14px;
+    text-align:center;
+    color:var(--forest-deep);
+    font-weight:700;
+  }
+  .blank:focus{outline:none;border-bottom-color:var(--forest);background:#F0F7F3;}
+  .blank-select{
+    display:inline-block;
+    min-width:44px;
+    padding:3px 22px 3px 8px;
+    border:none;
+    border-bottom:2px solid var(--amber);
+    background:#FFF8EA url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23274734' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 6px center;
+    background-size:10px 7px;
+    font-family:var(--mono);
+    font-size:14px;
+    text-align:center;
+    text-align-last:center;
+    color:var(--forest-deep);
+    font-weight:700;
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    cursor:pointer;
+  }
+  .blank-select:focus{outline:none;border-bottom-color:var(--forest);background-color:#F0F7F3;}
+
+  .divider{
+    height:1px;
+    background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
+    margin:22px 0;
+  }
+
+  .output-label{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:#8a8f80;
+    text-transform:uppercase;margin-bottom:8px;
+  }
+  .output-row{display:flex;gap:10px;align-items:stretch;}
+  .output-cell{
+    flex:1;
+    font-family:var(--mono);
+    font-size:18px;
+    font-weight:700;
+    background:var(--forest-deep);
+    color:#EAF3EE;
+    padding:14px 16px;
+    border-radius:3px;
+    letter-spacing:.02em;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  .copy-btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:700;
+    background:var(--amber);
+    color:#3A2A0A;
+    border:none;
+    border-radius:3px;
+    padding:0 18px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .copy-btn:active{transform:translateY(1px);}
+  .copy-btn.copied{background:var(--forest);color:#fff;}
+  .copy-hint{font-size:11.5px;color:#8a8f80;margin-top:8px;}
+
+  .explain{
+    margin-top:20px;
+    font-size:14px;
+    line-height:1.85;
+    color:#3c4438;
+    background:#F5F2E8;
+    border-left:3px solid var(--forest);
+    padding:14px 16px;
+    border-radius:0 3px 3px 0;
+  }
+  .explain b{color:var(--forest-deep);}
+
+  .pitfall{
+    margin-top:12px;
+    font-size:13px;
+    line-height:1.75;
+    color:#6b4a1e;
+    background:#FFF3E0;
+    border-left:3px solid var(--amber);
+    padding:12px 16px;
+    border-radius:0 3px 3px 0;
+  }
+  .pitfall b{color:#a5680f;}
+
+  .version-note{
+    margin-top:14px;
+    font-size:12.5px;
+    font-family:var(--mono);
+    color:#8a8f80;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .version-note .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);display:inline-block;}
+
+  footer{
+    text-align:center;
+    font-size:12px;
+    color:#9aa093;
+    margin-top:40px;
+    font-family:var(--mono);
+  }
+  .footer-links{
+    margin-top:10px;
+  }
+  .footer-links a{
+    color:#5b6459;
+    text-decoration:none;
+    margin:0 8px;
+    font-family:var(--sans);
+  }
+  .footer-links a:hover{color:var(--forest-deep);}
+
+  .lang-switch{
+    text-align:right;
+    font-family:var(--mono);
+    font-size:11px;
+    color:#8a8f80;
+    margin-bottom:14px;
+  }
+  .lang-switch a{color:#5b6459;text-decoration:none;}
+  .lang-switch a:hover{color:var(--forest-deep);}
+  .lang-switch .current{color:var(--forest-deep);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="lang-switch"><a href="/">日本語</a> | <a href="/en/">English</a> | <span class="current">中文(繁體)</span></div>
+
+  <header>
+    <div class="eyebrow">Formula Fill-in Tool</div>
+    <h1>填空造句，組出Excel函數。</h1>
+    <p class="sub">選擇你想做的操作，只要在空格中填入儲存格編號，就能自動產生Excel公式，同時了解函數的意思。</p>
+  </header>
+
+  <div class="category-row" id="categoryRow"></div>
+  <div class="fn-row" id="fnRow"></div>
+
+  <div id="cardsArea"></div>
+
+  <div class="pager" id="pagerArea"></div>
+
+  <footer>
+    セルうめ β — 專為行政事務人員打造的Excel函數產生器
+    <div class="footer-links">
+      <a href="/guide.html">使用方法</a>|
+      <a href="/articles.html">實用文章</a>|
+      <a href="/privacy.html">隱私權政策</a>|
+      <a href="/terms.html">使用條款</a>|
+      <a href="/contact.html">聯絡我們</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ==========================================================
+   資料定義：分類 → 函數 的兩層結構
+   ========================================================== */
+const categories = [
+  { key:'agg',  label:'加總與計算' },
+  { key:'cond', label:'條件判斷' },
+  { key:'search', label:'查詢與參照' },
+  { key:'text', label:'字串處理' },
+  { key:'date', label:'日期與時間' },
+  { key:'round', label:'數字進位與格式' }
+];
+
+const functions = {
+
+  /* ---------------- 加總與計算 ---------------- */
+  sum: {
+    cat:'agg', label:'加總 (SUM)', level:'初級',
+    scene:'適用情境：加總請款單上的各項費用、計算每日營業額的月度總計',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，顯示把
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 儲存格到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 儲存格之間所有數字加總後的結果。`,
+    values: {target:'A1', from:'B1', to:'D1'},
+    formula: (v) => `=SUM(${v.from}:${v.to})`,
+    explain: (v) => `<b>SUM函數</b>會把指定範圍內儲存格的數值全部加總。<br>
+      <b>SUM(${v.from}:${v.to})</b> 代表「從${v.from}儲存格加總到${v.to}儲存格」的意思。請把結果填入${v.target}儲存格。`,
+    pitfall: `如果在費用明細表最下方新增了一列費用項目，但加總欄位的公式仍固定為像<b>SUM(B1:B10)</b>這樣的範圍，新增列的金額就不會被計入總計。如果是在範圍內側（最後一列的上方）插入新列，公式會自動延伸；但如果是在範圍外側（最後一列下方）新增列，就必須手動調整加總公式的範圍。如果要加總不連續的儲存格，也可以用逗號分隔，例如<b>SUM(B1,D1,F1)</b>。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  average: {
+    cat:'agg', label:'平均值 (AVERAGE)', level:'初級',
+    scene:'適用情境：計算教育訓練測驗的平均分數、各部門的平均加班時數',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，顯示
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 儲存格到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 儲存格之間數字的平均值。`,
+    values: {target:'E1', from:'B1', to:'D1'},
+    formula: (v) => `=AVERAGE(${v.from}:${v.to})`,
+    explain: (v) => `<b>AVERAGE函數</b>會計算指定範圍內數值的平均值（總和 ÷ 個數）。`,
+    pitfall: `如果10位受測者中有1人缺席，卻在缺席者的分數欄填入「0分」，AVERAGE函數會把這個0也算進去，導致本來應該是9人份的平均分數被當成10人份來計算，使平均分數比實際情況低很多。空白儲存格會自動被排除在平均值計算之外，所以缺席者的欄位應該保持空白，而不是填入0。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  count: {
+    cat:'agg', label:'個數統計 (COUNT/COUNTA)', level:'初級',
+    scene:'適用情境：計算請款單已提交的件數、已蓋章申請書的件數',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，計算從
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 的範圍內，
+      <select class="blank-select" data-k="mode" style="width:140px;">
+        <option value="有數字的" ${v.mode==='有數字的'?'selected':''}>有數字的</option>
+        <option value="包含文字的全部" ${v.mode==='包含文字的全部'?'selected':''}>包含文字的全部</option>
+      </select>
+      儲存格數量。`,
+    values: {target:'F1', from:'B1', to:'B10', mode:'有數字的'},
+    formula: (v) => v.mode.includes('數字') ? `=COUNT(${v.from}:${v.to})` : `=COUNTA(${v.from}:${v.to})`,
+    explain: (v) => `<b>COUNT函數</b>只計算含有數字的儲存格，<b>COUNTA函數</b>則會計算包含文字在內、只要有輸入內容的儲存格。系統會依照你選擇的內容自動判斷要使用哪一個。`,
+    pitfall: `如果在已提交的申請書清單中，只在對應欄位輸入「已核可」之類的文字，使用COUNT函數計算件數時，因為文字不會被當作數字，結果會顯示為0件。如果也想計算輸入了文字的儲存格，就需要使用COUNTA函數。只算數字用COUNT，連文字也算就用COUNTA，這樣記就不會搞混。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  sumif: {
+    cat:'agg', label:'條件式加總 (SUMIF)', level:'中級',
+    scene:'適用情境：計算各部門的費用加總、各業務負責人的業績加總',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="condRange">${v.condRange}</span> 範圍內符合
+      「<span contenteditable class="blank" data-k="cond" style="width:70px;">${v.cond}</span>」的資料列，加總其對應的
+      <span contenteditable class="blank" data-k="sumRange">${v.sumRange}</span> 數字。`,
+    values: {target:'E1', condRange:'B1:B10', cond:'業務部', sumRange:'C1:C10'},
+    formula: (v) => `=SUMIF(${v.condRange},"${v.cond}",${v.sumRange})`,
+    explain: (v) => `<b>SUMIF函數</b>只會加總符合條件的資料列。「用來判斷條件的欄位（${v.condRange}）」和「要加總的欄位（${v.sumRange}）」的列數必須對齊。`,
+    pitfall: `如果部門名稱欄位是B2:B10，卻不小心把加總對象的金額欄位指定成錯開一列的C1:C9，就會導致部門名稱與金額的對應關係整整錯開一列，算出來的部門別加總金額也會跟實際情況不同。表格開頭是否有標題列很容易造成起始列的誤差，請務必確認條件範圍和加總範圍的列數、起始列是否一致。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  subtotal: {
+    cat:'agg', label:'篩選後加總 (SUBTOTAL)', level:'高級',
+    scene:'適用情境：篩選資料後，仍想正確顯示加總結果',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，即使套用篩選，也能正確加總
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 儲存格的數字。`,
+    values: {target:'D1', from:'B2', to:'B20'},
+    formula: (v) => `=SUBTOTAL(109,${v.from}:${v.to})`,
+    explain: (v) => `<b>SUBTOTAL函數</b>可以在計算時排除被篩選隱藏的資料列。「109」代表計算方法為加總。`,
+    pitfall: `如果用自動篩選只顯示「業務部」的資料，只憑肉眼確認畫面上看得到的資料列，但加總欄位的公式如果還是一般的<b>SUM</b>，隱藏起來的其他部門資料仍會被計入加總，只看畫面上顯示的資料列很容易沒發現，就這樣回報了錯誤的金額。經常使用篩選功能的表格，建議一開始就使用SUBTOTAL。`,
+    version: `Excel 2003以後即可使用。`
+  },
+  countifs: {
+    cat:'agg', label:'多條件計數 (COUNTIFS)', level:'高級',
+    scene:'適用情境：想計算「業務部」且「正職員工」的人數等，同時符合兩個以上條件的情況',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，計算同時符合
+      <span contenteditable class="blank" data-k="range1">${v.range1}</span> 為「<span contenteditable class="blank" data-k="cond1" style="width:60px;">${v.cond1}</span>」，
+      且 <span contenteditable class="blank" data-k="range2">${v.range2}</span> 為「<span contenteditable class="blank" data-k="cond2" style="width:60px;">${v.cond2}</span>」
+      的資料列數量。`,
+    values: {target:'F1', range1:'B2:B20', cond1:'業務部', range2:'C2:C20', cond2:'正職'},
+    formula: (v) => `=COUNTIFS(${v.range1},"${v.cond1}",${v.range2},"${v.cond2}")`,
+    explain: (v) => `<b>COUNTIFS函數</b>是COUNTIF的「多條件版」。只要增加條件與範圍的配對，即使是3個以上的條件也能計算。只有同時符合所有條件的資料列才會被計入（AND條件）。`,
+    pitfall: `明明只想計算「業務部」且「正職員工」的人數，卻不小心把其中一個條件的範圍多指定了一列（例如B2:B21），就可能把不該列入的資料也納入判斷，導致已離職或下一期才會到職的人也被計算進去。條件之間的範圍列數務必要一致。另外，如果想用「符合其中一個條件即可」（OR條件）來計數，COUNTIFS無法直接處理，需要改用兩個COUNTIF相加的方式。`,
+    version: `Excel 2007以後即可使用。`
+  },
+  averageif: {
+    cat:'agg', label:'條件式平均 (AVERAGEIF)', level:'中級',
+    scene:'適用情境：計算各部門的平均加班時數、各商品的平均單價',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="condRange">${v.condRange}</span> 範圍內符合
+      「<span contenteditable class="blank" data-k="cond" style="width:70px;">${v.cond}</span>」的資料列，計算其對應
+      <span contenteditable class="blank" data-k="avgRange">${v.avgRange}</span> 數字的平均值。`,
+    values: {target:'E1', condRange:'B1:B10', cond:'業務部', avgRange:'C1:C10'},
+    formula: (v) => `=AVERAGEIF(${v.condRange},"${v.cond}",${v.avgRange})`,
+    explain: (v) => `<b>AVERAGEIF函數</b>是SUMIF的平均值版本，只會計算符合條件的資料列的平均值。`,
+    pitfall: `計算各部門的平均加班時數時，如果條件欄位（部門名稱）和平均欄位（加班時數）的起始列只要錯開一列，就會出現A先生的加班時數被算進B先生所屬部門的情況，導致對應關係錯亂後計算出平均值。和SUMIF一樣，請確認「條件欄位」與「平均欄位」的列數、起始列是否一致。`,
+    version: `Excel 2007以後即可使用。`
+  },
+  maxmin: {
+    cat:'agg', label:'最大值・最小值 (MAX/MIN)', level:'初級',
+    scene:'適用情境：想知道當月業績最高的一天、請款申請中金額最少的一筆',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，找出
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 範圍內
+      <select class="blank-select" data-k="mode" style="width:70px;">
+        <option value="最大" ${v.mode==='最大'?'selected':''}>最大</option>
+        <option value="最小" ${v.mode==='最小'?'selected':''}>最小</option>
+      </select>
+      的數字。`,
+    values: {target:'F1', from:'B1', to:'D1', mode:'最大'},
+    formula: (v) => v.mode.includes('大') ? `=MAX(${v.from}:${v.to})` : `=MIN(${v.from}:${v.to})`,
+    explain: (v) => `<b>MAX函數</b>會傳回指定範圍內最大的數值，<b>MIN函數</b>則傳回最小的數值。系統會依照你選擇的「最大／最小」自動判斷要使用哪一個。`,
+    pitfall: `如果金額尚未確定的儲存格填入「未定」之類的文字，MAX/MIN會忽略該儲存格繼續計算，不會有問題；但如果原本想表示「沒有金額」卻填入「0」，這個0就會被當成最小值直接取用，導致結果出現實際上不存在的金額。含有文字或空白的儲存格會被忽略，所以範圍中混入多餘的欄位也不會影響結果。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  rank: {
+    cat:'agg', label:'排名 (RANK)', level:'中級',
+    scene:'適用情境：計算業務績效排名、達成率排名',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，計算
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格的數值，在
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 範圍中
+      <select class="blank-select" data-k="mode" style="width:90px;">
+        <option value="由大到小" ${v.mode==='由大到小'?'selected':''}>由大到小</option>
+        <option value="由小到大" ${v.mode==='由小到大'?'selected':''}>由小到大</option>
+      </select>
+      排列時是第幾名。`,
+    values: {target:'C1', source:'B1', from:'B1', to:'B10', mode:'由大到小'},
+    formula: (v) => v.mode.includes('大到小') ? `=RANK(${v.source},${v.from}:${v.to},0)` : `=RANK(${v.source},${v.from}:${v.to},1)`,
+    explain: (v) => `<b>RANK函數</b>會計算指定儲存格的數值，在某個範圍中排第幾名。第3個引數「0」代表由大到小（降冪）排序，「1」代表由小到大（升冪）排序，系統會依照你的選擇自動切換。`,
+    pitfall: `如果把10位業務人員成績排名的公式從B1直接往下複製，範圍的指定（B1:B10）會跟著每列往下移動一列，導致第2位以後的排名都是在人數逐漸減少的範圍中計算出來的，顯示的名次會和實際成績不符。要把這個公式複製到其他列時，範圍的部分必須改成<b>絕對參照</b>（加上$符號，例如$B$1:$B$10）。`,
+    version: `Excel 2003以後的所有版本都可以使用（Excel 2010以後建議改用RANK.EQ函數）。`
+  },
+  largesmall: {
+    cat:'agg', label:'第N大・第N小的值 (LARGE/SMALL)', level:'中級',
+    scene:'適用情境：只想取出業績排名第1名的金額、想知道請款申請中金額第2少的數字',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，找出
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 範圍中，由
+      <select class="blank-select" data-k="mode" style="width:70px;">
+        <option value="最大" ${v.mode==='最大'?'selected':''}>最大</option>
+        <option value="最小" ${v.mode==='最小'?'selected':''}>最小</option>
+      </select>
+      排序的第 <span contenteditable class="blank" data-k="n">${v.n}</span> 個數字。`,
+    values: {target:'D1', from:'B1', to:'B10', mode:'最大', n:'1'},
+    formula: (v) => v.mode.includes('大') ? `=LARGE(${v.from}:${v.to},${v.n})` : `=SMALL(${v.from}:${v.to},${v.n})`,
+    explain: (v) => `<b>LARGE函數</b>會傳回範圍中第n大的值，<b>SMALL函數</b>會傳回第n小的值。系統會依照你選擇的「最大／最小」自動判斷要使用哪一個。`,
+    pitfall: `想知道業績排名第2名的金額時，如果第1名和第2名剛好金額相同（並列第一），LARGE(範圍,2)會再次傳回和第1名相同的金額，無法取得原本想要的第3大金額。請注意，當有多個相同數值時，同樣的名次會重複被計算。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+
+  /* ---------------- 條件判斷 ---------------- */
+  if: {
+    cat:'cond', label:'依條件切換顯示內容 (IF)', level:'初級',
+    scene:'適用情境：判定及格／不及格、依金額分別處理',
+    render: (v) => `我想設定：如果 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格的數字
+      <select class="blank-select" data-k="cmp" style="width:110px;">
+        <option value="大於" ${v.cmp==='大於'?'selected':''}>大於</option>
+        <option value="大於或等於" ${v.cmp==='大於或等於'?'selected':''}>大於或等於</option>
+        <option value="小於" ${v.cmp==='小於'?'selected':''}>小於</option>
+        <option value="小於或等於" ${v.cmp==='小於或等於'?'selected':''}>小於或等於</option>
+        <option value="等於" ${v.cmp==='等於'?'selected':''}>等於</option>
+      </select>
+      <span contenteditable class="blank" data-k="threshold">${v.threshold}</span>，就顯示
+      「<span contenteditable class="blank" data-k="yes" style="width:70px;">${v.yes}</span>」，
+      否則顯示
+      「<span contenteditable class="blank" data-k="no" style="width:70px;">${v.no}</span>」。`,
+    values: {target:'C1', threshold:'80', cmp:'大於', yes:'合格', no:'不合格'},
+    formula: (v) => {
+      const opMap = {'大於':'>','大於或等於':'>=','小於':'<','小於或等於':'<=','等於':'='};
+      const op = opMap[v.cmp] || '>';
+      return `=IF(${v.target}${op}${v.threshold},"${v.yes}","${v.no}")`;
+    },
+    explain: (v) => `<b>IF函數</b>會在「條件成立時顯示A，不成立時顯示B」。依照你選擇的比較方式（大於／大於或等於／小於／小於或等於／等於），對應的符號（&gt; &gt;= &lt; &lt;= =）會自動代入。`,
+    pitfall: `如果及格門檻訂在剛好80分，卻誤選了「大於」（不含80分本身）而不是「大於或等於」，剛好80分的人就會被判定為不及格。混淆「大於或等於」和「大於」會改變邊界數字（此例中就是剛好80分）的判定結果，請事先確認基準數字本身是否要納入。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  ifs: {
+    cat:'cond', label:'三段以上等級分類 (IFS)', level:'中級',
+    scene:'適用情境：A/B/C評等等，三個以上等級的分類',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中：數字在
+      <span contenteditable class="blank" data-k="t1">${v.t1}</span> 以上顯示「<span contenteditable class="blank" data-k="r1" style="width:50px;">${v.r1}</span>」，
+      <span contenteditable class="blank" data-k="t2">${v.t2}</span> 以上顯示「<span contenteditable class="blank" data-k="r2" style="width:50px;">${v.r2}</span>」，
+      其餘則顯示「<span contenteditable class="blank" data-k="r3" style="width:50px;">${v.r3}</span>」。`,
+    values: {target:'C1', t1:'80', r1:'A', t2:'60', r2:'B', r3:'C'},
+    formula: (v) => `=IFS(${v.target}>=${v.t1},"${v.r1}",${v.target}>=${v.t2},"${v.r2}",TRUE,"${v.r3}")`,
+    explain: (v) => `<b>IFS函數</b>會依序由上而下判斷條件，並傳回第一個符合的結果。最後的「其餘」則是用<b>TRUE</b>當作條件，代表「都不符合上述情況時」的處理方式。`,
+    pitfall: `如果把IF函數多層嵌套的公式弄得又長又難懂，改用IFS會清爽許多。不過如果這份檔案要交給客戶等對象，而對方用<b>Excel 2016以前</b>的版本開啟，函數名稱可能無法被辨識而出現<b>#NAME?</b>錯誤，請留意對方使用的Excel版本。`,
+    version: `需要Excel 2019或Microsoft 365（Excel 2016以前的版本無法使用）。`
+  },
+  iferror: {
+    cat:'cond', label:'避免出現錯誤 (IFERROR)', level:'中級',
+    scene:'適用情境：想避免除法等計算出現錯誤導致表格跑版',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，如果公式
+      「<span contenteditable class="blank" data-k="formula" style="width:110px;">${v.formula}</span>」計算出現錯誤，就顯示
+      「<span contenteditable class="blank" data-k="fallback" style="width:60px;">${v.fallback}</span>」，
+      沒有錯誤的話則照常顯示計算結果。`,
+    values: {target:'D1', formula:'B1/C1', fallback:'0'},
+    formula: (v) => `=IFERROR(${v.formula},${isNaN(v.fallback) ? `"${v.fallback}"` : v.fallback})`,
+    explain: (v) => `<b>IFERROR函數</b>就像是直接套在既有公式外面的「保險」。沒有發生錯誤時會照常顯示計算結果，一旦發生錯誤，就會切換成你指定的顯示內容。`,
+    pitfall: `用「實際 ÷ 目標」計算達成率的統計表中，如果目標欄位還沒輸入（視為0），就會出現<b>#DIV/0!</b>錯誤，甚至可能連帶影響下方的合計欄一起出錯。只要用IFERROR包起來，就能把目標未輸入的資料列替換成空白或0之類指定的顯示內容。如果想顯示為空白，只要不在替代值欄位輸入任何內容，變成<b>""</b>就會顯示為空白。`,
+    version: `Excel 2007以後即可使用。`
+  },
+  andor: {
+    cat:'cond', label:'組合多個條件 (AND/OR)', level:'中級',
+    scene:'適用情境：想同時判斷「部門為業務部」且「職稱為課長」等多個條件',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，如果
+      <span contenteditable class="blank" data-k="range1">${v.range1}</span> 儲存格為
+      「<span contenteditable class="blank" data-k="cond1" style="width:60px;">${v.cond1}</span>」，
+      <select class="blank-select" data-k="logic" style="width:110px;">
+        <option value="且(AND)" ${v.logic==='且(AND)'?'selected':''}>且(AND)</option>
+        <option value="或(OR)" ${v.logic==='或(OR)'?'selected':''}>或(OR)</option>
+      </select>
+      <span contenteditable class="blank" data-k="range2">${v.range2}</span> 儲存格為
+      「<span contenteditable class="blank" data-k="cond2" style="width:60px;">${v.cond2}</span>」，
+      就顯示「<span contenteditable class="blank" data-k="yes" style="width:60px;">${v.yes}</span>」，
+      否則顯示「<span contenteditable class="blank" data-k="no" style="width:60px;">${v.no}</span>」。`,
+    values: {target:'D2', range1:'B2', cond1:'業務部', logic:'且(AND)', range2:'C2', cond2:'課長', yes:'對象', no:'對象外'},
+    formula: (v) => v.logic.includes('OR') || v.logic.includes('或')
+      ? `=IF(OR(${v.range1}="${v.cond1}",${v.range2}="${v.cond2}"),"${v.yes}","${v.no}")`
+      : `=IF(AND(${v.range1}="${v.cond1}",${v.range2}="${v.cond2}"),"${v.yes}","${v.no}")`,
+    explain: (v) => `<b>AND函數</b>會在所有條件都成立時傳回TRUE，<b>OR函數</b>則是只要有一個條件成立就傳回TRUE。搭配IF函數，就能依照多個條件切換顯示內容。系統會依照你選擇的「且／或」自動切換AND、OR。`,
+    pitfall: `明明只想篩選出「業務部」且「課長」的人，卻不小心用OR（或）組成公式，就會導致即使不是業務部、只要職稱是課長就會被納入，符合條件的人數會比原本想篩選的範圍大幅增加。「且」和「或」搞混會讓符合條件的資料列大幅改變，請務必留意。如果想再增加條件，只要用逗號新增，例如AND(條件1,條件2,條件3)即可。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  isblankif: {
+    cat:'cond', label:'依是否空白切換顯示 (ISBLANK+IF)', level:'初級',
+    scene:'適用情境：未填寫的欄位維持空白，只在已填寫的資料列顯示計算結果',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，如果
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格是空白，就顯示
+      「<span contenteditable class="blank" data-k="blankMsg" style="width:50px;">${v.blankMsg}</span>」；
+      如果已經有輸入內容，就顯示
+      「<span contenteditable class="blank" data-k="filledExpr" style="width:90px;">${v.filledExpr}</span>」
+      的計算結果。`,
+    values: {target:'C1', source:'A1', blankMsg:'', filledExpr:'A1*1.1'},
+    formula: (v) => `=IF(ISBLANK(${v.source}),"${v.blankMsg}",${v.filledExpr})`,
+    explain: (v) => `<b>ISBLANK函數</b>會判斷儲存格是否完全空白，傳回TRUE或FALSE。搭配IF函數，就能做出「空白時維持空白、已輸入時自動計算」的表格。`,
+    pitfall: `如果某個儲存格的內容其實是另一個公式算出來的結果（實際上輸入了=""這樣的公式），外觀看起來雖然是空白，但用ISBLANK判斷會得到FALSE，導致本來想要「未輸入時維持空白」的判斷，卻跑進了「已輸入」的分支，顯示出不是預期中的計算結果。請注意，ISBLANK函數只會把「真正什麼都沒輸入的儲存格」判定為TRUE。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+
+  /* ---------------- 查詢與參照 ---------------- */
+  vlookup: {
+    cat:'search', label:'從表格中查詢 (VLOOKUP)', level:'中級',
+    scene:'適用情境：用員工編號查詢姓名、用商品代碼查詢單價',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="key">${v.key}</span> 儲存格的值拿到
+      <span contenteditable class="blank" data-k="range">${v.range}</span> 範圍的最左欄去查詢，並顯示該表格從左數來第
+      <span contenteditable class="blank" data-k="col">${v.col}</span> 欄的值。`,
+    values: {target:'D2', key:'C2', range:'A2:B100', col:'2'},
+    formula: (v) => `=VLOOKUP(${v.key},${v.range},${v.col},FALSE)`,
+    explain: (v) => `<b>VLOOKUP函數</b>會從表格最左欄搜尋要查詢的值，再傳回往右數指定欄數的值。最後的<b>FALSE</b>代表「只尋找完全一致的資料」。`,
+    pitfall: `想用員工編號查詢姓名時，如果參照表格的欄位順序是「姓名、員工編號」（員工編號在右側的欄位），VLOOKUP只能搜尋最左欄（姓名），因此會出現<b>#N/A</b>錯誤。<b>如果要查詢的值不在表格最左欄</b>，VLOOKUP就無法查詢，這種情況需要改用XLOOKUP或INDEX+MATCH。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  xlookup: {
+    cat:'search', label:'新一代查詢函數 (XLOOKUP)', level:'中級',
+    scene:'適用情境：想比VLOOKUP更靈活地查詢，不論左右哪個方向都能搜尋',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="key">${v.key}</span> 儲存格的值拿到
+      <span contenteditable class="blank" data-k="lookupRange">${v.lookupRange}</span> 範圍中查詢，並顯示對應的
+      <span contenteditable class="blank" data-k="returnRange">${v.returnRange}</span> 的值。`,
+    values: {target:'D2', key:'C2', lookupRange:'A2:A100', returnRange:'B2:B100'},
+    formula: (v) => `=XLOOKUP(${v.key},${v.lookupRange},${v.returnRange})`,
+    explain: (v) => `<b>XLOOKUP函數</b>是VLOOKUP的後繼函數，因為可以分別指定「查詢欄」和「取值欄」，所以不論查詢對象位在表格左側還是右側都能使用。`,
+    pitfall: `如果用XLOOKUP做成的檔案被客戶用較舊的<b>Excel 2019</b>開啟，函數名稱可能無法被辨識，直接出現<b>#NAME?</b>錯誤，讓對方感到困擾。若對方公司的電腦是Excel 2019以前的版本就無法使用，交給公司外部的檔案請改用VLOOKUP或INDEX+MATCH。`,
+    version: `需要Excel 2021或Microsoft 365（Excel 2019以前的版本無法使用）。`
+  },
+  indexmatch: {
+    cat:'search', label:'不限位置查詢 (INDEX+MATCH)', level:'高級',
+    scene:'適用情境：要查詢的值位在表格右側欄位、VLOOKUP無法使用的情況',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="key">${v.key}</span> 儲存格的值拿到
+      <span contenteditable class="blank" data-k="keyRange">${v.keyRange}</span> 中查詢，並顯示同一列中
+      <span contenteditable class="blank" data-k="returnRange">${v.returnRange}</span> 的值。`,
+    values: {target:'D2', key:'C2', keyRange:'A2:A100', returnRange:'B2:B100'},
+    formula: (v) => `=INDEX(${v.returnRange},MATCH(${v.key},${v.keyRange},0))`,
+    explain: (v) => `<b>MATCH函數</b>會找出要查詢的值在${v.keyRange}中排在第幾個位置，<b>INDEX函數</b>再利用這個位置，從${v.returnRange}中取出對應的值——這是兩段式的組合技。和VLOOKUP不同，即使查詢欄位在想取得的欄位右側也能使用。`,
+    pitfall: `即使員工代碼在表格右側欄位、姓名在左側欄位，這種「VLOOKUP無法查詢」的欄位排列，用INDEX+MATCH也不用在意欄位順序就能查詢。只要記住「先用MATCH找位置，再用INDEX取出該位置的值」這樣的分工，就不會覺得困難。如果省略最後的<b>0</b>或改成其他數字，就會變成近似查詢，可能傳回不是你要的那一列的值，請務必留意。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  hlookup: {
+    cat:'search', label:'橫向查表 (HLOOKUP)', level:'中級',
+    scene:'適用情境：想從月份橫向排列的表格中，查詢特定月份的數值',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="key">${v.key}</span> 儲存格的值拿到
+      <span contenteditable class="blank" data-k="range">${v.range}</span> 範圍的最上面一列去查詢，並顯示該表格從上數來第
+      <span contenteditable class="blank" data-k="row">${v.row}</span> 列的值。`,
+    values: {target:'B5', key:'B4', range:'B1:M2', row:'2'},
+    formula: (v) => `=HLOOKUP(${v.key},${v.range},${v.row},FALSE)`,
+    explain: (v) => `<b>HLOOKUP函數</b>是VLOOKUP的「橫向」版本，會從表格最上面一列搜尋要查詢的值，再傳回往下數指定列數的值。最後的<b>FALSE</b>代表「只尋找完全一致的資料」。`,
+    pitfall: `想從月份橫向排列的表格中查詢「4月」欄位時，如果標題列混用了全形和半形的「4月」字樣，就會因不一致而找不到，出現<b>#N/A</b>錯誤。這個函數是用在表格為橫向排列（由左到右，而不是由上到下）的情況，一般的直向表格請改用<b>VLOOKUP或XLOOKUP</b>。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  choose: {
+    cat:'search', label:'依編號選取數值 (CHOOSE)', level:'中級',
+    scene:'適用情境：想依星期編號或類別編號，顯示對應的名稱',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，依照
+      <span contenteditable class="blank" data-k="indexCell">${v.indexCell}</span> 儲存格的編號：1顯示
+      「<span contenteditable class="blank" data-k="v1" style="width:60px;">${v.v1}</span>」，2顯示
+      「<span contenteditable class="blank" data-k="v2" style="width:60px;">${v.v2}</span>」，3顯示
+      「<span contenteditable class="blank" data-k="v3" style="width:60px;">${v.v3}</span>」。`,
+    values: {target:'B1', indexCell:'A1', v1:'週一', v2:'週二', v3:'週三'},
+    formula: (v) => `=CHOOSE(${v.indexCell},"${v.v1}","${v.v2}","${v.v3}")`,
+    explain: (v) => `<b>CHOOSE函數</b>會依照指定的編號，從清單中選出對應的值傳回。「第1個顯示○○、第2個顯示△△」這種切換，比用巢狀的IF更簡潔。`,
+    pitfall: `如果類別編號實際上有1～7，卻只設定了1～3（週一、週二、週三）的選項，一旦不小心輸入4以上的編號，就會出現<b>錯誤（#VALUE!）</b>。編號沒有對應的值時就會出錯，請務必讓編號範圍和準備好的選項數量一致。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+
+  /* ---------------- 字串處理 ---------------- */
+  concat: {
+    cat:'text', label:'連接文字 (CONCAT/&)', level:'初級',
+    scene:'適用情境：想把姓和名合併到同一個儲存格、想連接地址',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="a">${v.a}</span> 儲存格和
+      <span contenteditable class="blank" data-k="b">${v.b}</span> 儲存格的文字，中間夾著
+      「<span contenteditable class="blank" data-k="sep" style="width:50px;">${v.sep}</span>」連接起來。`,
+    values: {target:'C1', a:'A1', b:'B1', sep:'　'},
+    formula: (v) => `=${v.a}&"${v.sep}"&${v.b}`,
+    explain: (v) => `<b>&（連接符號）</b>是用來連接文字的符號。「${v.a}&"${v.sep}"&${v.b}」代表「${v.a}的文字＋分隔符號＋${v.b}的文字」連接成一個字串的意思。`,
+    pitfall: `在姓和名分別輸入在不同儲存格的名冊中，如果不加分隔符號直接連接，就會變成像「山田太郎」這樣擠在一起顯示，如果日後想把這個字串重新拆分成「山田」和「太郎」，會不知道該從哪裡切開。如果確定不需要分隔符號、想直接連接，把分隔欄位留空即可；但如果之後有可能需要拆分，保留分隔符號會比較保險。用CONCAT函數（=CONCAT(A1,B1)）也能得到相同結果。`,
+    version: `用&連接的方式，Excel 2003以後的所有版本都可以使用。CONCAT函數則需要Excel 2019以後的版本。`
+  },
+  leftright: {
+    cat:'text', label:'取出部分文字 (LEFT/RIGHT)', level:'初級',
+    scene:'適用情境：只想取出郵遞區號開頭3碼、只想取出電話號碼末4碼',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，取出
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格文字
+      <select class="blank-select" data-k="side" style="width:60px;">
+        <option value="左" ${v.side==='左'?'selected':''}>左</option>
+        <option value="右" ${v.side==='右'?'selected':''}>右</option>
+      </select>
+      邊的 <span contenteditable class="blank" data-k="num">${v.num}</span> 個字。`,
+    values: {target:'B1', source:'A1', side:'左', num:'3'},
+    formula: (v) => v.side.includes('右') ? `=RIGHT(${v.source},${v.num})` : `=LEFT(${v.source},${v.num})`,
+    explain: (v) => `<b>LEFT函數</b>會從文字左邊、<b>RIGHT函數</b>會從右邊，取出指定的字數。系統會依照你選擇的「左／右」自動判斷要使用哪一個。`,
+    pitfall: `如果郵遞區號是像「123-4567」這樣含連字號輸入的欄位，用LEFT函數想取出開頭3碼，取到的不是連字號後面的字元，而是單純從左邊數來的3個字元（「123」）。如果表格的輸入規則不統一，只有沒輸入連字號的資料列結果會跟著跑掉。全形字元（漢字等）和半形字元都會被當成「1個字」同樣計算。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  mid: {
+    cat:'text', label:'從中間取出文字 (MID)', level:'中級',
+    scene:'適用情境：只想取出員工代碼中間的部門代碼',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，從
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格文字的第
+      <span contenteditable class="blank" data-k="start">${v.start}</span> 個字開始，取出
+      <span contenteditable class="blank" data-k="num">${v.num}</span> 個字。`,
+    values: {target:'B1', source:'A1', start:'3', num:'2'},
+    formula: (v) => `=MID(${v.source},${v.start},${v.num})`,
+    explain: (v) => `<b>MID函數</b>會從文字的中間開始，取出指定字數的內容。「從第${v.start}個字開始，取出${v.num}個字」的說法，會直接對應到公式引數的順序。`,
+    pitfall: `想從「E-2024-015」這種員工代碼中只取出部門代碼，如果把起始位置想成從第0個字開始，就會取到比預期偏移1個字元的部分（例如連字號），出現和原本想要的部門代碼不同的字元。「第○個字開始」是<b>從第1個字開始計算</b>（沒有第0個字）。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  trim: {
+    cat:'text', label:'消除多餘空白 (TRIM)', level:'初級',
+    scene:'適用情境：從其他系統複製過來的文字中混雜了多餘的空白',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，顯示把
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格文字中多餘空白刪除後的結果。`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=TRIM(${v.source})`,
+    explain: (v) => `<b>TRIM函數</b>會刪除文字前後所有的空白，並把單字之間的空白只保留1個。很適合用來清除匯入資料時常見的「看不見的空白」。`,
+    pitfall: `從其他系統複製過來的地址資料中，如果混雜了全形空格（像是「台北市　中正區」這種），TRIM函數並不會刪除它，即使外觀看起來很乾淨，日後和其他表格比對字串時，也可能因此變成「不一致」的原因。TRIM函數有時無法刪除全形空格，使用前請先確認混雜的是全形還是半形空白。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  substitute: {
+    cat:'text', label:'取代文字 (SUBSTITUTE)', level:'中級',
+    scene:'適用情境：想統一地址中特定符號的寫法、想把舊公司名稱一次替換成新公司名稱',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格文字中的
+      「<span contenteditable class="blank" data-k="from" style="width:60px;">${v.from}</span>」，替換成
+      「<span contenteditable class="blank" data-k="to" style="width:60px;">${v.to}</span>」。`,
+    values: {target:'B1', source:'A1', from:'－', to:'ー'},
+    formula: (v) => `=SUBSTITUTE(${v.source},"${v.from}","${v.to}")`,
+    explain: (v) => `<b>SUBSTITUTE函數</b>會把文字中特定的字串替換成別的字串。原本的儲存格（${v.source}）內容不會改變，只有替換後的結果會顯示在${v.target}儲存格中。`,
+    pitfall: `想統一地址中「－」（全形連字號）的寫法，指定要替換的對象是全形連字號「－」，但實際資料中卻混雜了外觀很像的長音符號「ー」或半形連字號「-」，這些儲存格就不會被替換，維持原樣。全形連字號、半形連字號、長音符號等外觀相似的字元，在電腦中會被視為不同的字元，因此可能無法如預期般被替換。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  len: {
+    cat:'text', label:'計算字數 (LEN)', level:'初級',
+    scene:'適用情境：想檢查輸入的字數是否符合規定的位數',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，顯示
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格中輸入文字的字數。`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=LEN(${v.source})`,
+    explain: (v) => `<b>LEN函數</b>會直接計算儲存格中輸入的字數。半形和全形字元都會被當作1個字同樣計算。`,
+    pitfall: `電話號碼明明應該剛好10碼，用LEN函數計算卻顯示11，這種情況通常是末尾或中間混入了1個看不見的空格。用來檢查位數時，如果混入了<b>空格或看不見的資料</b>，字數就可能不如預期，建議搭配TRIM函數一起使用會比較保險。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  upperlower: {
+    cat:'text', label:'英文字母大小寫轉換 (UPPER/LOWER/PROPER)', level:'初級',
+    scene:'適用情境：想統一羅馬拼音輸入時大小寫不一致的寫法（全部大寫、全部小寫、僅字首大寫）',
+    render: (v) => `我想把 <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格的英文字母轉換成
+      <select class="blank-select" data-k="mode" style="width:150px;">
+        <option value="全部大寫" ${v.mode==='全部大寫'?'selected':''}>全部大寫</option>
+        <option value="全部小寫" ${v.mode==='全部小寫'?'selected':''}>全部小寫</option>
+        <option value="每個字首大寫" ${v.mode==='每個字首大寫'?'selected':''}>每個字首大寫</option>
+      </select>，
+      顯示在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中。`,
+    values: {target:'B1', source:'A1', mode:'全部大寫'},
+    formula: (v) => v.mode.includes('字首') ? `=PROPER(${v.source})` : v.mode.includes('小寫') ? `=LOWER(${v.source})` : `=UPPER(${v.source})`,
+    explain: (v) => `<b>UPPER函數</b>會轉換成全部大寫，<b>LOWER函數</b>會轉換成全部小寫，<b>PROPER函數</b>則只會把每個單字的字首轉成大寫。系統會依照你選擇的轉換方式自動選用對應的函數。`,
+    pitfall: `想統一「ABC-001」和「abc-001」混用的廠商代碼寫法而套用UPPER函數時，如果混入了全形英文字母（像是全形的Ａ、Ｂ、Ｃ），這些字元不會被轉換，維持原樣，導致原本想統一的寫法還是沒有統一。這些函數不會影響中文（全形字元），<b>只有半形英文字母</b>才會被轉換，請特別留意。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  textjoin: {
+    cat:'text', label:'用分隔符號連接多個儲存格 (TEXTJOIN)', level:'中級',
+    scene:'適用情境：想把分散在不同儲存格的地址各部分，加上分隔符號合併成一個',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 儲存格的文字，用分隔符號
+      「<span contenteditable class="blank" data-k="sep" style="width:40px;">${v.sep}</span>」連接起來
+      （空白的儲存格請忽略）。`,
+    values: {target:'E1', from:'A1', to:'D1', sep:'、'},
+    formula: (v) => `=TEXTJOIN("${v.sep}",TRUE,${v.from}:${v.to})`,
+    explain: (v) => `<b>TEXTJOIN函數</b>會把指定範圍的文字用分隔符號連接起來。第2個引數的<b>TRUE</b>代表「忽略空白儲存格」，而且會自動幫你在每個部分之間插入分隔符號。`,
+    pitfall: `在縣市、鄉鎮區、街道門牌、建築物名稱分別輸入在不同儲存格的地址清單中，如果建築物名稱那一列是空白的，用&直接連接就會多出一個分隔符號，顯示起來不太自然。TEXTJOIN只要把第2個引數設為TRUE，就會自動略過空白儲存格再連接。用&連接多個儲存格時，每次都要輸入一次分隔符號，但TEXTJOIN的分隔符號<b>只需要在一開始指定一次</b>就好。`,
+    version: `需要Excel 2019或Microsoft 365（Excel 2016以前的版本無法使用）。`
+  },
+
+  /* ---------------- 日期與時間 ---------------- */
+  today: {
+    cat:'date', label:'今天的日期 (TODAY)', level:'初級',
+    scene:'適用情境：想在單據上自動顯示今天的日期',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，
+      自動顯示今天的日期。`,
+    values: {target:'A1'},
+    formula: () => `=TODAY()`,
+    explain: () => `<b>TODAY函數</b>會自動顯示開啟檔案當天的日期（依照電腦的日期設定）。括號中不需要輸入任何內容。`,
+    pitfall: `如果在請款單範本中隨手用TODAY函數顯示開立日期，之後每次重新開啟或重新列印檔案時，日期都會自動更新成當天的日期，和實際開立的日期對不上。TODAY函數會<b>每次開啟檔案時自動更新日期</b>。如果想固定「建立當天的日期」，建議直接手動輸入日期。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  datedif: {
+    cat:'date', label:'計算期間 (DATEDIF)', level:'中級',
+    scene:'適用情境：想計算年資、想用「幾年幾個月」表示在職期間',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 儲存格之間的期間，用
+      「<select class="blank-select" data-k="unit" style="width:70px;">
+        <option value="年" ${v.unit==='年'?'selected':''}>年</option>
+        <option value="月" ${v.unit==='月'?'selected':''}>月</option>
+        <option value="日" ${v.unit==='日'?'selected':''}>日</option>
+      </select>」為單位計算出來。`,
+    values: {target:'C1', from:'A1', to:'B1', unit:'年'},
+    formula: (v) => {
+      const unitMap = {'年':'Y', '月':'M', '日':'D'};
+      const u = unitMap[v.unit] || 'Y';
+      return `=DATEDIF(${v.from},${v.to},"${u}")`;
+    },
+    explain: (v) => `<b>DATEDIF函數</b>會計算兩個日期之間的期間。「Y」是滿年數，「M」是滿月數，「D」是天數，系統會依照你選擇的單位自動切換。`,
+    pitfall: `事後檢視年資計算公式的同事，如果想用輸入自動完成功能搜尋這個函數名稱卻找不到候選項目，可能會誤以為「這個函數根本不存在」。因為這是<b>不會出現在Excel自動完成建議中</b>的函數，必須自己記住名稱手動輸入，是比較少見的函數，請特別注意拼字錯誤。`,
+    version: `Excel 2003以後即可使用，但屬於官方說明文件中沒有記載的隱藏函數。`
+  },
+  edate: {
+    cat:'date', label:'〇個月後的日期 (EDATE)', level:'中級',
+    scene:'適用情境：想自動計算合約更新日（1年後）或付款期限（次月底）',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，計算
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格日期的
+      <span contenteditable class="blank" data-k="months">${v.months}</span> 個月後是哪一天。`,
+    values: {target:'B1', source:'A1', months:'12'},
+    formula: (v) => `=EDATE(${v.source},${v.months})`,
+    explain: (v) => `<b>EDATE函數</b>會計算指定日期的幾個月後（或前）是哪一天。如果想往前推算，只要在月數欄位輸入負數（例如：-1）即可。`,
+    pitfall: `把合約更新日算成1年後的日期，儲存格卻顯示「45678」這種5位數的數字，看起來完全不像日期。計算結果本身是正確的，只是儲存格的顯示格式還沒設定成「日期」，才會出現這種單純外觀上的問題。如果計算結果顯示的不是日期，而是<b>單純的數字（序列值）</b>，請把儲存格格式改成「日期」。`,
+    version: `Excel 2007以後即可使用（Excel 2003需要分析工具箱增益集）。`
+  },
+  weekday: {
+    cat:'date', label:'判斷星期幾 (WEEKDAY/TEXT)', level:'中級',
+    scene:'適用情境：想從日期自動顯示「一」「二」等星期幾',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格日期的星期幾，用
+      「<span contenteditable class="blank" data-k="style" style="width:60px;">${v.style}</span>」的格式顯示出來。`,
+    values: {target:'B1', source:'A1', style:'一'},
+    formula: (v) => `=TEXT(${v.source},"aaa")`,
+    explain: (v) => `想把星期幾顯示成「一」「二」這種單一漢字的格式，最簡單的方式是用<b>TEXT函數</b>並指定格式代碼「aaa」（如果指定「aaaa」則會顯示「星期一」）。如果想當作數字（1～7）處理，則要使用<b>WEEKDAY函數</b>。`,
+    pitfall: `想做出週末自動變色的設定格式化條件時，如果用TEXT函數產生的「六」「日」文字當作判斷條件，可能無法如預期運作。TEXT函數產生的星期幾是<b>文字字串</b>，如果要用在條件判斷（例如週末變色）上，通常WEEKDAY函數會比較好處理，請依用途分別使用。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  networkdays: {
+    cat:'date', label:'計算工作日數 (NETWORKDAYS)', level:'中級',
+    scene:'適用情境：想計算扣除週末的實際工作天數、距離交期還有幾個工作天',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，計算
+      <span contenteditable class="blank" data-k="from">${v.from}</span> 到
+      <span contenteditable class="blank" data-k="to">${v.to}</span> 儲存格之間，扣除週六日後的工作天數。`,
+    values: {target:'C1', from:'A1', to:'B1'},
+    formula: (v) => `=NETWORKDAYS(${v.from},${v.to})`,
+    explain: (v) => `<b>NETWORKDAYS函數</b>會計算從開始日到結束日之間的天數，並自動扣除星期六、星期日。開始日和結束日只要是平日，都會被算作工作天。`,
+    pitfall: `計算橫跨連假的交期時，如果只用NETWORKDAYS以為已經扣除了假日，結果連假的天數也會被當成工作天計入，導致算出來的工作天數比實際情況多。如果想扣除國定假日，需要在第3個引數加入輸入了假日日期的儲存格範圍。不特別指定的話，<b>國定假日也會被當成工作天</b>計算。`,
+    version: `Excel 2007以後即可使用（Excel 2003需要分析工具箱增益集）。`
+  },
+  yearmonthday: {
+    cat:'date', label:'從日期取出年・月・日 (YEAR/MONTH/DAY)', level:'初級',
+    scene:'適用情境：想從日期資料中只取出「年」或「月」用於統計',
+    render: (v) => `我想從 <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格的日期中，只取出
+      <select class="blank-select" data-k="mode" style="width:60px;">
+        <option value="年" ${v.mode==='年'?'selected':''}>年</option>
+        <option value="月" ${v.mode==='月'?'selected':''}>月</option>
+        <option value="日" ${v.mode==='日'?'selected':''}>日</option>
+      </select>
+      的數字，顯示在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中。`,
+    values: {target:'B1', source:'A1', mode:'年'},
+    formula: (v) => v.mode.includes('月') ? `=MONTH(${v.source})` : v.mode.includes('日') ? `=DAY(${v.source})` : `=YEAR(${v.source})`,
+    explain: (v) => `<b>YEAR函數</b>會從日期取出「年」，<b>MONTH函數</b>取出「月」，<b>DAY函數</b>取出「日」的數字。系統會依照你選擇的項目自動判斷要使用哪一個。`,
+    pitfall: `想從日期資料只取出「月」用在月報標題上，但YEAR/MONTH/DAY的結果<b>單純是數字</b>（1月只會顯示「1」），不會變成「2026年1月」這種文字，用在標題上可能會顯得有點單調。取出的年、月、日<b>全部都是數字</b>，如果想顯示成文字，請搭配TEXT函數使用。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+
+  /* ---------------- 數字進位與格式 ---------------- */
+  round: {
+    cat:'round', label:'四捨五入 (ROUND)', level:'初級',
+    scene:'適用情境：想把計算營業稅後的零頭四捨五入',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格的數值四捨五入到小數點後第
+      <span contenteditable class="blank" data-k="digit">${v.digit}</span> 位。`,
+    values: {target:'B1', source:'A1', digit:'0'},
+    formula: (v) => `=ROUND(${v.source},${v.digit})`,
+    explain: (v) => `<b>ROUND函數</b>會依指定的位數四捨五入。位數指定「0」會變成整數，指定「-1」則會在十位數四捨五入。`,
+    pitfall: `只把儲存格的顯示格式改成「小數點後1位」，看起來像是四捨五入了，但儲存格中的數值本身其實沒有改變，之後的加總計算還是會把沒顯示出來的零頭也算進去，可能和用計算機手算出來的總金額差了幾塊到幾十塊錢。ROUND函數會改變<b>數值本身</b>，因此會確實反映在後續的計算上。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  roundupdown: {
+    cat:'round', label:'無條件進位・無條件捨去 (ROUNDUP/ROUNDDOWN)', level:'初級',
+    scene:'適用情境：想讓報價金額的零頭一律無條件進位／無條件捨去',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格的數值在小數點後第
+      <span contenteditable class="blank" data-k="digit">${v.digit}</span> 位
+      <select class="blank-select" data-k="mode" style="width:110px;">
+        <option value="無條件進位" ${v.mode==='無條件進位'?'selected':''}>無條件進位</option>
+        <option value="無條件捨去" ${v.mode==='無條件捨去'?'selected':''}>無條件捨去</option>
+      </select>。`,
+    values: {target:'B1', source:'A1', digit:'0', mode:'無條件進位'},
+    formula: (v) => v.mode.includes('進位') ? `=ROUNDUP(${v.source},${v.digit})` : `=ROUNDDOWN(${v.source},${v.digit})`,
+    explain: (v) => `<b>ROUNDUP函數</b>一律無條件進位，<b>ROUNDDOWN函數</b>一律無條件捨去。和ROUND不同，就算小數點後是4以下也會進位、5以上也會捨去，這是它們的特色。`,
+    pitfall: `公司內部規定報價金額不滿1元一律「無條件進位」，卻不小心用了ROUND函數（四捨五入），結果像0.4元這種零頭會被四捨五入捨去，開出的報價金額就會和公司規定不同。如果報價單或請款單有「不滿1元一律無條件進位」這類公司內部規定，就需要用ROUNDUP而不是ROUND（四捨五入），請務必分清楚兩者的用法。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  texttostr: {
+    cat:'round', label:'改變顯示格式 (TEXT)', level:'中級',
+    scene:'適用情境：想把數字顯示成「NT$1,000」或「2026年1月」這樣的外觀',
+    render: (v) => `我想把 <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格的值，轉換成
+      「<span contenteditable class="blank" data-k="format" style="width:110px;">${v.format}</span>」這種顯示格式的文字，
+      顯示在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中。`,
+    values: {target:'B1', source:'A1', format:'#,##0"元"'},
+    formula: (v) => `=TEXT(${v.source},"${v.format}")`,
+    explain: (v) => `<b>TEXT函數</b>會把數字或日期轉換成指定格式的「文字」。雖然效果類似改變儲存格的顯示格式，但TEXT函數的特色是可以用&和其他文字連接使用。`,
+    pitfall: `用TEXT函數把金額欄轉換成「NT$1,000」這種外觀後，如果直接把這一欄拿到另一張統計表用SUM函數加總，即使外觀看起來是數字，實際上已經變成文字，加總結果可能會顯示為0元。用TEXT函數轉換後的結果會變成<b>文字</b>，之後無法再用於加總等進一步的計算，請記得這只是「純顯示用」的數值。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  },
+  ceilingfloor: {
+    cat:'round', label:'無條件進位・捨去至倍數 (CEILING/FLOOR)', level:'中級',
+    scene:'適用情境：想把金額無條件進位到100元單位、想把時間無條件捨去到15分鐘單位',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，把
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格的數值，
+      <select class="blank-select" data-k="mode" style="width:110px;">
+        <option value="無條件進位" ${v.mode==='無條件進位'?'selected':''}>無條件進位</option>
+        <option value="無條件捨去" ${v.mode==='無條件捨去'?'selected':''}>無條件捨去</option>
+      </select>
+      到 <span contenteditable class="blank" data-k="base">${v.base}</span> 的倍數。`,
+    values: {target:'B1', source:'A1', base:'100', mode:'無條件進位'},
+    formula: (v) => v.mode.includes('進位') ? `=CEILING(${v.source},${v.base})` : `=FLOOR(${v.source},${v.base})`,
+    explain: (v) => `<b>CEILING函數</b>會無條件進位到指定基準值的倍數，<b>FLOOR函數</b>則會無條件捨去。和ROUNDUP／ROUNDDOWN不同，適合用在想湊成「10的倍數」「100的倍數」這類整數的情況。`,
+    pitfall: `想把加班時間以15分鐘為單位無條件捨去來統計時，如果同時處理補休折抵等含有負數的數值，CEILING/FLOOR的運作方向會和正數時相反，導致捨入的方向和預期不同。基準值（倍數）使用負數時，運作方式會因數值正負而改變。只要是正數，就可以單純理解成「會捨入到指定基準值的倍數」。`,
+    version: `Excel 2007以後即可使用（部分版本建議改用CEILING.MATH／FLOOR.MATH）。`
+  },
+  int: {
+    cat:'round', label:'只取出整數部分 (INT)', level:'初級',
+    scene:'適用情境：想捨去小數點以下只留整數、只想取出除法的商',
+    render: (v) => `我想在 <span contenteditable class="blank" data-k="target">${v.target}</span> 儲存格中，只取出
+      <span contenteditable class="blank" data-k="source">${v.source}</span> 儲存格數值的整數部分。`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=INT(${v.source})`,
+    explain: (v) => `<b>INT函數</b>會捨去小數點以下的部分，只傳回整數部分。雖然和ROUNDDOWN(儲存格,0)很像，但要注意負數的情況下結果會不一樣。`,
+    pitfall: `補休折抵等情況下出現負數的加班時間（例如：-2.5小時）使用INT函數時，會捨入成<b>比它更小的整數</b>-3小時，和用ROUNDDOWN(-2.5,0)算出的-2小時不同。負數（例如：-2.5）的情況下，INT函數會傳回比它更小的整數（-3），和ROUNDDOWN(-2.5,0)的結果（-2）不同，處理負數時請特別留意。`,
+    version: `Excel 2003以後的所有版本都可以使用。`
+  }
+};
+
+/* ==========================================================
+   狀態管理・畫面繪製邏輯
+   ========================================================== */
+const PAGE_SIZE = 4;
+
+let currentCat = 'agg';
+let currentPage = 0;
+
+function catFnKeys(){
+  return Object.keys(functions).filter(k => functions[k].cat === currentCat);
+}
+
+function totalPages(){
+  return Math.max(1, Math.ceil(catFnKeys().length / PAGE_SIZE));
+}
+
+function renderCategoryRow(){
+  const row = document.getElementById('categoryRow');
+  row.innerHTML = '';
+  categories.forEach(c => {
+    const btn = document.createElement('div');
+    btn.className = 'category-btn' + (c.key === currentCat ? ' active' : '');
+    btn.textContent = c.label;
+    btn.addEventListener('click', () => {
+      currentCat = c.key;
+      currentPage = 0;
+      renderCategoryRow();
+      renderFnRow();
+      renderCards();
+    });
+    row.appendChild(btn);
+  });
+}
+
+function renderFnRow(){
+  const row = document.getElementById('fnRow');
+  row.innerHTML = '';
+  const fnKeys = catFnKeys();
+  const start = currentPage * PAGE_SIZE;
+  const visibleKeys = fnKeys.slice(start, start + PAGE_SIZE);
+  fnKeys.forEach(key => {
+    const f = functions[key];
+    const btn = document.createElement('div');
+    btn.className = 'fn-btn' + (visibleKeys.includes(key) ? ' active' : '');
+    btn.innerHTML = `${f.label} <span class="lv">${f.level}</span>`;
+    btn.addEventListener('click', () => {
+      currentPage = Math.floor(fnKeys.indexOf(key) / PAGE_SIZE);
+      renderFnRow();
+      renderCards();
+      highlightCard(key);
+    });
+    row.appendChild(btn);
+  });
+}
+
+function buildCardHTML(key){
+  const f = functions[key];
+  return `
+    <div class="card" data-cellref="${f.values.target}" id="card-${key}">
+      <div class="scene">${f.scene}</div>
+      <div class="sentence" id="sentence-${key}">${f.render(f.values)}</div>
+      <div class="divider"></div>
+      <div class="output-label">公式預覽</div>
+      <div class="output-row">
+        <div class="output-cell" id="formulaOut-${key}"></div>
+        <button class="copy-btn" data-fn="${key}">複製</button>
+      </div>
+      <div class="copy-hint">複製這個公式，直接貼到Excel裡就可以使用了。</div>
+      <div class="explain" id="explainArea-${key}"></div>
+      <div class="pitfall" id="pitfallArea-${key}"></div>
+      <div class="version-note"><span class="dot"></span><span>${f.version}</span></div>
+    </div>
+  `;
+}
+
+function renderCards(){
+  const fnKeys = catFnKeys();
+  const start = currentPage * PAGE_SIZE;
+  const pageKeys = fnKeys.slice(start, start + PAGE_SIZE);
+
+  const area = document.getElementById('cardsArea');
+  area.innerHTML = pageKeys.map(buildCardHTML).join('');
+
+  pageKeys.forEach(key => {
+    document.querySelectorAll(`#card-${key} .blank, #card-${key} .blank-select`).forEach(el => el.setAttribute('data-fn', key));
+    updateFormula(key);
+  });
+
+  bindBlanks();
+  bindCopyButtons();
+  renderPager();
+}
+
+function updateFormula(key){
+  const f = functions[key];
+  const out = document.getElementById(`formulaOut-${key}`);
+  const exp = document.getElementById(`explainArea-${key}`);
+  const pit = document.getElementById(`pitfallArea-${key}`);
+  if (out) out.textContent = f.formula(f.values);
+  if (exp) exp.innerHTML = f.explain(f.values);
+  if (pit) pit.innerHTML = f.pitfall;
+}
+
+function bindBlanks(){
+  document.querySelectorAll('#cardsArea .blank').forEach(el => {
+    el.addEventListener('input', () => {
+      const key = el.getAttribute('data-fn');
+      const k = el.getAttribute('data-k');
+      functions[key].values[k] = el.textContent.trim();
+      updateFormula(key);
+    });
+  });
+  document.querySelectorAll('#cardsArea .blank-select').forEach(el => {
+    el.addEventListener('change', () => {
+      const key = el.getAttribute('data-fn');
+      const k = el.getAttribute('data-k');
+      functions[key].values[k] = el.value;
+      updateFormula(key);
+    });
+  });
+}
+
+function bindCopyButtons(){
+  document.querySelectorAll('#cardsArea .copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-fn');
+      const text = document.getElementById(`formulaOut-${key}`).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '已複製';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = '複製'; btn.classList.remove('copied'); }, 1500);
+
+        if (typeof gtag === 'function') {
+          gtag('event', 'copy_formula', { function_name: key });
+        }
+      });
+    });
+  });
+}
+
+function renderPager(){
+  const area = document.getElementById('pagerArea');
+  const pages = totalPages();
+  area.innerHTML = `
+    <button class="pager-btn" id="prevPageBtn" ${currentPage <= 0 ? 'disabled' : ''}>← 上一頁</button>
+    <span class="pager-info">${currentPage + 1} / ${pages} 頁</span>
+    <button class="pager-btn" id="nextPageBtn" ${currentPage >= pages - 1 ? 'disabled' : ''}>下一頁 →</button>
+  `;
+  document.getElementById('prevPageBtn').addEventListener('click', () => {
+    if (currentPage > 0) {
+      currentPage--;
+      renderFnRow();
+      renderCards();
+    }
+  });
+  document.getElementById('nextPageBtn').addEventListener('click', () => {
+    if (currentPage < totalPages() - 1) {
+      currentPage++;
+      renderFnRow();
+      renderCards();
+    }
+  });
+}
+
+function highlightCard(key){
+  const el = document.getElementById(`card-${key}`);
+  if (!el) return;
+  if (typeof el.scrollIntoView === 'function') {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  el.classList.add('highlight');
+  setTimeout(() => el.classList.remove('highlight'), 1500);
+}
+
+renderCategoryRow();
+renderFnRow();
+renderCards();
+</script>
+</body>
+</html>
