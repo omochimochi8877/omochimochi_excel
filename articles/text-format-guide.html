@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>TEXT関数で日付・金額の表示形式を自由自在に変える方法｜書式コードの意味とよくある失敗</title>
+<meta name="description" content="TEXT関数を使って日付や数値を好きな文字列表示に変える方法を実務目線で解説。「令和」表示や「¥1,000」表示、曜日表示の書式コードの意味、TEXT関数の結果を数値として計算できない落とし穴、セルの表示形式との違いまで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/text-format-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="TEXT関数で日付・金額の表示形式を自由自在に変える方法｜書式コードの意味とよくある失敗｜セルうめ">
+<meta property="og:description" content="TEXT関数の書式コードの意味と、日付・金額表示でよくある失敗、セルの表示形式との違いを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/text-format-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TEXT関数で日付・金額の表示形式を自由自在に変える方法">
+<meta name="twitter:description" content="書式コードの意味、よくある失敗、セルの表示形式との違いを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "TEXT関数で日付・金額の表示形式を自由自在に変える方法｜書式コードの意味とよくある失敗",
+  "description": "TEXT関数を使って日付や数値を好きな文字列表示に変える方法を実務目線で解説。「令和」表示や「¥1,000」表示、曜日表示の書式コードの意味、TEXT関数の結果を数値として計算できない落とし穴、セルの表示形式との違いまで紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/text-format-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-26"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "TEXT関数で作った文字列を、そのままSUM関数などで計算できますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "できません。TEXT関数の戻り値は見た目が数値のように見えても文字列(テキスト)です。SUM・AVERAGEなどの計算関数にそのまま渡すと、無視されるか0として扱われ、意図した合計になりません。TEXT関数はあくまで「表示・結合用の文字列」を作る関数であり、計算にはもとの数値セルを使うか、必要であればVALUE関数で数値に戻してから計算してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "セルの表示形式(右クリック→セルの書式設定)とTEXT関数は何が違うのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "セルの表示形式は、セルの中身(数値・日付)自体はそのままに、見た目の表示だけを変える機能です。一方TEXT関数は、数値や日付を書式コードに従って文字列に変換し、その文字列自体を別のセルに結果として取り出す関数です。「2026年4月1日 締切分」のように日付と文字列を1つのセルに結合したい場合や、CONCAT・TEXTJOINで日付を他の文字列とつなげたい場合は、表示形式だけでは対応できないためTEXT関数が必要になります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "西暦を令和などの和暦表示にするにはどうすればいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TEXT関数の書式コードに \"ge.m.d\" や \"ggge年m月d日\" を指定すると、日付を和暦表示の文字列に変換できます。「gg」は元号を1文字(例:R)、「ggg」は元号を正式名称(例:令和)で表示する指定です。ただしこれはWindows版Excelの和暦カレンダー機能に依存する表示のため、環境によっては正しく変換されない場合があります。重要な書類で使う前に、実際の表示結果を必ず確認してください。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  table.codes{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px;}
+  table.codes th, table.codes td{border:1px solid var(--line);padding:8px 12px;text-align:left;}
+  table.codes th{background:#F5F2E8;font-family:var(--mono);font-size:12px;color:var(--forest-deep);}
+  table.codes td.code{font-family:var(--mono);color:#6b4a1e;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>TEXT関数で日付・金額の表示形式を自由自在に変える方法｜書式コードの意味とよくある失敗</h1>
+  <p class="sub">「請求書に'2026年4月分'とセルの表示形式だけで表示したのに、別のセルと結合したら数字の羅列になってしまった」――そんな経験はありませんか。TEXT関数を使えば、日付や金額を狙った通りの文字列に変換して、他の文字列と自由に結合できます。</p>
+  <div class="meta">2026-09-26更新 ｜ 文字列操作</div>
+
+  <article class="article-body">
+    <p>
+      Excelで日付や金額の見た目を整えるとき、多くの人は「セルの書式設定」を使います。ところが、その日付や金額を別の文字列と結合して1つのセルに表示したい場合、書式設定だけでは対応できません。たとえば「2026年4月分請求書」のように日付と固定文字列を1セルにまとめたい場合や、CONCAT・TEXTJOIN関数で複数セルを結合する際に日付部分だけ数字の羅列(シリアル値)になってしまう場合に必要になるのが<b>TEXT関数</b>です。この記事では、TEXT関数の書式コードの意味と、実務でつまずきやすいポイントを解説します。
+    </p>
+
+    <h2>TEXT関数の基本構文</h2>
+    <p>
+      TEXT関数は、数値や日付を指定した「書式コード」に従って文字列に変換する関数です。第1引数に変換したい値、第2引数に書式コードを文字列("")で指定します。
+    </p>
+    <div class="box">
+      <div class="code">=TEXT(値, 書式コード)</div>
+      <p style="margin-bottom:0;">例：請求日(A2)を「2026年4月」という文字列にしたい場合<br>
+        <span style="font-family:var(--mono);">=TEXT(A2,"yyyy年m月")</span> → 2026年4月<br>
+        金額(B2)を「¥12,000」という文字列にしたい場合<br>
+        <span style="font-family:var(--mono);">=TEXT(B2,"¥#,##0")</span> → ¥12,000<br>
+        請求日と件名を1セルに結合したい場合<br>
+        <span style="font-family:var(--mono);">=TEXT(A2,"yyyy年m月")&amp;"分ご請求書"</span> → 2026年4月分ご請求書</p>
+    </div>
+
+    <h2>よく使う書式コード一覧</h2>
+    <p>
+      TEXT関数の書式コードは、セルの表示形式の設定画面(ユーザー定義)に出てくる書式記号と共通です。よく使うものを以下にまとめます。
+    </p>
+    <table class="codes">
+      <tr><th>用途</th><th>書式コード</th><th>結果の例(2026/4/1・12000)</th></tr>
+      <tr><td>年月日</td><td class="code">yyyy/m/d</td><td>2026/4/1</td></tr>
+      <tr><td>年月(和文)</td><td class="code">yyyy年m月</td><td>2026年4月</td></tr>
+      <tr><td>曜日(漢字1文字)</td><td class="code">aaa</td><td>水</td></tr>
+      <tr><td>曜日(フル)</td><td class="code">aaaa</td><td>水曜日</td></tr>
+      <tr><td>3桁区切りの数値</td><td class="code">#,##0</td><td>12,000</td></tr>
+      <tr><td>円マーク付き金額</td><td class="code">¥#,##0</td><td>¥12,000</td></tr>
+      <tr><td>パーセント表示</td><td class="code">0.0%</td><td>(0.5なら)50.0%</td></tr>
+      <tr><td>0埋めの3桁コード</td><td class="code">000</td><td>(5なら)005</td></tr>
+    </table>
+    <p>
+      「#」は「数値があればその桁を表示し、なければ何も表示しない」記号、「0」は「数値がなくてもその桁を0として表示する」記号です。伝票番号を「005」のように必ず3桁で0埋め表示したい場合は「000」、金額のように余分な0を表示したくない場合は「#,##0」を使う、という使い分けを覚えておくと書式コード選びに迷いません。
+    </p>
+
+    <h2>セルの表示形式との違い</h2>
+    <div class="compare">
+      <div class="col">
+        <h3>セルの表示形式(書式設定)</h3>
+        <ul>
+          <li>セルの中身(数値・日付)は変わらず見た目だけ変わる</li>
+          <li>そのままSUM等の計算に使える</li>
+          <li>他の文字列と結合すると数字の羅列に戻る</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>TEXT関数</h3>
+        <ul>
+          <li>結果は文字列になり、別セルに取り出せる</li>
+          <li>そのままでは計算に使えない</li>
+          <li>CONCAT・TEXTJOIN・&amp;での結合に強い</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      印刷帳票の見た目だけを整えたいならセルの表示形式で十分ですが、日付・金額を他の文言と1つの文章として組み立てたい場合は、TEXT関数を使う必要があります。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば、請求書のタイトルセルに「=TEXT(発行日,"yyyy年m月")&amp;"分ご請求書"」のように数式を組み、発行日を変えるだけでタイトル文言が自動で更新される仕組みを作れます。<b>総務担当者</b>であれば、WEEKDAY関数の代わりにTEXT関数で「aaa」書式を使い、シフト表や会議室予約表の日付列に「4/1(水)」のような曜日付き表示を1つの数式で作ることができます。<b>営業事務</b>であれば、見積書番号を「=TEXT(連番,"000")」で常に3桁の0埋め表示にし、取引先ごとの番号ルールを統一する場面にも使われます。
+    </p>
+
+    <h2>TEXT関数でよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">TEXT関数の結果をSUM関数に入れても計算されない</span>
+      <p style="margin-bottom:6px;">TEXT関数が返すのは常に文字列です。見た目が「12,000」のように数値らしく見えても、Excel内部ではテキストとして扱われるため、SUM・AVERAGEなどの計算関数に範囲として含めても無視されるか、SUMではエラーにならず単に無視されて合計が想定より小さくなります。</p>
+      <div class="code">例：=TEXT(B2,"#,##0")の結果が入ったセルをSUM範囲に含めても、その値は合計されない</div>
+      <p style="margin-bottom:0;">対処法として、集計に使う数値は加工前の元セル(数値セル)を参照するようにし、TEXT関数の結果は表示専用のセルとして分けて管理してください。どうしても文字列を数値に戻す必要がある場合はVALUE関数を使います。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">書式コードの綴りミスでエラーにはならないが表示が崩れる</span>
+      <p style="margin-bottom:6px;">TEXT関数は書式コードの指定を間違えても#VALUE!のようなエラーにはならず、意図しない文字列をそのまま返してしまうことがあります。特に「yyyy」を「YYYY」のように大文字にしてもExcelでは同じ意味になりますが、コードの綴り自体を間違える(例:年を表す"y"を"Y"以外の文字にしてしまう)と、想定と違う結果になります。</p>
+      <div class="code">誤り例：書式コードのダブルクォーテーションを付け忘れて=TEXT(A2,yyyy年m月)と入力するとエラーになる</div>
+      <p style="margin-bottom:0;">書式コードは必ず半角のダブルクォーテーションで囲み、実際にセルに表示させて目視で確認する癖をつけてください。特に和暦表示など複雑な書式コードほど、思わぬ表示崩れが起きやすくなります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">全角のカンマ・記号を書式コードに使ってエラーになる</span>
+      <p style="margin-bottom:6px;">日本語入力モードのまま書式コードを入力すると、桁区切りのカンマや記号が全角になってしまい、Excelが書式コードとして認識できず#VALUE!エラーやエラー表示になることがあります。</p>
+      <div class="code">誤り例：=TEXT(B2,"￥＃，＃＃０")のように全角記号が混ざっている</div>
+      <p style="margin-bottom:0;">書式コードを入力する際は半角英数モードに切り替えるか、既存の正しい数式をコピーして数値部分だけ書き換える方法が安全です。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>「表示を変えたいだけ」か「文字列として使いたい」かを最初に決める。</b>印刷や画面表示だけを整えたいならセルの表示形式で十分で、TEXT関数を使う必要はありません。他の文字列と結合したい場合にだけTEXT関数を使いましょう。</li>
+      <li><b>書式コードはセルの表示形式の「ユーザー定義」画面で試してから使う。</b>先にセルの書式設定でユーザー定義のコードを試し、思い通りの表示になったコードをそのままTEXT関数の第2引数にコピーすると失敗が減ります。</li>
+      <li><b>結合した結果は文字列であることを忘れない。</b>見た目が数値・日付らしくても、TEXT関数を通した時点でその値は計算にも日付の比較にも使えなくなります。</li>
+      <li><b>和暦や曜日など複雑な書式は必ず表示結果を目視確認する。</b>環境やExcelのバージョンによって和暦表示の挙動が異なる場合があるため、重要書類で使う前には必ず確認しましょう。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      TEXT関数は、数値や日付を書式コードに従って自由な形の文字列に変換できる関数です。セルの表示形式が「見た目だけを変える」機能であるのに対し、TEXT関数は「文字列そのものを作り出して他の文言と結合できる」点が最大の違いです。請求書のタイトル自動生成や、曜日・金額を含んだ帳票の作成など、日付や数値と文章を組み合わせたい場面で威力を発揮します。ただし変換後は文字列になるため計算には使えない、という点だけ押さえておけば、事務作業の自由度を大きく広げてくれる関数です。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">TEXT関数で作った文字列を、そのままSUM関数などで計算できますか？</div>
+        <div class="a">できません。TEXT関数の戻り値は見た目が数値のように見えても文字列(テキスト)です。SUM・AVERAGEなどの計算関数にそのまま渡すと、無視されるか0として扱われ、意図した合計になりません。TEXT関数はあくまで「表示・結合用の文字列」を作る関数であり、計算にはもとの数値セルを使うか、必要であればVALUE関数で数値に戻してから計算してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">セルの表示形式(右クリック→セルの書式設定)とTEXT関数は何が違うのですか？</div>
+        <div class="a">セルの表示形式は、セルの中身(数値・日付)自体はそのままに、見た目の表示だけを変える機能です。一方TEXT関数は、数値や日付を書式コードに従って文字列に変換し、その文字列自体を別のセルに結果として取り出す関数です。「2026年4月1日 締切分」のように日付と文字列を1つのセルに結合したい場合や、CONCAT・TEXTJOINで日付を他の文字列とつなげたい場合は、表示形式だけでは対応できないためTEXT関数が必要になります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">西暦を令和などの和暦表示にするにはどうすればいいですか？</div>
+        <div class="a">TEXT関数の書式コードに "ge.m.d" や "ggge年m月d日" を指定すると、日付を和暦表示の文字列に変換できます。「gg」は元号を1文字(例:R)、「ggg」は元号を正式名称(例:令和)で表示する指定です。ただしこれはWindows版Excelの和暦カレンダー機能に依存する表示のため、環境によっては正しく変換されない場合があります。重要な書類で使う前に、実際の表示結果を必ず確認してください。</div>
+      </div>
+    </div>
+
+    <h2>関連記事</h2>
+    <ul>
+      <li><a href="/articles/concat-textjoin-guide.html">CONCAT・TEXTJOIN関数で文字列を結合する方法｜区切り文字が連続する原因と対処法</a></li>
+      <li><a href="/articles/year-month-day-guide.html">YEAR・MONTH・DAY関数の使い方｜年度集計がずれる原因と直し方</a></li>
+      <li><a href="/articles/edate-eomonth-guide.html">EDATE・EOMONTH関数で契約更新日・支払期日を自動計算する方法｜#NUM!エラーの原因と対処法</a></li>
+    </ul>
+
+    <a class="cta" href="/index.html">→ 文字列・日付の数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
