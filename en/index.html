@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>セルうめ | Fill-in-the-Blank Excel Formula Generator (Free)</title>
+<meta name="description" content="Fill in the cell references in a plain-English sentence and get your Excel formula instantly — SUM, AVERAGE, COUNTIF, IF, VLOOKUP, and more. A free tool that explains what each function does, too.">
+<link rel="canonical" href="https://www.omochimochis.com/en/">
+<link rel="alternate" hreflang="ja" href="https://www.omochimochis.com/">
+<link rel="alternate" hreflang="en" href="https://www.omochimochis.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://www.omochimochis.com/">
+
+<!-- OGP (how it looks when shared on social media) -->
+<meta property="og:title" content="セルうめ | Fill-in-the-Blank Excel Formula Generator">
+<meta property="og:description" content="Fill in the cell references in a plain-English sentence and get your Excel formula instantly. A free tool that explains what each function does, too.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.omochimochis.com/en/">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="セルうめ | Fill-in-the-Blank Excel Formula Generator">
+<meta name="twitter:description" content="Fill in the cell references in a plain-English sentence and get your Excel formula instantly. A free tool that explains what each function does, too.">
+
+<!-- Structured data (tells Google what this site is) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "セルうめ",
+  "url": "https://www.omochimochis.com/en/",
+  "description": "A free tool that turns a plain-English fill-in-the-blank sentence into an Excel formula, and explains what the formula does.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "inLanguage": "en"
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7308YW3KGH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7308YW3KGH');
+</script>
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1561794241850305"
+     crossorigin="anonymous"></script>
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0;
+    --ink:#20281F;
+    --line:#D8D0BE;
+    --forest:#2F6F5E;
+    --forest-deep:#1E4A3E;
+    --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Shippori Mincho', serif;
+    --sans: 'Noto Sans JP', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+    color:var(--ink);
+    font-family:var(--sans);
+    padding: 40px 20px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  header{margin-bottom:30px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--forest-deep);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{content:"fx";font-weight:700;background:var(--forest);color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;}
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(26px,5vw,38px);
+    margin:10px 0 8px;
+    line-height:1.3;
+  }
+  .sub{color:#5b6459;font-size:14.5px;line-height:1.7;max-width:56ch;}
+
+  /* Category selection */
+  .category-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .category-btn{
+    font-family:var(--sans);
+    font-size:13.5px;
+    font-weight:700;
+    padding:9px 14px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    background:#fff;
+    cursor:pointer;
+    color:#5b6459;
+  }
+  .category-btn.active{
+    background:var(--forest-deep);
+    color:#fff;
+    border-color:var(--forest-deep);
+  }
+
+  /* Function selection (within category) */
+  .fn-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .fn-btn{
+    font-family:var(--mono);
+    font-size:12.5px;
+    padding:7px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    cursor:pointer;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .fn-btn.active{background:var(--forest);color:#fff;border-color:var(--forest);}
+  .fn-btn .lv{
+    font-size:9.5px;
+    padding:1px 5px;
+    border-radius:8px;
+    background:rgba(0,0,0,.12);
+  }
+  .fn-btn.active .lv{background:rgba(255,255,255,.25);}
+
+  .card{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow: 0 1px 0 var(--line);
+    padding:28px;
+    margin-bottom:22px;
+    position:relative;
+    transition: box-shadow .3s ease;
+  }
+  .card::before{
+    content:attr(data-cellref);
+    position:absolute;
+    top:-11px;
+    left:20px;
+    background:var(--forest);
+    color:#fff;
+    font-family:var(--mono);
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:3px;
+    letter-spacing:.05em;
+  }
+  .card.highlight{
+    box-shadow: 0 0 0 3px var(--amber), 0 1px 0 var(--line);
+  }
+
+  /* Pager */
+  .pager{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    margin:-6px 0 30px;
+    flex-wrap:wrap;
+  }
+  .pager-btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:700;
+    background:var(--amber);
+    color:#3A2A0A;
+    border:none;
+    border-radius:3px;
+    padding:9px 18px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .pager-btn:active{transform:translateY(1px);}
+  .pager-btn:disabled{
+    background:#E5E1D3;
+    color:#9aa093;
+    cursor:not-allowed;
+  }
+  .pager-info{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:#5b6459;
+    letter-spacing:.05em;
+  }
+
+  .scene{
+    font-size:12.5px;
+    font-family:var(--mono);
+    color:var(--forest-deep);
+    background:#F0F7F3;
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:3px;
+    margin-bottom:14px;
+  }
+
+  .sentence{
+    font-size:16.5px;
+    line-height:2.5;
+    font-family:var(--sans);
+  }
+  .blank{
+    display:inline-block;
+    min-width:44px;
+    padding:3px 6px;
+    border:none;
+    border-bottom:2px solid var(--amber);
+    background:#FFF8EA;
+    font-family:var(--mono);
+    font-size:14px;
+    text-align:center;
+    color:var(--forest-deep);
+    font-weight:700;
+  }
+  .blank:focus{outline:none;border-bottom-color:var(--forest);background:#F0F7F3;}
+  .blank-select{
+    display:inline-block;
+    min-width:44px;
+    padding:3px 22px 3px 8px;
+    border:none;
+    border-bottom:2px solid var(--amber);
+    background:#FFF8EA url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23274734' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 6px center;
+    background-size:10px 7px;
+    font-family:var(--mono);
+    font-size:14px;
+    text-align:center;
+    text-align-last:center;
+    color:var(--forest-deep);
+    font-weight:700;
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    cursor:pointer;
+  }
+  .blank-select:focus{outline:none;border-bottom-color:var(--forest);background-color:#F0F7F3;}
+
+  .divider{
+    height:1px;
+    background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
+    margin:22px 0;
+  }
+
+  .output-label{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:#8a8f80;
+    text-transform:uppercase;margin-bottom:8px;
+  }
+  .output-row{display:flex;gap:10px;align-items:stretch;}
+  .output-cell{
+    flex:1;
+    font-family:var(--mono);
+    font-size:18px;
+    font-weight:700;
+    background:var(--forest-deep);
+    color:#EAF3EE;
+    padding:14px 16px;
+    border-radius:3px;
+    letter-spacing:.02em;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  .copy-btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:700;
+    background:var(--amber);
+    color:#3A2A0A;
+    border:none;
+    border-radius:3px;
+    padding:0 18px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .copy-btn:active{transform:translateY(1px);}
+  .copy-btn.copied{background:var(--forest);color:#fff;}
+  .copy-hint{font-size:11.5px;color:#8a8f80;margin-top:8px;}
+
+  .explain{
+    margin-top:20px;
+    font-size:14px;
+    line-height:1.85;
+    color:#3c4438;
+    background:#F5F2E8;
+    border-left:3px solid var(--forest);
+    padding:14px 16px;
+    border-radius:0 3px 3px 0;
+  }
+  .explain b{color:var(--forest-deep);}
+
+  .pitfall{
+    margin-top:12px;
+    font-size:13px;
+    line-height:1.75;
+    color:#6b4a1e;
+    background:#FFF3E0;
+    border-left:3px solid var(--amber);
+    padding:12px 16px;
+    border-radius:0 3px 3px 0;
+  }
+  .pitfall b{color:#a5680f;}
+
+  .version-note{
+    margin-top:14px;
+    font-size:12.5px;
+    font-family:var(--mono);
+    color:#8a8f80;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .version-note .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);display:inline-block;}
+
+  footer{
+    text-align:center;
+    font-size:12px;
+    color:#9aa093;
+    margin-top:40px;
+    font-family:var(--mono);
+  }
+  .footer-links{
+    margin-top:10px;
+  }
+  .footer-links a{
+    color:#5b6459;
+    text-decoration:none;
+    margin:0 8px;
+    font-family:var(--sans);
+  }
+  .footer-links a:hover{color:var(--forest-deep);}
+
+  .lang-switch{
+    text-align:right;
+    font-family:var(--mono);
+    font-size:11px;
+    color:#8a8f80;
+    margin-bottom:14px;
+  }
+  .lang-switch a{color:#5b6459;text-decoration:none;}
+  .lang-switch a:hover{color:var(--forest-deep);}
+  .lang-switch .current{color:var(--forest-deep);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="lang-switch"><a href="/">日本語</a> | <span class="current">English</span></div>
+
+  <header>
+    <div class="eyebrow">Formula Fill-in Tool</div>
+    <h1>Build the formula by filling in the blanks.</h1>
+    <p class="sub">Pick what you want to do, then just fill in the cell references. Your Excel formula is generated instantly — along with a plain-English explanation of what it does.</p>
+  </header>
+
+  <div class="category-row" id="categoryRow"></div>
+  <div class="fn-row" id="fnRow"></div>
+
+  <div id="cardsArea"></div>
+
+  <div class="pager" id="pagerArea"></div>
+
+  <footer>
+    セルうめ β — The Excel formula generator built for office admins
+    <div class="footer-links">
+      <a href="/guide.html">How to use</a>|
+      <a href="/articles.html">Articles</a>|
+      <a href="/privacy.html">Privacy Policy</a>|
+      <a href="/terms.html">Terms of Service</a>|
+      <a href="/contact.html">Contact</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ==========================================================
+   Data: two-level Category -> Function structure
+   ========================================================== */
+const categories = [
+  { key:'agg',  label:'Aggregate & Calculate' },
+  { key:'cond', label:'Conditional Logic' },
+  { key:'search', label:'Lookup & Reference' },
+  { key:'text', label:'Text Manipulation' },
+  { key:'date', label:'Date & Time' },
+  { key:'round', label:'Rounding & Formatting' }
+];
+
+const functions = {
+
+  /* ---------------- Aggregate & Calculate ---------------- */
+  sum: {
+    cat:'agg', label:'Add Up Numbers (SUM)', level:'Beginner',
+    scene:'Use this for: totaling each expense category on a reimbursement form, or adding up daily sales for a monthly total',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      add up everything from cell <span contenteditable class="blank" data-k="from">${v.from}</span>
+      through cell <span contenteditable class="blank" data-k="to">${v.to}</span>.`,
+    values: {target:'A1', from:'B1', to:'D1'},
+    formula: (v) => `=SUM(${v.from}:${v.to})`,
+    explain: (v) => `The <b>SUM function</b> adds up all the numbers in a range of cells.<br>
+      <b>SUM(${v.from}:${v.to})</b> means "the total from cell ${v.from} to cell ${v.to}." Enter the result in cell ${v.target}.`,
+    pitfall: `If you add a new expense line at the very bottom of your reimbursement sheet, but the SUM formula still points to a fixed range like <b>SUM(B1:B10)</b>, the new row's amount won't be included in the total. Inserting a row just above the last row of the range lets the formula grow automatically, but adding a row below the range means you'll need to extend the formula by hand. To add non-adjacent cells, you can also list them with commas, like <b>SUM(B1,D1,F1)</b>.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  average: {
+    cat:'agg', label:'Calculate an Average (AVERAGE)', level:'Beginner',
+    scene:'Use this for: the average score on a training comprehension test, or the average overtime hours per department',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      calculate the average of the numbers from cell <span contenteditable class="blank" data-k="from">${v.from}</span>
+      through cell <span contenteditable class="blank" data-k="to">${v.to}</span>.`,
+    values: {target:'E1', from:'B1', to:'D1'},
+    formula: (v) => `=AVERAGE(${v.from}:${v.to})`,
+    explain: (v) => `The <b>AVERAGE function</b> calculates the average (the total divided by the count) of the numbers in a range.`,
+    pitfall: `If one of 10 people was absent from a training test and you enter "0" in their score cell instead of leaving it blank, AVERAGE counts that 0 as a real score — so what should be the average of 9 people gets calculated as if there were 10, pulling the average down further than it should be. Blank cells are automatically excluded from the average, so leave an absent person's cell empty rather than entering 0.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  count: {
+    cat:'agg', label:'Count Cells (COUNT/COUNTA)', level:'Beginner',
+    scene:'Use this for: counting how many expense reports have been submitted, or how many application forms have been stamped',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      count how many cells — from <span contenteditable class="blank" data-k="from">${v.from}</span>
+      through <span contenteditable class="blank" data-k="to">${v.to}</span> — contain
+      <select class="blank-select" data-k="mode" style="width:130px;">
+        <option value="a number" ${v.mode==='a number'?'selected':''}>a number</option>
+        <option value="any content" ${v.mode==='any content'?'selected':''}>any content</option>
+      </select>.`,
+    values: {target:'F1', from:'B1', to:'B10', mode:'a number'},
+    formula: (v) => v.mode.includes('number') ? `=COUNT(${v.from}:${v.to})` : `=COUNTA(${v.from}:${v.to})`,
+    explain: (v) => `The <b>COUNT function</b> counts only cells that contain numbers, while <b>COUNTA</b> counts any cell that has something entered in it, including text. The right one is chosen automatically based on your selection.`,
+    pitfall: `If a list of submitted applications marks each one with a note like "done" instead of a number, using COUNT will show 0, because text isn't treated as a number. Use COUNTA to count cells that contain text as well. In short: COUNT for numbers only, COUNTA to include text too.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  sumif: {
+    cat:'agg', label:'Conditional Total (SUMIF)', level:'Intermediate',
+    scene:'Use this for: total expenses per department, or total sales per sales rep',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      look through <span contenteditable class="blank" data-k="condRange">${v.condRange}</span> for rows that match
+      "<span contenteditable class="blank" data-k="cond" style="width:70px;">${v.cond}</span>", and add up the corresponding
+      numbers in <span contenteditable class="blank" data-k="sumRange">${v.sumRange}</span>.`,
+    values: {target:'E1', condRange:'B1:B10', cond:'Sales', sumRange:'C1:C10'},
+    formula: (v) => `=SUMIF(${v.condRange},"${v.cond}",${v.sumRange})`,
+    explain: (v) => `The <b>SUMIF function</b> totals only the rows that match a condition. The column you check the condition against (${v.condRange}) and the column you total (${v.sumRange}) need to line up on the same rows.`,
+    pitfall: `If the department names are in B2:B10 but you accidentally point the total range to C1:C9 (off by one row), the department and amount will be paired up one row out of alignment, and the totals per department will be wrong. Header rows often cause this kind of off-by-one mistake, so always double-check that both ranges start on the same row and cover the same number of rows.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  subtotal: {
+    cat:'agg', label:'Filter-Aware Total (SUBTOTAL)', level:'Advanced',
+    scene:'Use this for: getting the correct total after filtering a table',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      total the numbers from cell <span contenteditable class="blank" data-k="from">${v.from}</span>
+      through cell <span contenteditable class="blank" data-k="to">${v.to}</span> in a way that stays correct even after filtering.`,
+    values: {target:'D1', from:'B2', to:'B20'},
+    formula: (v) => `=SUBTOTAL(109,${v.from}:${v.to})`,
+    explain: (v) => `The <b>SUBTOTAL function</b> ignores rows that a filter has hidden. The number <b>109</b> tells it to calculate a sum (other numbers give you other calculations, such as an average or a count).`,
+    pitfall: `If you filter a table down to just the "Sales" department and only look at the visible rows, but the total cell still uses a plain <b>SUM</b>, the hidden rows from other departments are still included in the total — and since you're only looking at the visible rows, it's easy not to notice the total is wrong. Using SUBTOTAL from the start is the safer choice for any table you plan to filter.`,
+    version: `Available in Excel 2003 and later.`
+  },
+  countifs: {
+    cat:'agg', label:'Count with Multiple Conditions (COUNTIFS)', level:'Advanced',
+    scene:'Use this for: counting people who are both in "Sales" and "Full-time," or any count with two or more conditions',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      count the rows where <span contenteditable class="blank" data-k="range1">${v.range1}</span> matches
+      "<span contenteditable class="blank" data-k="cond1" style="width:60px;">${v.cond1}</span>" AND
+      <span contenteditable class="blank" data-k="range2">${v.range2}</span> matches
+      "<span contenteditable class="blank" data-k="cond2" style="width:105px;">${v.cond2}</span>".`,
+    values: {target:'F1', range1:'B2:B20', cond1:'Sales', range2:'C2:C20', cond2:'Full-time'},
+    formula: (v) => `=COUNTIFS(${v.range1},"${v.cond1}",${v.range2},"${v.cond2}")`,
+    explain: (v) => `The <b>COUNTIFS function</b> is the "multiple condition" version of COUNTIF. Add more range/condition pairs to check three or more conditions at once. A row is only counted if it satisfies every condition (an AND condition).`,
+    pitfall: `If you want to count people who are both in Sales and full-time, but accidentally extend just one condition's range by an extra row (say, B2:B21), rows you didn't mean to include — like someone who already left the company or hasn't started yet — can get counted too. Always make sure every range covers the same number of rows. Also note that COUNTIFS can't check "either/or" (OR) conditions directly — for that, add two separate COUNTIF results together instead.`,
+    version: `Available in Excel 2007 and later.`
+  },
+  averageif: {
+    cat:'agg', label:'Conditional Average (AVERAGEIF)', level:'Intermediate',
+    scene:'Use this for: average overtime hours per department, or average unit price per product',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      look through <span contenteditable class="blank" data-k="condRange">${v.condRange}</span> for rows that match
+      "<span contenteditable class="blank" data-k="cond" style="width:70px;">${v.cond}</span>", and average the corresponding
+      numbers in <span contenteditable class="blank" data-k="avgRange">${v.avgRange}</span>.`,
+    values: {target:'E1', condRange:'B1:B10', cond:'Sales', avgRange:'C1:C10'},
+    formula: (v) => `=AVERAGEIF(${v.condRange},"${v.cond}",${v.avgRange})`,
+    explain: (v) => `The <b>AVERAGEIF function</b> is the average version of SUMIF. It averages only the rows that match a condition.`,
+    pitfall: `When calculating average overtime hours by department, if the condition column (department) and the value column (overtime hours) start even one row apart, one person's hours can end up mixed into another department's average without anything looking obviously wrong. Just as with SUMIF, double-check that the "condition" column and the "value" column line up on the same rows.`,
+    version: `Available in Excel 2007 and later.`
+  },
+  maxmin: {
+    cat:'agg', label:'Highest / Lowest Value (MAX/MIN)', level:'Beginner',
+    scene:'Use this for: finding the best sales day of the month, or the smallest reimbursement request in a batch',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      find <select class="blank-select" data-k="mode" style="width:150px;">
+        <option value="the largest" ${v.mode==='the largest'?'selected':''}>the largest</option>
+        <option value="the smallest" ${v.mode==='the smallest'?'selected':''}>the smallest</option>
+      </select>
+      number from cell <span contenteditable class="blank" data-k="from">${v.from}</span>
+      through cell <span contenteditable class="blank" data-k="to">${v.to}</span>.`,
+    values: {target:'F1', from:'B1', to:'D1', mode:'the largest'},
+    formula: (v) => v.mode.includes('largest') ? `=MAX(${v.from}:${v.to})` : `=MIN(${v.from}:${v.to})`,
+    explain: (v) => `The <b>MAX function</b> returns the largest number in a range, and the <b>MIN function</b> returns the smallest. The right one is chosen automatically based on your selection.`,
+    pitfall: `Cells with text like "TBD" for amounts that aren't finalized yet are simply ignored by MAX/MIN, so they won't cause problems — but if you enter "0" to mean "no amount" instead, that 0 gets picked up as the minimum, showing an amount that doesn't actually exist. Cells with text or blank cells are ignored in the calculation, so extra columns mixed into the range won't affect the result.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  rank: {
+    cat:'agg', label:'Find a Ranking (RANK)', level:'Intermediate',
+    scene:'Use this for: ranking sales performance, or ranking achievement rates',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      find where the value in cell <span contenteditable class="blank" data-k="source">${v.source}</span> ranks, in
+      <select class="blank-select" data-k="mode" style="width:110px;">
+        <option value="descending" ${v.mode==='descending'?'selected':''}>descending</option>
+        <option value="ascending" ${v.mode==='ascending'?'selected':''}>ascending</option>
+      </select>
+      order, among the values from cell <span contenteditable class="blank" data-k="from">${v.from}</span>
+      through cell <span contenteditable class="blank" data-k="to">${v.to}</span>.`,
+    values: {target:'C1', source:'B1', from:'B1', to:'B10', mode:'descending'},
+    formula: (v) => v.mode === 'descending' ? `=RANK(${v.source},${v.from}:${v.to},0)` : `=RANK(${v.source},${v.from}:${v.to},1)`,
+    explain: (v) => `The <b>RANK function</b> returns how a value ranks within a range — 1st, 2nd, 3rd, and so on. The third argument, <b>0</b>, ranks from highest to lowest (descending); <b>1</b> ranks from lowest to highest (ascending). It's switched automatically based on your choice.`,
+    pitfall: `If you enter this formula for the first of 10 salespeople's rankings and then copy it down for the rest, the range (B1:B10) shifts down one row each time, so from the second row on, each person's rank is calculated against a shrinking pool — giving rankings that don't reflect the real results. When copying this formula to other rows, the range needs to be an <b>absolute reference</b> (add $ signs, like $B$1:$B$10).`,
+    version: `Available in Excel 2003 and later, in every version (Excel 2010 and later recommend switching to the RANK.EQ function).`
+  },
+  largesmall: {
+    cat:'agg', label:'Nth Largest / Smallest Value (LARGE/SMALL)', level:'Intermediate',
+    scene:'Use this for: pulling out the #1 sales figure, or finding the 2nd-lowest expense claim in a batch',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      look at the range from cell <span contenteditable class="blank" data-k="from">${v.from}</span>
+      through cell <span contenteditable class="blank" data-k="to">${v.to}</span>, and find the number
+      <span contenteditable class="blank" data-k="n">${v.n}</span> from the
+      <select class="blank-select" data-k="mode" style="width:90px;">
+        <option value="top" ${v.mode==='top'?'selected':''}>top</option>
+        <option value="bottom" ${v.mode==='bottom'?'selected':''}>bottom</option>
+      </select>.`,
+    values: {target:'D1', from:'B1', to:'B10', mode:'top', n:'1'},
+    formula: (v) => v.mode === 'top' ? `=LARGE(${v.from}:${v.to},${v.n})` : `=SMALL(${v.from}:${v.to},${v.n})`,
+    explain: (v) => `The <b>LARGE function</b> returns the nth-largest value in a range, and the <b>SMALL function</b> returns the nth-smallest. The right one is chosen automatically based on your selection.`,
+    pitfall: `If you want the 2nd-highest sales figure, but the top two salespeople happen to have tied for 1st place, LARGE(range,2) returns that same top amount again instead of the 3rd-highest figure you were actually after. Keep in mind that duplicate values occupy multiple rank positions.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+
+  /* ---------------- Conditional Logic ---------------- */
+  if: {
+    cat:'cond', label:'Change Output Based on a Condition (IF)', level:'Beginner',
+    scene:'Use this for: pass/fail decisions, or splitting processing based on an amount',
+    render: (v) => `If the value in cell <span contenteditable class="blank" data-k="target">${v.target}</span> is
+      <select class="blank-select" data-k="cmp" style="width:150px;">
+        <option value="greater than" ${v.cmp==='greater than'?'selected':''}>greater than</option>
+        <option value="at least" ${v.cmp==='at least'?'selected':''}>at least</option>
+        <option value="less than" ${v.cmp==='less than'?'selected':''}>less than</option>
+        <option value="at most" ${v.cmp==='at most'?'selected':''}>at most</option>
+        <option value="equal to" ${v.cmp==='equal to'?'selected':''}>equal to</option>
+      </select>
+      <span contenteditable class="blank" data-k="threshold">${v.threshold}</span>, show
+      "<span contenteditable class="blank" data-k="yes" style="width:70px;">${v.yes}</span>";
+      otherwise, show "<span contenteditable class="blank" data-k="no" style="width:70px;">${v.no}</span>".`,
+    values: {target:'C1', threshold:'80', cmp:'greater than', yes:'Pass', no:'Fail'},
+    formula: (v) => {
+      const opMap = {'greater than':'>','at least':'>=','less than':'<','at most':'<=','equal to':'='};
+      const op = opMap[v.cmp] || '>';
+      return `=IF(${v.target}${op}${v.threshold},"${v.yes}","${v.no}")`;
+    },
+    explain: (v) => `The <b>IF function</b> shows A when a condition is true, and B when it's not. Based on the comparison you choose (greater than / at least / less than / at most / equal to), the matching symbol (&gt; &gt;= &lt; &lt;= =) is used automatically.`,
+    pitfall: `If the passing line is meant to be exactly 80 points, but you pick "greater than" instead of "at least" (which excludes 80 itself), anyone who scores exactly 80 is marked as failing. Mixing up "at least" and "greater than" changes how the boundary number is treated, so check in advance whether the cutoff itself should count as a pass.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  ifs: {
+    cat:'cond', label:'3+ Tier Ranking (IFS)', level:'Intermediate',
+    scene:'Use this for: A/B/C-style grading, or any ranking with three or more tiers',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      if the value is <span contenteditable class="blank" data-k="t1">${v.t1}</span> or more show
+      "<span contenteditable class="blank" data-k="r1" style="width:50px;">${v.r1}</span>";
+      if it's <span contenteditable class="blank" data-k="t2">${v.t2}</span> or more show
+      "<span contenteditable class="blank" data-k="r2" style="width:50px;">${v.r2}</span>";
+      otherwise show "<span contenteditable class="blank" data-k="r3" style="width:50px;">${v.r3}</span>".`,
+    values: {target:'C1', t1:'80', r1:'A', t2:'60', r2:'B', r3:'C'},
+    formula: (v) => `=IFS(${v.target}>=${v.t1},"${v.r1}",${v.target}>=${v.t2},"${v.r2}",TRUE,"${v.r3}")`,
+    explain: (v) => `The <b>IFS function</b> checks conditions in order from left to right and returns the result for the first one that matches. The final "otherwise" case is written as <b>TRUE</b>, which means "none of the above matched."`,
+    pitfall: `If a nested IF formula has gotten long and hard to read, switching to IFS can clean it up nicely. But if you send the file to a client or colleague still using <b>Excel 2016 or earlier</b>, the function name won't be recognized and they'll see a <b>#NAME?</b> error — so check what Excel version the recipient uses before relying on it.`,
+    version: `Requires Excel 2019 or Microsoft 365 (not available in Excel 2016 or earlier).`
+  },
+  iferror: {
+    cat:'cond', label:'Prevent Errors (IFERROR)', level:'Intermediate',
+    scene:'Use this for: keeping a table from breaking when a calculation like division produces an error',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, if the formula
+      "<span contenteditable class="blank" data-k="formula" style="width:110px;">${v.formula}</span>" produces an error, show
+      "<span contenteditable class="blank" data-k="fallback" style="width:60px;">${v.fallback}</span>" instead;
+      otherwise, show the normal result.`,
+    values: {target:'D1', formula:'B1/C1', fallback:'0'},
+    formula: (v) => `=IFERROR(${v.formula},${isNaN(v.fallback) ? `"${v.fallback}"` : v.fallback})`,
+    explain: (v) => `The <b>IFERROR function</b> wraps around an existing formula like a safety net. If there's no error, it shows the normal result; if there is one, it switches to whatever you specify instead.`,
+    pitfall: `In a summary table that calculates an achievement rate as "actual ÷ target," any row where the target hasn't been entered yet (treated as 0) shows a <b>#DIV/0!</b> error — and that can cascade down into the total below it. Wrapping the formula in IFERROR lets you replace just the affected rows with a blank or a 0. If you want the display to be blank, leave the fallback value empty and it becomes <b>""</b>, which shows as empty.`,
+    version: `Available in Excel 2007 and later.`
+  },
+  andor: {
+    cat:'cond', label:'Combine Multiple Conditions (AND/OR)', level:'Intermediate',
+    scene:'Use this for: judging conditions like "department is Sales" AND "title is Manager" at the same time',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      if cell <span contenteditable class="blank" data-k="range1">${v.range1}</span> is
+      "<span contenteditable class="blank" data-k="cond1" style="width:70px;">${v.cond1}</span>"
+      <select class="blank-select" data-k="logic" style="width:70px;">
+        <option value="AND" ${v.logic==='AND'?'selected':''}>AND</option>
+        <option value="OR" ${v.logic==='OR'?'selected':''}>OR</option>
+      </select>
+      cell <span contenteditable class="blank" data-k="range2">${v.range2}</span> is
+      "<span contenteditable class="blank" data-k="cond2" style="width:95px;">${v.cond2}</span>", show
+      "<span contenteditable class="blank" data-k="yes" style="width:75px;">${v.yes}</span>";
+      otherwise show "<span contenteditable class="blank" data-k="no" style="width:110px;">${v.no}</span>".`,
+    values: {target:'D2', range1:'B2', cond1:'Sales', logic:'AND', range2:'C2', cond2:'Manager', yes:'Target', no:'Not target'},
+    formula: (v) => v.logic === 'OR'
+      ? `=IF(OR(${v.range1}="${v.cond1}",${v.range2}="${v.cond2}"),"${v.yes}","${v.no}")`
+      : `=IF(AND(${v.range1}="${v.cond1}",${v.range2}="${v.cond2}"),"${v.yes}","${v.no}")`,
+    explain: (v) => `The <b>AND function</b> returns TRUE only when every condition is true; the <b>OR function</b> returns TRUE if any condition is true. Combined with IF, they let you switch what's shown based on multiple conditions — AND or OR is chosen automatically based on your selection.`,
+    pitfall: `If you only want people who are both in Sales AND hold the title Manager, but accidentally build the formula with OR instead, anyone with the title Manager gets included even if they're not in Sales — inflating the list far beyond what you intended. Mixing up AND and OR can drastically change which rows qualify, so double-check which one you actually need. To add more conditions, just add another argument, like AND(condition1,condition2,condition3).`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  isblankif: {
+    cat:'cond', label:'Show Different Output for Blank Cells (ISBLANK+IF)', level:'Beginner',
+    scene:'Use this for: leaving unfilled rows blank while calculating a result only for rows that have data',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      if cell <span contenteditable class="blank" data-k="source">${v.source}</span> is blank show
+      "<span contenteditable class="blank" data-k="blankMsg" style="width:50px;">${v.blankMsg}</span>";
+      otherwise show the result of
+      "<span contenteditable class="blank" data-k="filledExpr" style="width:90px;">${v.filledExpr}</span>".`,
+    values: {target:'C1', source:'A1', blankMsg:'', filledExpr:'A1*1.1'},
+    formula: (v) => `=IF(ISBLANK(${v.source}),"${v.blankMsg}",${v.filledExpr})`,
+    explain: (v) => `The <b>ISBLANK function</b> checks whether a cell is truly empty, returning TRUE or FALSE. Combined with IF, you can build a table that stays blank for unfilled rows and calculates automatically once data is entered.`,
+    pitfall: `A cell that looks empty because it holds a formula result like ="" (rather than being truly blank) is judged FALSE by ISBLANK — so instead of staying blank as intended, it falls into the "has data" branch and shows an unexpected calculated result. Keep in mind ISBLANK only returns TRUE for cells that are genuinely empty, with nothing entered at all.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+
+  /* ---------------- Lookup & Reference ---------------- */
+  vlookup: {
+    cat:'search', label:'Look Up a Value in a Table (VLOOKUP)', level:'Intermediate',
+    scene:'Use this for: finding a name from an employee ID, or a price from a product code',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      search the leftmost column of <span contenteditable class="blank" data-k="range">${v.range}</span> for the value in cell
+      <span contenteditable class="blank" data-k="key">${v.key}</span>, and return the value from the
+      <span contenteditable class="blank" data-k="col">${v.col}</span>th column of that table.`,
+    values: {target:'D2', key:'C2', range:'A2:B100', col:'2'},
+    formula: (v) => `=VLOOKUP(${v.key},${v.range},${v.col},FALSE)`,
+    explain: (v) => `The <b>VLOOKUP function</b> searches the leftmost column of a table for a value, then returns a value a given number of columns to the right. The final <b>FALSE</b> means "only match exactly."`,
+    pitfall: `If you're trying to look up a name from an employee ID, but the reference table has the columns in the order "name, then ID" (with the ID on the right), VLOOKUP can only search the leftmost column (name) and returns a <b>#N/A</b> error. If <b>the value you're searching for isn't in the leftmost column</b> of your table, VLOOKUP won't be able to find it — use XLOOKUP or INDEX+MATCH instead.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  xlookup: {
+    cat:'search', label:'The Newer Lookup Function (XLOOKUP)', level:'Intermediate',
+    scene:'Use this for: more flexible lookups than VLOOKUP, searching in either direction',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      search <span contenteditable class="blank" data-k="lookupRange">${v.lookupRange}</span> for the value in cell
+      <span contenteditable class="blank" data-k="key">${v.key}</span>, and return the matching value from
+      <span contenteditable class="blank" data-k="returnRange">${v.returnRange}</span>.`,
+    values: {target:'D2', key:'C2', lookupRange:'A2:A100', returnRange:'B2:B100'},
+    formula: (v) => `=XLOOKUP(${v.key},${v.lookupRange},${v.returnRange})`,
+    explain: (v) => `The <b>XLOOKUP function</b> is the successor to VLOOKUP. Because you specify the search column and the return column separately, it works whether the value you need is to the left or right of the search column.`,
+    pitfall: `If a colleague or client opens a file built with XLOOKUP in an older version like <b>Excel 2019</b>, the function name won't be recognized and they'll see a <b>#NAME?</b> error. Since it isn't available in Excel 2019 or earlier, use VLOOKUP or INDEX+MATCH instead for files you send outside your organization.`,
+    version: `Requires Excel 2021 or Microsoft 365 (not available in Excel 2019 or earlier).`
+  },
+  indexmatch: {
+    cat:'search', label:'Look Up From Any Column (INDEX+MATCH)', level:'Advanced',
+    scene:'Use this for: when the value you need is to the right of your search column and VLOOKUP won’t work',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      search <span contenteditable class="blank" data-k="keyRange">${v.keyRange}</span> for the value in cell
+      <span contenteditable class="blank" data-k="key">${v.key}</span>, and return the value in the same row from
+      <span contenteditable class="blank" data-k="returnRange">${v.returnRange}</span>.`,
+    values: {target:'D2', key:'C2', keyRange:'A2:A100', returnRange:'B2:B100'},
+    formula: (v) => `=INDEX(${v.returnRange},MATCH(${v.key},${v.keyRange},0))`,
+    explain: (v) => `<b>MATCH</b> finds the position of the value you're looking for within ${v.keyRange}, and <b>INDEX</b> uses that position to pull the corresponding value from ${v.returnRange} — a two-step combination. Unlike VLOOKUP, this works even when the search column is to the right of the column you want to return.`,
+    pitfall: `Even in a table where the employee code sits in a column to the right of the name, INDEX+MATCH can search it without worrying about column order — as long as you remember the roles: "MATCH finds the position, INDEX fetches the value at that position," it's not so intimidating. If you omit the final <b>0</b> or use a different number, it switches to an approximate match, which can return the wrong row's value — so be careful.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  hlookup: {
+    cat:'search', label:'Horizontal Lookup (HLOOKUP)', level:'Intermediate',
+    scene:'Use this for: finding a specific month’s value in a table where months run left to right',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      search the top row of <span contenteditable class="blank" data-k="range">${v.range}</span> for the value in cell
+      <span contenteditable class="blank" data-k="key">${v.key}</span>, and return the value from the
+      <span contenteditable class="blank" data-k="row">${v.row}</span>th row of that table.`,
+    values: {target:'B5', key:'B4', range:'B1:M2', row:'2'},
+    formula: (v) => `=HLOOKUP(${v.key},${v.range},${v.row},FALSE)`,
+    explain: (v) => `The <b>HLOOKUP function</b> is the horizontal version of VLOOKUP. It searches the top row of a table for a value, then returns a value a given number of rows down. The final <b>FALSE</b> means "only match exactly."`,
+    pitfall: `If you're trying to find the "Apr" column in a table where months run left to right, mixing full-width and half-width characters in the header row (for example, two different-looking "Apr" labels) can cause a mismatch and a <b>#N/A</b> error. Use this function only when your table runs horizontally (left to right) rather than vertically — for a normal vertical table, use <b>VLOOKUP or XLOOKUP</b> instead.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  choose: {
+    cat:'search', label:'Pick a Value by Number (CHOOSE)', level:'Intermediate',
+    scene:'Use this for: turning a day-of-week number or category code into its label',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, based on the number in cell
+      <span contenteditable class="blank" data-k="indexCell">${v.indexCell}</span>: if it's 1 show
+      "<span contenteditable class="blank" data-k="v1" style="width:50px;">${v.v1}</span>", if it's 2 show
+      "<span contenteditable class="blank" data-k="v2" style="width:50px;">${v.v2}</span>", if it's 3 show
+      "<span contenteditable class="blank" data-k="v3" style="width:50px;">${v.v3}</span>".`,
+    values: {target:'B1', indexCell:'A1', v1:'Mon', v2:'Tue', v3:'Wed'},
+    formula: (v) => `=CHOOSE(${v.indexCell},"${v.v1}","${v.v2}","${v.v3}")`,
+    explain: (v) => `The <b>CHOOSE function</b> picks a value from a list based on a given number — "1st value show X, 2nd show Y." It's a simpler way to write this kind of branching than nesting several IFs.`,
+    pitfall: `If your category codes actually run from 1 to 7, but you've only set up options for 1 through 3 (Mon, Tue, Wed), entering a number 4 or higher produces a <b>#VALUE! error</b>. Whenever a number doesn't have a matching value set up for it, you'll get an error — so make sure the range of possible numbers matches the number of options you've provided.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+
+  /* ---------------- Text Manipulation ---------------- */
+  concat: {
+    cat:'text', label:'Join Text Together (CONCAT/&)', level:'Beginner',
+    scene:'Use this for: combining a first and last name into one cell, or joining parts of an address',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      join the text in cell <span contenteditable class="blank" data-k="a">${v.a}</span> and cell
+      <span contenteditable class="blank" data-k="b">${v.b}</span>, with
+      "<span contenteditable class="blank" data-k="sep" style="width:50px;">${v.sep}</span>" in between.`,
+    values: {target:'C1', a:'A1', b:'B1', sep:' '},
+    formula: (v) => `=${v.a}&"${v.sep}"&${v.b}`,
+    explain: (v) => `The <b>& (ampersand)</b> joins pieces of text together. "${v.a}&"${v.sep}"&${v.b}" means "the text in ${v.a}, plus the separator, plus the text in ${v.b}," combined into one.`,
+    pitfall: `In a list where first and last names sit in separate cells, joining them with no separator produces something like "JohnSmith" run together — which makes it hard to split back into "John" and "Smith" later if you ever need to. Leaving the separator blank works fine if you truly want them run together, but if there's any chance you'll need to split the text again later, it's worth keeping a separator in there. The CONCAT function (=CONCAT(A1,B1)) gives the same result.`,
+    version: `Joining with & works in every version since Excel 2003. The CONCAT function requires Excel 2019 or later.`
+  },
+  leftright: {
+    cat:'text', label:'Extract Part of a String (LEFT/RIGHT)', level:'Beginner',
+    scene:'Use this for: pulling the first 3 digits of a postal code, or the last 4 digits of a phone number',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, take
+      <span contenteditable class="blank" data-k="num">${v.num}</span> characters from the
+      <select class="blank-select" data-k="side" style="width:90px;">
+        <option value="left" ${v.side==='left'?'selected':''}>left</option>
+        <option value="right" ${v.side==='right'?'selected':''}>right</option>
+      </select>
+      side of the text in cell <span contenteditable class="blank" data-k="source">${v.source}</span>.`,
+    values: {target:'B1', source:'A1', side:'left', num:'3'},
+    formula: (v) => v.side.includes('right') ? `=RIGHT(${v.source},${v.num})` : `=LEFT(${v.source},${v.num})`,
+    explain: (v) => `The <b>LEFT function</b> takes characters starting from the left side of a string, and <b>RIGHT</b> takes them from the right. The right one is chosen automatically based on your selection.`,
+    pitfall: `If a postal code column has some entries formatted with a hyphen, like "123-4567," using LEFT to grab the first 3 characters still just takes the leftmost 3 characters ("123") — it doesn't skip past the hyphen. If your data isn't entered consistently, rows without a hyphen can end up with a different result than you expect. Full-width characters (like kanji or hiragana) and half-width characters are each counted as one character, the same way.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  mid: {
+    cat:'text', label:'Extract From the Middle (MID)', level:'Intermediate',
+    scene:'Use this for: pulling just the department code out of the middle of an employee code',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, starting at character
+      <span contenteditable class="blank" data-k="start">${v.start}</span> of the text in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span>, take
+      <span contenteditable class="blank" data-k="num">${v.num}</span> characters.`,
+    values: {target:'B1', source:'A1', start:'3', num:'2'},
+    formula: (v) => `=MID(${v.source},${v.start},${v.num})`,
+    explain: (v) => `The <b>MID function</b> extracts a set number of characters starting partway through a string. "Starting at character ${v.start}, take ${v.num} characters" maps directly onto the order of the formula's arguments.`,
+    pitfall: `If you're trying to pull the department code out of an employee code like "E-2024-015" and you think of the starting position as starting from character 0, you'll grab a character one position off from what you intended (like the hyphen) instead of the department code you wanted. Character counting in MID <b>starts from 1</b> — there's no "character 0."`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  trim: {
+    cat:'text', label:'Remove Extra Spaces (TRIM)', level:'Beginner',
+    scene:'Use this for: cleaning up text copied from another system that has stray spaces mixed in',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      remove any extra spaces from the text in cell <span contenteditable class="blank" data-k="source">${v.source}</span>.`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=TRIM(${v.source})`,
+    explain: (v) => `The <b>TRIM function</b> removes all leading and trailing spaces from a string, and collapses multiple spaces between words down to just one. It's handy for cleaning up the "invisible spaces" that often sneak in when importing data.`,
+    pitfall: `If address data copied from another system has full-width spaces mixed in (like "Tokyo　Chiyoda-ku" with a full-width space), TRIM won't remove them — so the text can look perfectly clean while still causing "doesn't match" problems later when you compare it against another table. TRIM may not remove full-width spaces, so check whether you're dealing with full-width or half-width spaces before relying on it.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  substitute: {
+    cat:'text', label:'Replace Text (SUBSTITUTE)', level:'Intermediate',
+    scene:'Use this for: standardizing how addresses are punctuated, or replacing an old company name with a new one throughout',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, replace
+      "<span contenteditable class="blank" data-k="from" style="width:60px;">${v.from}</span>" with
+      "<span contenteditable class="blank" data-k="to" style="width:60px;">${v.to}</span>" wherever it appears in the text in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span>.`,
+    values: {target:'B1', source:'A1', from:'-', to:'–'},
+    formula: (v) => `=SUBSTITUTE(${v.source},"${v.from}","${v.to}")`,
+    explain: (v) => `The <b>SUBSTITUTE function</b> replaces a specific piece of text within a string with something else. The original cell (${v.source}) is left unchanged — only the result shown in ${v.target} reflects the replacement.`,
+    pitfall: `If you're trying to standardize how addresses are written and target a hyphen "-" for replacement, but the actual data has a mix of a similar-looking en dash "–" or em dash "—", those cells won't get replaced and stay as they were. Characters that look alike — hyphens, en dashes, em dashes — are treated as completely different characters by the computer, so replacements may not work exactly as expected.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  len: {
+    cat:'text', label:'Count Characters (LEN)', level:'Beginner',
+    scene:'Use this for: checking whether an entry has the right number of digits',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      show how many characters are in the text in cell <span contenteditable class="blank" data-k="source">${v.source}</span>.`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=LEN(${v.source})`,
+    explain: (v) => `The <b>LEN function</b> simply counts the number of characters in a cell. Full-width and half-width characters are each counted the same, as one character.`,
+    pitfall: `If a phone number is supposed to be exactly 10 digits but LEN shows 11, it's often because a stray space has snuck in somewhere, at the end or in the middle. When using this for a digit-count check, keep in mind that a hidden <b>space or invisible character</b> mixed in throws off the count — pairing it with TRIM can help.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  upperlower: {
+    cat:'text', label:'Convert Upper/Lower Case (UPPER/LOWER/PROPER)', level:'Beginner',
+    scene:'Use this for: standardizing inconsistent capitalization in codes or names (ALL CAPS, all lowercase, or Capitalized)',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, convert the letters in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span> to
+      <select class="blank-select" data-k="mode" style="width:160px;">
+        <option value="ALL CAPS" ${v.mode==='ALL CAPS'?'selected':''}>ALL CAPS</option>
+        <option value="all lowercase" ${v.mode==='all lowercase'?'selected':''}>all lowercase</option>
+        <option value="Capitalized" ${v.mode==='Capitalized'?'selected':''}>Capitalized</option>
+      </select>.`,
+    values: {target:'B1', source:'A1', mode:'ALL CAPS'},
+    formula: (v) => v.mode.includes('Capitalized') ? `=PROPER(${v.source})` : v.mode.includes('lowercase') ? `=LOWER(${v.source})` : `=UPPER(${v.source})`,
+    explain: (v) => `The <b>UPPER function</b> converts everything to uppercase, <b>LOWER</b> converts everything to lowercase, and <b>PROPER</b> capitalizes just the first letter of each word. The right one is chosen automatically based on your selection.`,
+    pitfall: `If you're trying to standardize a mix of "ABC-001" and "abc-001" style vendor codes with UPPER, full-width letters (like full-width A, B, C, sometimes pasted in from other systems) won't get converted and stay as they are — so the inconsistency you were trying to fix isn't actually resolved. These functions only affect regular (half-width) letters and have no effect on full-width characters.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  textjoin: {
+    cat:'text', label:'Join Multiple Cells With a Separator (TEXTJOIN)', level:'Intermediate',
+    scene:'Use this for: combining scattered address fields into one, with a separator between each part',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, join the text from cell
+      <span contenteditable class="blank" data-k="from">${v.from}</span> through cell
+      <span contenteditable class="blank" data-k="to">${v.to}</span> with
+      "<span contenteditable class="blank" data-k="sep" style="width:40px;">${v.sep}</span>" between each part
+      (skipping any blank cells).`,
+    values: {target:'E1', from:'A1', to:'D1', sep:', '},
+    formula: (v) => `=TEXTJOIN("${v.sep}",TRUE,${v.from}:${v.to})`,
+    explain: (v) => `The <b>TEXTJOIN function</b> joins the text in a range together with a separator. The second argument, <b>TRUE</b>, means "ignore blank cells" — and it automatically inserts the separator between each piece for you.`,
+    pitfall: `In an address list where the street, city, and building name each sit in their own cell, joining them with & when the building name is blank leaves a stray extra separator sitting there, looking a bit off. With TEXTJOIN, setting the second argument to TRUE automatically skips blank cells. Joining several cells with & also means typing the separator over and over, whereas with TEXTJOIN you only need to <b>specify the separator once</b>, at the start.`,
+    version: `Requires Excel 2019 or Microsoft 365 (not available in Excel 2016 or earlier).`
+  },
+
+  /* ---------------- Date & Time ---------------- */
+  today: {
+    cat:'date', label:'Today’s Date (TODAY)', level:'Beginner',
+    scene:'Use this for: automatically stamping today’s date on a document',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      automatically show today's date.`,
+    values: {target:'A1'},
+    formula: () => `=TODAY()`,
+    explain: () => `The <b>TODAY function</b> automatically shows the date the file is opened (based on the computer's clock). Nothing goes inside the parentheses.`,
+    pitfall: `If you casually use TODAY for the issue date on an invoice template, the date re-updates to the current date every time you reopen or reprint the file later — so it no longer matches the date the invoice was actually issued. TODAY <b>updates every time the file is opened</b>. If you need to lock in the date something was created, type the date in directly instead.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  datedif: {
+    cat:'date', label:'Calculate a Duration (DATEDIF)', level:'Intermediate',
+    scene:'Use this for: years of service, or expressing a length of employment as "X years, Y months"',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      calculate the duration from cell <span contenteditable class="blank" data-k="from">${v.from}</span> to cell
+      <span contenteditable class="blank" data-k="to">${v.to}</span>, in
+      <select class="blank-select" data-k="unit" style="width:100px;">
+        <option value="years" ${v.unit==='years'?'selected':''}>years</option>
+        <option value="months" ${v.unit==='months'?'selected':''}>months</option>
+        <option value="days" ${v.unit==='days'?'selected':''}>days</option>
+      </select>.`,
+    values: {target:'C1', from:'A1', to:'B1', unit:'years'},
+    formula: (v) => {
+      const unitMap = {'years':'Y', 'months':'M', 'days':'D'};
+      const u = unitMap[v.unit] || 'Y';
+      return `=DATEDIF(${v.from},${v.to},"${u}")`;
+    },
+    explain: (v) => `The <b>DATEDIF function</b> calculates the span between two dates. "Y" gives full years, "M" gives full months, and "D" gives days. The right one is chosen automatically based on your selection.`,
+    pitfall: `A colleague reviewing a years-of-service formula later on might search for this function name in Excel's autocomplete and, finding nothing, assume it doesn't actually exist. That's because DATEDIF <b>doesn't appear in Excel's autocomplete suggestions</b> — it's an unusual function you have to type out from memory, so watch out for typos.`,
+    version: `Available since Excel 2003, but it's an undocumented function that doesn't appear in the official help.`
+  },
+  edate: {
+    cat:'date', label:'A Date N Months Later (EDATE)', level:'Intermediate',
+    scene:'Use this for: automatically calculating a contract renewal date (1 year later) or a payment due date (end of next month)',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      calculate the date <span contenteditable class="blank" data-k="months">${v.months}</span> months after the date in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span>.`,
+    values: {target:'B1', source:'A1', months:'12'},
+    formula: (v) => `=EDATE(${v.source},${v.months})`,
+    explain: (v) => `The <b>EDATE function</b> calculates the date a given number of months before or after a starting date. To go backward in time, enter a negative number of months (for example, -1).`,
+    pitfall: `You calculate a contract renewal date one year out, but instead of a date, the cell just shows a 5-digit number like "45678" that doesn't look like a date at all. The calculation itself is correct — it's just that the cell's display format hasn't been set to "Date," so it shows the underlying <b>serial number</b> instead. If this happens, change the cell's format to "Date."`,
+    version: `Available in Excel 2007 and later (requires the Analysis ToolPak add-in in Excel 2003).`
+  },
+  weekday: {
+    cat:'date', label:'Get the Day of the Week (WEEKDAY/TEXT)', level:'Intermediate',
+    scene:'Use this for: automatically showing "Mon," "Tue," etc. from a date',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, show the day of the week for the date in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span>, formatted like
+      "<span contenteditable class="blank" data-k="style" style="width:60px;">${v.style}</span>".`,
+    values: {target:'B1', source:'A1', style:'Mon'},
+    formula: (v) => `=TEXT(${v.source},"ddd")`,
+    explain: (v) => `If you want the day of the week shown as short text like "Mon" or "Tue," the easiest way is the <b>TEXT function</b> with the format code "ddd" (use "dddd" to get the full name, like "Monday"). If you need it as a number (1–7) for other calculations, use the <b>WEEKDAY function</b> instead.`,
+    pitfall: `If you try to build conditional formatting that shades weekend rows based on the text "Sat" or "Sun" that TEXT produces, it won't behave the way you'd expect. The day of the week TEXT produces is a <b>string</b>, so for conditional logic like shading weekends, the WEEKDAY function is usually easier to work with. Pick whichever fits your situation.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  networkdays: {
+    cat:'date', label:'Count Working Days (NETWORKDAYS)', level:'Intermediate',
+    scene:'Use this for: working days excluding weekends, or business days remaining until a deadline',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>,
+      calculate the number of working days (excluding weekends) between cell
+      <span contenteditable class="blank" data-k="from">${v.from}</span> and cell
+      <span contenteditable class="blank" data-k="to">${v.to}</span>.`,
+    values: {target:'C1', from:'A1', to:'B1'},
+    formula: (v) => `=NETWORKDAYS(${v.from},${v.to})`,
+    explain: (v) => `The <b>NETWORKDAYS function</b> calculates the number of days between a start and end date, automatically excluding Saturdays and Sundays. Both the start and end date are counted as working days if they fall on a weekday.`,
+    pitfall: `When calculating a deadline that spans a holiday week, if you rely on NETWORKDAYS alone thinking it will exclude the holidays too, it actually counts those holiday days as working days, giving you more business days than you actually have. To exclude holidays, you need to add a range of holiday dates as the third argument — <b>holidays are counted as working days</b> unless you specify them.`,
+    version: `Available in Excel 2007 and later (requires the Analysis ToolPak add-in in Excel 2003).`
+  },
+  yearmonthday: {
+    cat:'date', label:'Extract Year/Month/Day From a Date (YEAR/MONTH/DAY)', level:'Beginner',
+    scene:'Use this for: pulling just the year, or just the month, out of a date for use in a summary',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, extract just the
+      <select class="blank-select" data-k="mode" style="width:90px;">
+        <option value="year" ${v.mode==='year'?'selected':''}>year</option>
+        <option value="month" ${v.mode==='month'?'selected':''}>month</option>
+        <option value="day" ${v.mode==='day'?'selected':''}>day</option>
+      </select>
+      from the date in cell <span contenteditable class="blank" data-k="source">${v.source}</span>, as a number.`,
+    values: {target:'B1', source:'A1', mode:'year'},
+    formula: (v) => v.mode.includes('month') ? `=MONTH(${v.source})` : v.mode.includes('day') ? `=DAY(${v.source})` : `=YEAR(${v.source})`,
+    explain: (v) => `The <b>YEAR function</b> extracts the year from a date, <b>MONTH</b> extracts the month, and <b>DAY</b> extracts the day — each as a plain number. The right one is chosen automatically based on your selection.`,
+    pitfall: `If you extract just the month to use as a heading in a monthly report, the result from YEAR/MONTH/DAY is <b>always a plain number</b> (January comes out as just "1"), so it won't read as "January 2026" — it can look a bit bare as a heading. If you want it shown as readable text, combine it with the TEXT function.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+
+  /* ---------------- Rounding & Formatting ---------------- */
+  round: {
+    cat:'round', label:'Round a Number (ROUND)', level:'Beginner',
+    scene:'Use this for: rounding the fractional amount left over after a tax calculation',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, round the number in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span> to
+      <span contenteditable class="blank" data-k="digit">${v.digit}</span> decimal place(s).`,
+    values: {target:'B1', source:'A1', digit:'0'},
+    formula: (v) => `=ROUND(${v.source},${v.digit})`,
+    explain: (v) => `The <b>ROUND function</b> rounds a number to a specified number of decimal places. Use "0" to round to a whole number, or "-1" to round to the nearest ten.`,
+    pitfall: `If you only change a cell's display format to "1 decimal place" to make it look rounded, the underlying number hasn't actually changed — so any later total still includes the hidden decimal amounts, and can end up a bit off from what you'd get by rounding on a calculator by hand. The ROUND function changes <b>the actual number itself</b>, so it carries through correctly into later calculations.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  roundupdown: {
+    cat:'round', label:'Round Up / Round Down (ROUNDUP/ROUNDDOWN)', level:'Beginner',
+    scene:'Use this for: always rounding a quoted price up, or always rounding it down',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, round the number in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span> to
+      <span contenteditable class="blank" data-k="digit">${v.digit}</span> decimal place(s), always rounding
+      <select class="blank-select" data-k="mode" style="width:70px;">
+        <option value="up" ${v.mode==='up'?'selected':''}>up</option>
+        <option value="down" ${v.mode==='down'?'selected':''}>down</option>
+      </select>.`,
+    values: {target:'B1', source:'A1', digit:'0', mode:'up'},
+    formula: (v) => v.mode.includes('up') ? `=ROUNDUP(${v.source},${v.digit})` : `=ROUNDDOWN(${v.source},${v.digit})`,
+    explain: (v) => `The <b>ROUNDUP function</b> always rounds up, and <b>ROUNDDOWN</b> always rounds down. Unlike ROUND, they don't follow the usual "round half up" rule — a value ending in .4 still rounds up, and one ending in .5 still rounds down, depending on which you use.`,
+    pitfall: `If your company has a rule that quoted prices should "always round up" any amount under a cent, but you build the formula with ROUND (standard rounding) by mistake, a value like 0.4 gets rounded down instead — sending out a quote that doesn't match your company's own policy. When a business rule calls for "always round up" (or down), make sure to use ROUNDUP or ROUNDDOWN rather than ROUND.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  texttostr: {
+    cat:'round', label:'Change How a Number Looks (TEXT)', level:'Intermediate',
+    scene:'Use this for: showing a number as "$1,000" or "Jan 2026"',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, convert the value in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span> into text formatted as
+      "<span contenteditable class="blank" data-k="format" style="width:110px;">${v.format}</span>".`,
+    values: {target:'B1', source:'A1', format:'$#,##0'},
+    formula: (v) => `=TEXT(${v.source},"${v.format}")`,
+    explain: (v) => `The <b>TEXT function</b> converts a number or date into a "text" string with a given format. It's similar to changing a cell's display format, but the key difference is that TEXT's result can be joined with other text using &.`,
+    pitfall: `If you convert a column of amounts into a nice-looking "$1,000" style with TEXT and then try to feed that same column into a SUM formula elsewhere, the total can show up as $0 — because even though it looks like a number, it's actually now a piece of <b>text</b>. Anything converted with TEXT becomes text, so it can no longer be used in further calculations like totals. Think of it as strictly a "display-only" value.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  },
+  ceilingfloor: {
+    cat:'round', label:'Round to the Nearest Multiple (CEILING/FLOOR)', level:'Intermediate',
+    scene:'Use this for: rounding an amount up to the nearest $100, or rounding time down to the nearest 15 minutes',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, round the number in cell
+      <span contenteditable class="blank" data-k="source">${v.source}</span> to the nearest multiple of
+      <span contenteditable class="blank" data-k="base">${v.base}</span>, rounding
+      <select class="blank-select" data-k="mode" style="width:70px;">
+        <option value="up" ${v.mode==='up'?'selected':''}>up</option>
+        <option value="down" ${v.mode==='down'?'selected':''}>down</option>
+      </select>.`,
+    values: {target:'B1', source:'A1', base:'100', mode:'up'},
+    formula: (v) => v.mode.includes('up') ? `=CEILING(${v.source},${v.base})` : `=FLOOR(${v.source},${v.base})`,
+    explain: (v) => `The <b>CEILING function</b> rounds up to the nearest multiple of a given value, and <b>FLOOR</b> rounds down. Unlike ROUNDUP/ROUNDDOWN, these are handy when you want to land on a clean number, like the nearest multiple of 10 or 100.`,
+    pitfall: `When rounding overtime down to the nearest 15 minutes, if you also use negative numbers somewhere — like when calculating time-off adjustments — CEILING/FLOOR can behave in the opposite direction compared to positive numbers, producing rounding you didn't expect. Using a negative number as the "multiple of" value, in particular, can change the behavior depending on the sign. For positive numbers, it's safe to think of it simply as "rounds to the nearest multiple of the value you specify."`,
+    version: `Available in Excel 2007 and later (some versions recommend switching to CEILING.MATH / FLOOR.MATH).`
+  },
+  int: {
+    cat:'round', label:'Extract Just the Integer Part (INT)', level:'Beginner',
+    scene:'Use this for: dropping everything after the decimal point, or getting just the quotient from a division',
+    render: (v) => `In cell <span contenteditable class="blank" data-k="target">${v.target}</span>, extract just the integer
+      (whole number) part of the value in cell <span contenteditable class="blank" data-k="source">${v.source}</span>.`,
+    values: {target:'B1', source:'A1'},
+    formula: (v) => `=INT(${v.source})`,
+    explain: (v) => `The <b>INT function</b> drops everything after the decimal point and returns just the integer part. It looks similar to ROUNDDOWN(cell,0), but note that the result differs for negative numbers.`,
+    pitfall: `For negative overtime figures used in time-off adjustments (say, -2.5 hours), INT rounds down to -3 — the <b>next integer below</b> -2.5 — whereas ROUNDDOWN(-2.5,0) gives -2, a different result. Be careful with this difference whenever you're working with negative numbers.`,
+    version: `Available in Excel 2003 and later — works in every version.`
+  }
+};
+
+/* ==========================================================
+   State management / rendering logic
+   ========================================================== */
+const PAGE_SIZE = 4;
+
+let currentCat = 'agg';
+let currentPage = 0;
+
+function catFnKeys(){
+  return Object.keys(functions).filter(k => functions[k].cat === currentCat);
+}
+
+function totalPages(){
+  return Math.max(1, Math.ceil(catFnKeys().length / PAGE_SIZE));
+}
+
+function renderCategoryRow(){
+  const row = document.getElementById('categoryRow');
+  row.innerHTML = '';
+  categories.forEach(c => {
+    const btn = document.createElement('div');
+    btn.className = 'category-btn' + (c.key === currentCat ? ' active' : '');
+    btn.textContent = c.label;
+    btn.addEventListener('click', () => {
+      currentCat = c.key;
+      currentPage = 0;
+      renderCategoryRow();
+      renderFnRow();
+      renderCards();
+    });
+    row.appendChild(btn);
+  });
+}
+
+function renderFnRow(){
+  const row = document.getElementById('fnRow');
+  row.innerHTML = '';
+  const fnKeys = catFnKeys();
+  const start = currentPage * PAGE_SIZE;
+  const visibleKeys = fnKeys.slice(start, start + PAGE_SIZE);
+  fnKeys.forEach(key => {
+    const f = functions[key];
+    const btn = document.createElement('div');
+    btn.className = 'fn-btn' + (visibleKeys.includes(key) ? ' active' : '');
+    btn.innerHTML = `${f.label} <span class="lv">${f.level}</span>`;
+    btn.addEventListener('click', () => {
+      currentPage = Math.floor(fnKeys.indexOf(key) / PAGE_SIZE);
+      renderFnRow();
+      renderCards();
+      highlightCard(key);
+    });
+    row.appendChild(btn);
+  });
+}
+
+function buildCardHTML(key){
+  const f = functions[key];
+  return `
+    <div class="card" data-cellref="${f.values.target}" id="card-${key}">
+      <div class="scene">${f.scene}</div>
+      <div class="sentence" id="sentence-${key}">${f.render(f.values)}</div>
+      <div class="divider"></div>
+      <div class="output-label">Formula preview</div>
+      <div class="output-row">
+        <div class="output-cell" id="formulaOut-${key}"></div>
+        <button class="copy-btn" data-fn="${key}">Copy</button>
+      </div>
+      <div class="copy-hint">Copy this formula and paste it straight into Excel.</div>
+      <div class="explain" id="explainArea-${key}"></div>
+      <div class="pitfall" id="pitfallArea-${key}"></div>
+      <div class="version-note"><span class="dot"></span><span>${f.version}</span></div>
+    </div>
+  `;
+}
+
+function renderCards(){
+  const fnKeys = catFnKeys();
+  const start = currentPage * PAGE_SIZE;
+  const pageKeys = fnKeys.slice(start, start + PAGE_SIZE);
+
+  const area = document.getElementById('cardsArea');
+  area.innerHTML = pageKeys.map(buildCardHTML).join('');
+
+  pageKeys.forEach(key => {
+    document.querySelectorAll(`#card-${key} .blank, #card-${key} .blank-select`).forEach(el => el.setAttribute('data-fn', key));
+    updateFormula(key);
+  });
+
+  bindBlanks();
+  bindCopyButtons();
+  renderPager();
+}
+
+function updateFormula(key){
+  const f = functions[key];
+  const out = document.getElementById(`formulaOut-${key}`);
+  const exp = document.getElementById(`explainArea-${key}`);
+  const pit = document.getElementById(`pitfallArea-${key}`);
+  if (out) out.textContent = f.formula(f.values);
+  if (exp) exp.innerHTML = f.explain(f.values);
+  if (pit) pit.innerHTML = f.pitfall;
+}
+
+function bindBlanks(){
+  document.querySelectorAll('#cardsArea .blank').forEach(el => {
+    el.addEventListener('input', () => {
+      const key = el.getAttribute('data-fn');
+      const k = el.getAttribute('data-k');
+      functions[key].values[k] = el.textContent.trim();
+      updateFormula(key);
+    });
+  });
+  document.querySelectorAll('#cardsArea .blank-select').forEach(el => {
+    el.addEventListener('change', () => {
+      const key = el.getAttribute('data-fn');
+      const k = el.getAttribute('data-k');
+      functions[key].values[k] = el.value;
+      updateFormula(key);
+    });
+  });
+}
+
+function bindCopyButtons(){
+  document.querySelectorAll('#cardsArea .copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-fn');
+      const text = document.getElementById(`formulaOut-${key}`).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+
+        if (typeof gtag === 'function') {
+          gtag('event', 'copy_formula', { function_name: key });
+        }
+      });
+    });
+  });
+}
+
+function renderPager(){
+  const area = document.getElementById('pagerArea');
+  const pages = totalPages();
+  area.innerHTML = `
+    <button class="pager-btn" id="prevPageBtn" ${currentPage <= 0 ? 'disabled' : ''}>← Prev</button>
+    <span class="pager-info">${currentPage + 1} / ${pages}</span>
+    <button class="pager-btn" id="nextPageBtn" ${currentPage >= pages - 1 ? 'disabled' : ''}>Next →</button>
+  `;
+  document.getElementById('prevPageBtn').addEventListener('click', () => {
+    if (currentPage > 0) {
+      currentPage--;
+      renderFnRow();
+      renderCards();
+    }
+  });
+  document.getElementById('nextPageBtn').addEventListener('click', () => {
+    if (currentPage < totalPages() - 1) {
+      currentPage++;
+      renderFnRow();
+      renderCards();
+    }
+  });
+}
+
+function highlightCard(key){
+  const el = document.getElementById(`card-${key}`);
+  if (!el) return;
+  if (typeof el.scrollIntoView === 'function') {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  el.classList.add('highlight');
+  setTimeout(() => el.classList.remove('highlight'), 1500);
+}
+
+renderCategoryRow();
+renderFnRow();
+renderCards();
+</script>
+</body>
+</html>
