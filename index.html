@@ -5,6 +5,9 @@
 <title>セルうめ｜穴埋めで作るExcel関数ジェネレーター【無料】</title>
 <meta name="description" content="日本語の穴埋め文にセル番号を入れるだけでExcelの数式（SUM・AVERAGE・COUNTIF・IF・VLOOKUPなど）を自動生成。関数の意味も一緒にわかる無料ツール。">
 <link rel="canonical" href="https://www.omochimochis.com/">
+<link rel="alternate" hreflang="ja" href="https://www.omochimochis.com/">
+<link rel="alternate" hreflang="en" href="https://www.omochimochis.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://www.omochimochis.com/">
 
 <!-- OGP（SNSでシェアされたときの見た目） -->
 <meta property="og:title" content="セルうめ｜穴埋めで作るExcel関数ジェネレーター">
@@ -363,10 +366,23 @@
     font-family:var(--sans);
   }
   .footer-links a:hover{color:var(--forest-deep);}
+
+  .lang-switch{
+    text-align:right;
+    font-family:var(--mono);
+    font-size:11px;
+    color:#8a8f80;
+    margin-bottom:14px;
+  }
+  .lang-switch a{color:#5b6459;text-decoration:none;}
+  .lang-switch a:hover{color:var(--forest-deep);}
+  .lang-switch .current{color:var(--forest-deep);font-weight:700;}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <div class="lang-switch"><span class="current">日本語</span> | <a href="/en/">English</a></div>
 
   <header>
     <div class="eyebrow">Formula Fill-in Tool</div>
