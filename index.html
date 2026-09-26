@@ -698,6 +698,19 @@ const functions = {
     pitfall: `XLOOKUPで組んだファイルを取引先が古い<b>Excel 2019</b>で開くと、関数名が認識されずそのまま<b>#NAME?</b>エラーになって渡した相手が困ってしまうことがあります。会社のPCがExcel 2019以前の場合は使えないので、社外に渡すファイルではVLOOKUPかINDEX+MATCHを使ってください。`,
     version: `Excel 2021またはMicrosoft 365が必要です（Excel 2019以前では使用できません）。`
   },
+  filter: {
+    cat:'search', label:'条件に合う行を一覧表示 (FILTER)', level:'中級',
+    scene:'こんな時に：指定した部署や担当者に一致するデータだけを別の場所に一覧表示したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルから下に、
+      <span contenteditable class="blank" data-k="tableRange">${v.tableRange}</span> の中で
+      <span contenteditable class="blank" data-k="conditionRange">${v.conditionRange}</span> が
+      「<span contenteditable class="blank" data-k="condition" style="width:70px;">${v.condition}</span>」に一致する行を一覧表示したい。`,
+    values: {target:'E2', tableRange:'A2:C100', conditionRange:'B2:B100', condition:'営業部'},
+    formula: (v) => `=FILTER(${v.tableRange},${v.conditionRange}="${v.condition}","該当なし")`,
+    explain: (v) => `<b>FILTER関数</b>は、条件に一致した行をまとめて取り出します。結果は${v.target}セルから下や右に自動で広がるため、表示先の周りは空けておいてください。条件を見る範囲と一覧表示する範囲は、同じ行数にします。`,
+    pitfall: `FILTER関数の結果が広がる先にすでに値が入っていると、<b>#SPILL!</b>エラーになります。また、条件範囲（${v.conditionRange}）と一覧表示する範囲（${v.tableRange}）の行数が違うとエラーになるため、同じ行に対応した範囲を指定してください。`,
+    version: `Microsoft 365またはExcel 2021以降で使用できます（Excel 2019以前では使用できません）。`
+  },
   indexmatch: {
     cat:'search', label:'表のどこからでも探す (INDEX+MATCH)', level:'上級',
     scene:'こんな時に：探したい値が表の右側の列にある、VLOOKUPが使えない場面で',
