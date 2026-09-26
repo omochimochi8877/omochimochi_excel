@@ -708,7 +708,7 @@ const functions = {
     values: {target:'E2', tableRange:'A2:C100', conditionRange:'B2:B100', condition:'営業部'},
     formula: (v) => `=FILTER(${v.tableRange},${v.conditionRange}="${v.condition}","該当なし")`,
     explain: (v) => `<b>FILTER関数</b>は、条件に一致した行をまとめて取り出します。結果は${v.target}セルから下や右に自動で広がるため、表示先の周りは空けておいてください。条件を見る範囲と一覧表示する範囲は、同じ行数にします。`,
-    pitfall: `FILTER関数の結果が広がる先にすでに値が入っていると、<b>#SPILL!</b>エラーになります。また、条件範囲（${v.conditionRange}）と一覧表示する範囲（${v.tableRange}）の行数が違うとエラーになるため、同じ行に対応した範囲を指定してください。`,
+    pitfall: (v) => `FILTER関数の結果が広がる先にすでに値が入っていると、<b>#SPILL!</b>エラーになります。また、条件範囲（${v.conditionRange}）と一覧表示する範囲（${v.tableRange}）の行数が違うとエラーになるため、同じ行に対応した範囲を指定してください。`,
     version: `Microsoft 365またはExcel 2021以降で使用できます（Excel 2019以前では使用できません）。`
   },
   indexmatch: {
