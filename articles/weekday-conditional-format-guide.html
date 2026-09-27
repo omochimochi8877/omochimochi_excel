@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>WEEKDAY関数で土日・祝日を自動で色分けする方法｜条件付き書式との組み合わせとよくある失敗</title>
+<meta name="description" content="WEEKDAY関数と条件付き書式を組み合わせて、シフト表や納品スケジュールの土日を自動で色分けする方法を実務目線で解説。種類(type)引数の指定ミスで色分けがずれる原因、条件付き書式で絶対参照を間違えて全セルが同じ色になるトラブル、祝日は別リストが必要な理由まで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/weekday-conditional-format-guide.html">
+
+<!-- OGP(SNSでシェアされたときの見た目) -->
+<meta property="og:title" content="WEEKDAY関数で土日・祝日を自動で色分けする方法｜条件付き書式との組み合わせとよくある失敗｜セルうめ">
+<meta property="og:description" content="WEEKDAY関数と条件付き書式を組み合わせて土日を自動で色分けする方法、種類引数のずれや絶対参照ミスの直し方を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/weekday-conditional-format-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WEEKDAY関数で土日・祝日を自動で色分けする方法">
+<meta name="twitter:description" content="条件付き書式との組み合わせ方、種類引数のずれ、絶対参照ミスの直し方を解説します。">
+
+<!-- 構造化データ(記事) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "WEEKDAY関数で土日・祝日を自動で色分けする方法｜条件付き書式との組み合わせとよくある失敗",
+  "description": "WEEKDAY関数と条件付き書式を組み合わせて、シフト表や納品スケジュールの土日を自動で色分けする方法を実務目線で解説。種類(type)引数の指定ミスで色分けがずれる原因、条件付き書式で絶対参照を間違えて全セルが同じ色になるトラブル、祝日は別リストが必要な理由まで紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/weekday-conditional-format-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-27"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "条件付き書式にWEEKDAYの数式を入れても色がつきません。原因は何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "多くの場合、数式の参照方法(絶対参照・相対参照)の指定ミスが原因です。条件付き書式は「選択範囲の先頭セル」を基準に数式を作り、それを他のセルへ自動的にずらしながら判定します。日付が入っている列だけを固定したい場合は「$A2」のように列だけ$を付け、行方向にコピーされても列がずれないようにする必要があります。列も行も固定してしまう($A$2)と、選択範囲のどのセルを見ても常に同じ1つのセル(A2)だけを判定してしまい、意図した色分けになりません。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "WEEKDAY関数だけで祝日も色分けできますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "できません。WEEKDAY関数は日付から曜日番号を計算するだけの関数で、祝日かどうかを判定する機能は持っていません。祝日も含めて色分けしたい場合は、別セルに祝日の日付一覧を用意し、条件付き書式の数式でCOUNTIF関数などを使って「その日付が祝日リストに含まれているか」を判定し、WEEKDAYの条件とOR関数で組み合わせる必要があります。祝日リストは年ごとに更新が必要な点も忘れずに管理してください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "WEEKDAY関数の種類(type)引数は結局どれを指定すればいいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "土日を色分けする用途であれば、種類に2を指定して「月曜日を1、日曜日を7」として扱う方法が直感的でわかりやすくおすすめです。この場合、土日は6以上(=WEEKDAY(A2,2)>=6)という単純な条件で判定できます。種類を省略した場合は日曜日が1、土曜日が7になるため、土日の判定条件が「1または7」という書き方になり、OR関数が必要になって数式が長くなります。どちらでも正しく動作しますが、社内で使う数式は種類を統一しておくと、後から見返したときに条件の意味が分かりやすくなります。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  table.codes{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px;}
+  table.codes th, table.codes td{border:1px solid var(--line);padding:8px 12px;text-align:left;}
+  table.codes th{background:#F5F2E8;font-family:var(--mono);font-size:12px;color:var(--forest-deep);}
+  table.codes td.code{font-family:var(--mono);color:#6b4a1e;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>WEEKDAY関数で土日・祝日を自動で色分けする方法｜条件付き書式との組み合わせとよくある失敗</h1>
+  <p class="sub">シフト表や納品スケジュールの土日の行に、毎回自分で色をつけていませんか。日付が変わるたびに塗り直す作業は抜け漏れの元です。WEEKDAY関数と条件付き書式を組み合わせれば、日付を入力するだけで土日が自動的に色分けされる表を作れます。</p>
+  <div class="meta">2026-09-27更新 ｜ 日付関数</div>
+
+  <article class="article-body">
+    <p>
+      勤怠表や会議室予約表、納品スケジュールなど、日付が並ぶ一覧表では「土日の行だけ薄い色をつけて見やすくする」という体裁がよく求められます。これを毎月・毎週手作業で塗り分けていると、日付を差し替えたときに塗り忘れる、コピペで色がずれるといったミスが起こりがちです。<b>WEEKDAY関数</b>を条件付き書式と組み合わせると、日付セルの中身に応じて自動的に色分けされる仕組みを1回作るだけで、以降はメンテナンス不要になります。この記事では、その組み合わせ方と、実務で特につまずきやすいポイントを解説します。
+    </p>
+
+    <h2>WEEKDAY関数の基本構文</h2>
+    <p>
+      WEEKDAY関数は、日付から曜日を表す数値を取り出す関数です。第2引数の「種類」によって、どの曜日を1番として数えるかが変わります。
+    </p>
+    <div class="box">
+      <div class="code">=WEEKDAY(シリアル値, [種類])</div>
+      <p style="margin-bottom:0;">例:2026/4/1(水曜日)の場合<br>
+        <span style="font-family:var(--mono);">=WEEKDAY(A2)</span> または <span style="font-family:var(--mono);">=WEEKDAY(A2,1)</span> → 4(日曜日=1,月曜日=2…で数えるため水曜日は4)<br>
+        <span style="font-family:var(--mono);">=WEEKDAY(A2,2)</span> → 3(月曜日=1,火曜日=2…で数えるため水曜日は3)<br>
+        <span style="font-family:var(--mono);">=WEEKDAY(A2,3)</span> → 2(月曜日=0,火曜日=1…で数えるため水曜日は2)</p>
+    </div>
+    <p>
+      条件付き書式で土日を判定する場合、種類に<b>2</b>を指定すると「月曜日=1〜日曜日=7」という並びになり、土日は「6以上」という単純な条件で判定できるため、実務ではもっとも扱いやすい設定です。
+    </p>
+
+    <h2>条件付き書式と組み合わせて土日を自動色分けする</h2>
+    <p>
+      日付が入ったA列(2行目〜)に対して、土日の行全体を色分けする手順は次のとおりです。
+    </p>
+    <ol>
+      <li>色をつけたい範囲(例:A2:D31)を選択する</li>
+      <li>「ホーム」タブ→「条件付き書式」→「新しいルール」→「数式を使用して、書式設定するセルを決定」を選ぶ</li>
+      <li>数式欄に <span style="font-family:var(--mono);">=WEEKDAY($A2,2)&gt;=6</span> と入力する</li>
+      <li>「書式」ボタンから塗りつぶし色を指定して「OK」</li>
+    </ol>
+    <div class="box">
+      <div class="code">=WEEKDAY($A2,2)&gt;=6</div>
+      <p style="margin-bottom:0;">A列を月曜始まり(種類2)で数えたとき、土曜日(6)・日曜日(7)に該当する行全体が指定した色で塗りつぶされます。日付を入れ替えたり行を挿入したりしても、条件付き書式は数式で自動判定されるため、塗り直しが不要になります。</p>
+    </div>
+
+    <h2>WEEKDAYとTEXT関数(曜日書式)の違い</h2>
+    <div class="compare">
+      <div class="col">
+        <h3>TEXT(A2,"aaa")</h3>
+        <ul>
+          <li>「月」「火」のような文字列を表示するのに向く</li>
+          <li>結果が文字列のため、条件付き書式の不等号(&gt;=など)での判定には使いにくい</li>
+          <li>人が読む曜日表示を作りたいときに使う</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>WEEKDAY(A2,種類)</h3>
+        <ul>
+          <li>1〜7の数値を返すため条件式・IF・COUNTIFSと相性が良い</li>
+          <li>条件付き書式・CHOOSE・SUMPRODUCTなど計算処理に向く</li>
+          <li>そのままセルに表示しても数字にしか見えない</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      「表に曜日の文字を表示したい」のか「土日かどうかを条件として判定したい」のかで、使うべき関数が変わります。両方必要な場合は、表示用のセルにはTEXT関数、条件付き書式の数式にはWEEKDAY関数、というように役割を分けて使うのが確実です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、勤怠表や会議室予約表の日付列にWEEKDAY関数を使った条件付き書式を設定し、土日の行を薄いグレーで自動的に塗り分けることで、印刷した紙面でも一目で休日がわかるようにできます。<b>経理担当者</b>であれば、支払期日の一覧表で「支払期日が土日にあたる行」を赤字で目立たせ、金融機関の休業日と重なる可能性がある支払いを事前にチェックする運用に使えます。<b>営業事務担当者</b>であれば、納品スケジュール表の土日納品予定を色分けし、配送業者の休業日と重ならないかを確認する目的でも活用されています。
+    </p>
+
+    <h2>WEEKDAY関数でよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">条件付き書式で全部の行、または全く色がつかない</span>
+      <p style="margin-bottom:6px;">条件付き書式の数式を作るとき、参照方法(相対参照・絶対参照)の指定を誤ると、選択範囲のどのセルを見ても常に同じ1つのセルだけを判定してしまい、範囲全体が色づく、または全く色がつかないという症状になります。</p>
+      <div class="code">誤り例:=WEEKDAY($A$2,2)&gt;=6 のように行まで固定してしまうと、選択範囲のどのセルも常にA2の判定結果だけを見て色分けされる</div>
+      <p style="margin-bottom:0;">日付が入っている列(この例ではA列)だけを$で固定し、行番号は固定しない「$A2」という形にしてください。これにより、条件付き書式が各行のA列を正しく参照しながら判定できます。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">種類(type)引数の指定忘れで色分けが1日ずれる</span>
+      <p style="margin-bottom:6px;">WEEKDAY関数の種類引数を省略すると、日曜日が1、土曜日が7として計算されます。この状態で「6以上」を土日の条件にしてしまうと、実際には金曜日(6)まで色がついてしまい、意図した曜日と1日ずれた色分けになります。</p>
+      <div class="code">誤り例:種類を省略した=WEEKDAY($A2)&gt;=6 は「金曜日・土曜日」を対象にしてしまう(正しくは土日を対象にしたい)</div>
+      <p style="margin-bottom:0;">土日を「6以上」というシンプルな条件で判定したい場合は、必ず種類に2を指定してください。種類を省略したままにしたい場合は、条件を「WEEKDAY($A2)=1」(日曜日)「OR(WEEKDAY($A2)=1,WEEKDAY($A2)=7)」のように書き直す必要があります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">祝日の行に色がつかない(祝日はWEEKDAYだけでは判定できない)</span>
+      <p style="margin-bottom:6px;">WEEKDAY関数はあくまで曜日(月曜〜日曜)を計算するだけの関数で、その日が祝日かどうかを判断する機能は持っていません。「土日は色がつくのに祝日には色がつかない」という問い合わせは、この仕様を知らないことが原因でよく発生します。</p>
+      <div class="code">対処法:祝日の日付一覧を別シートに用意し、条件付き書式の数式を =OR(WEEKDAY($A2,2)&gt;=6, COUNTIF(祝日リスト,$A2)&gt;0) のようにOR関数とCOUNTIF関数で組み合わせる</div>
+      <p style="margin-bottom:0;">稼働日数の計算に祝日リストを使うNETWORKDAYS関数と同様、祝日情報は関数任せにできないため、年ごとに更新できる祝日リストを用意し、そこと照合する仕組みを別途組む必要があります。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>種類引数の意味を最初に決めて統一する。</b>「月曜=1」で統一するのか「日曜=1」で統一するのか、社内の数式で種類を揃えておくと、後から見返したときに条件の意味を勘違いしにくくなります。</li>
+      <li><b>条件付き書式の数式は選択範囲の「左上のセル」を基準に考える。</b>選択範囲の先頭セルにその数式を入れたときにTRUEになるかどうかをまず確認してから、参照方法(相対・絶対)を調整すると失敗が減ります。</li>
+      <li><b>「曜日を表示したい」のか「曜日で判定したい」のかを分けて考える。</b>表示にはTEXT関数、判定(条件付き書式・IF・COUNTIFS)にはWEEKDAY関数、という役割分担を意識しましょう。</li>
+      <li><b>祝日は自動で判定されないと心得る。</b>祝日まで含めて色分けしたい場合は、祝日リストとの照合が必須であることを前提に数式を設計してください。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      WEEKDAY関数は、日付から曜日番号を数値として取り出す関数で、単体で表示するだけでなく、条件付き書式やIF、COUNTIFSなどの条件判定と組み合わせることで真価を発揮します。土日の自動色分けは、種類引数を2に統一し、条件付き書式の数式で日付列だけを絶対参照にする、という2点さえ押さえれば安定して運用できます。祝日まで含めたい場合はWEEKDAY単体では対応できないため、祝日リストとの組み合わせが必要になる点も忘れずに設計しましょう。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">条件付き書式にWEEKDAYの数式を入れても色がつきません。原因は何ですか？</div>
+        <div class="a">多くの場合、数式の参照方法(絶対参照・相対参照)の指定ミスが原因です。条件付き書式は「選択範囲の先頭セル」を基準に数式を作り、それを他のセルへ自動的にずらしながら判定します。日付が入っている列だけを固定したい場合は「$A2」のように列だけ$を付け、行方向にコピーされても列がずれないようにする必要があります。列も行も固定してしまう($A$2)と、選択範囲のどのセルを見ても常に同じ1つのセル(A2)だけを判定してしまい、意図した色分けになりません。</div>
+      </div>
+      <div class="qa">
+        <div class="q">WEEKDAY関数だけで祝日も色分けできますか？</div>
+        <div class="a">できません。WEEKDAY関数は日付から曜日番号を計算するだけの関数で、祝日かどうかを判定する機能は持っていません。祝日も含めて色分けしたい場合は、別セルに祝日の日付一覧を用意し、条件付き書式の数式でCOUNTIF関数などを使って「その日付が祝日リストに含まれているか」を判定し、WEEKDAYの条件とOR関数で組み合わせる必要があります。祝日リストは年ごとに更新が必要な点も忘れずに管理してください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">WEEKDAY関数の種類(type)引数は結局どれを指定すればいいですか？</div>
+        <div class="a">土日を色分けする用途であれば、種類に2を指定して「月曜日を1、日曜日を7」として扱う方法が直感的でわかりやすくおすすめです。この場合、土日は6以上(=WEEKDAY(A2,2)&gt;=6)という単純な条件で判定できます。種類を省略した場合は日曜日が1、土曜日が7になるため、土日の判定条件が「1または7」という書き方になり、OR関数が必要になって数式が長くなります。どちらでも正しく動作しますが、社内で使う数式は種類を統一しておくと、後から見返したときに条件の意味が分かりやすくなります。</div>
+      </div>
+    </div>
+
+    <h2>関連記事</h2>
+    <ul>
+      <li><a href="/articles/choose-guide.html">CHOOSE関数で番号から値を選ぶ使い方｜曜日ラベル・歩合率の自動切り替え</a></li>
+      <li><a href="/articles/networkdays-guide.html">NETWORKDAYS関数で稼働日数(営業日数)を計算する方法｜祝日リストが反映されない原因と対処法</a></li>
+      <li><a href="/articles/text-format-guide.html">TEXT関数で日付・金額の表示形式を自由自在に変える方法｜書式コードの意味とよくある失敗</a></li>
+    </ul>
+
+    <a class="cta" href="/index.html">→ 日付の数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
