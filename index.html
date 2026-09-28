@@ -1142,7 +1142,7 @@ function updateFormula(key){
   const pit = document.getElementById(`pitfallArea-${key}`);
   if (out) out.textContent = f.formula(f.values);
   if (exp) exp.innerHTML = f.explain(f.values);
-  if (pit) pit.innerHTML = f.pitfall;
+  if (pit) pit.innerHTML = typeof f.pitfall === 'function' ? f.pitfall(f.values) : f.pitfall;
 }
 
 function bindBlanks(){
