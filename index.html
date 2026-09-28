@@ -483,6 +483,21 @@ const functions = {
     pitfall: `部署名の列がB2:B10なのに、合計対象の金額の列を1行ずれたC1:C9のように指定してしまうと、部署名と金額の対応関係が1行分ずれた状態で集計され、実際の部署別合計とは違う金額が出てしまいます。表の先頭に見出し行があるかどうかで開始行がズレやすいので、条件の範囲と合計する範囲は同じ行数・同じ開始行になっているか必ず確認してください。`,
     version: `Excel 2003以降、すべてのバージョンで使用できます。`
   },
+  sumifs: {
+    cat:'agg', label:'複数条件で合計 (SUMIFS)', level:'中級',
+    scene:'こんな時に：「営業部」かつ「正社員」の売上など、2つの条件に合う数字を合計したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="sumRange">${v.sumRange}</span> の数字から、
+      <span contenteditable class="blank" data-k="range1">${v.range1}</span> が
+      「<span contenteditable class="blank" data-k="cond1" style="width:65px;">${v.cond1}</span>」で、
+      <span contenteditable class="blank" data-k="range2">${v.range2}</span> が
+      「<span contenteditable class="blank" data-k="cond2" style="width:65px;">${v.cond2}</span>」の行だけを合計したい。`,
+    values: {target:'E2', sumRange:'C2:C100', range1:'B2:B100', cond1:'営業部', range2:'D2:D100', cond2:'正社員'},
+    formula: (v) => `=SUMIFS(${v.sumRange},${v.range1},"${v.cond1}",${v.range2},"${v.cond2}")`,
+    explain: (v) => `<b>SUMIFS関数</b>は、複数の条件をすべて満たす行だけを合計します。合計範囲（${v.sumRange}）の各行について、${v.range1}が「${v.cond1}」かつ${v.range2}が「${v.cond2}」かを判定します。条件範囲はさらに追加できます。`,
+    pitfall: (v) => `合計範囲（${v.sumRange}）と条件範囲（${v.range1}、${v.range2}）の開始行や行数がずれていると、対応する行が合わず、意図しない合計になることがあります。見出し行を除いて、同じ行から始まる範囲を指定してください。`,
+    version: `Excel 2007以降で使用できます。`
+  },
   subtotal: {
     cat:'agg', label:'フィルター対応合計 (SUBTOTAL)', level:'上級',
     scene:'こんな時に：フィルターをかけた後の合計を正しく出したい',
