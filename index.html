@@ -378,6 +378,55 @@
   .lang-switch a{color:#5b6459;text-decoration:none;}
   .lang-switch a:hover{color:var(--forest-deep);}
   .lang-switch .current{color:var(--forest-deep);font-weight:700;}
+  /* ヘッダーの記事導線 */
+  .header-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  .header-link{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:700;text-decoration:none;
+    padding:7px 14px;border-radius:20px;
+    background:#fff;border:1px solid var(--forest);color:var(--forest-deep);
+  }
+  .header-link:hover{background:var(--forest-deep);border-color:var(--forest-deep);color:#fff;}
+  .header-link .count{font-family:var(--mono);font-size:11px;background:var(--amber);color:#3A2A0A;border-radius:10px;padding:1px 7px;}
+
+  /* お役立ち記事セクション */
+  .articles{
+    margin:10px 0 30px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:4px solid var(--forest);
+    border-radius:4px;
+    padding:24px 22px 22px;
+    box-shadow:0 1px 0 var(--line);
+  }
+  .articles-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .articles-head .eyebrow::before{content:"📖";background:none;padding:0;font-size:14px;}
+  .articles-head h2{font-family:var(--serif);font-size:clamp(20px,4vw,26px);margin:6px 0 4px;line-height:1.35;}
+  .articles-head p{margin:0;color:#5b6459;font-size:13.5px;line-height:1.7;}
+  .article-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  @media (max-width:560px){ .article-grid{grid-template-columns:1fr;} .articles{padding:20px 16px 18px;} }
+  .article-card{
+    display:flex;flex-direction:column;gap:6px;
+    text-decoration:none;color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-left:3px solid var(--amber);
+    border-radius:3px;
+    padding:13px 14px 12px;
+    transition:transform .12s, box-shadow .12s, border-color .12s;
+  }
+  .article-card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(32,40,31,.08);border-left-color:var(--forest);}
+  .article-card .meta{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:#9aa093;}
+  .article-card .cat{font-family:var(--sans);font-size:11px;font-weight:700;color:#fff;background:var(--forest);padding:2px 8px;border-radius:3px;}
+  .article-card .new{font-size:10.5px;font-weight:700;color:#3A2A0A;background:var(--amber);padding:1px 6px;border-radius:3px;letter-spacing:.05em;}
+  .article-card .title{font-size:14.5px;font-weight:700;line-height:1.5;}
+  .article-card .subtitle{font-size:12.5px;color:#5b6459;line-height:1.55;}
+  .articles-more{text-align:center;margin-top:18px;}
+  .articles-more a{
+    display:inline-block;font-size:14px;font-weight:700;text-decoration:none;
+    background:var(--forest-deep);color:#fff;padding:11px 24px;border-radius:3px;
+  }
+  .articles-more a:hover{background:var(--forest);}
 </style>
 </head>
 <body>
@@ -389,6 +438,10 @@
     <div class="eyebrow">Formula Fill-in Tool</div>
     <h1>虫食い文で、関数を組み立てる。</h1>
     <p class="sub">やりたい作業を選んで、空欄にセル番号を入れるだけ。Excelの数式が自動生成されます。関数の意味も一緒に確認できます。</p>
+    <div class="header-links">
+      <a class="header-link" href="#articles">📖 お役立ち記事を読む <span class="count" id="articleCount" hidden></span></a>
+      <a class="header-link" href="/guide.html">使い方</a>
+    </div>
   </header>
 
   <div class="category-row" id="categoryRow"></div>
@@ -397,6 +450,18 @@
   <div id="cardsArea"></div>
 
   <div class="pager" id="pagerArea"></div>
+
+  <section class="articles" id="articles" aria-labelledby="articlesTitle">
+    <div class="articles-head">
+      <div>
+        <div class="eyebrow">Articles</div>
+        <h2 id="articlesTitle">お役立ち記事</h2>
+        <p>よくあるエラーの直し方や、似た関数の使い分けを実務目線で解説しています。</p>
+      </div>
+    </div>
+    <div class="article-grid" id="articleGrid"></div>
+    <div class="articles-more"><a href="/articles.html">記事一覧をすべて見る →</a></div>
+  </section>
 
   <footer>
     セルうめ β — 事務員さんのためのExcel関数ジェネレーター
@@ -1204,6 +1269,58 @@ function highlightCard(key){
 renderCategoryRow();
 renderFnRow();
 renderCards();
+</script>
+<script>
+/* お役立ち記事：articles.html から新着を読み込んでトップに表示 */
+(function(){
+  const grid = document.getElementById('articleGrid');
+  const countEl = document.getElementById('articleCount');
+  const SHOW = 6;
+  fetch('/articles.html')
+    .then(r => r.ok ? r.text() : Promise.reject())
+    .then(html => {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const items = [...doc.querySelectorAll('.list .item')];
+      if(!items.length) return;
+      countEl.textContent = items.length + '本';
+      countEl.hidden = false;
+      const newest = items[0].querySelector('.date')?.textContent.trim();
+      items.slice(0, SHOW).forEach(item => {
+        const link = item.querySelector('h2 a');
+        if(!link) return;
+        const [title, ...rest] = link.textContent.split('｜');
+        const date = item.querySelector('.date')?.textContent.trim() || '';
+        const a = document.createElement('a');
+        a.className = 'article-card';
+        a.href = link.getAttribute('href');
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const cat = document.createElement('span');
+        cat.className = 'cat';
+        cat.textContent = item.querySelector('.cat')?.textContent.trim() || '記事';
+        meta.appendChild(cat);
+        if(date && date === newest){
+          const n = document.createElement('span');
+          n.className = 'new';
+          n.textContent = 'NEW';
+          meta.appendChild(n);
+        }
+        meta.appendChild(document.createTextNode(date));
+        const t = document.createElement('div');
+        t.className = 'title';
+        t.textContent = title.trim();
+        a.append(meta, t);
+        if(rest.length){
+          const st = document.createElement('div');
+          st.className = 'subtitle';
+          st.textContent = rest.join('｜').trim();
+          a.appendChild(st);
+        }
+        grid.appendChild(a);
+      });
+    })
+    .catch(() => {});
+})();
 </script>
 </body>
 </html>
