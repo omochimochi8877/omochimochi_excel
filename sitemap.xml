@@ -146,6 +146,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://www.omochimochis.com/articles/len-guide.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://www.omochimochis.com/privacy.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>

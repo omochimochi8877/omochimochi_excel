@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>LEN関数で文字数を数える方法｜入力規則との組み合わせと全角スペース・改行のよくある落とし穴</title>
+<meta name="description" content="LEN関数を使って文字数をチェックする方法を実務目線で解説。データの入力規則と組み合わせて文字数制限をかける方法、SUBSTITUTEと組み合わせて特定の文字の出現回数を数える方法、全角スペース・改行・見た目上の桁数とのズレでよくあるトラブルまで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/len-guide.html">
+
+<!-- OGP(SNSでシェアされたときの見た目) -->
+<meta property="og:title" content="LEN関数で文字数を数える方法｜入力規則との組み合わせとよくある落とし穴｜セルうめ">
+<meta property="og:description" content="LEN関数と入力規則を組み合わせた文字数チェック、SUBSTITUTEとの組み合わせ方、全角スペース・改行でズレるトラブルを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/len-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LEN関数で文字数を数える方法">
+<meta name="twitter:description" content="入力規則との組み合わせ、SUBSTITUTEとの組み合わせ、全角スペース・改行でズレるトラブルを解説します。">
+
+<!-- 構造化データ(記事) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "LEN関数で文字数を数える方法｜入力規則との組み合わせと全角スペース・改行のよくある落とし穴",
+  "description": "LEN関数を使って文字数をチェックする方法を実務目線で解説。データの入力規則と組み合わせて文字数制限をかける方法、SUBSTITUTEと組み合わせて特定の文字の出現回数を数える方法、全角スペース・改行・見た目上の桁数とのズレでよくあるトラブルまで紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/len-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-28"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "LEN関数で数えた文字数と、セルに表示されている桁数が合わないのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "セルの表示形式(桁区切りや円マーク、日付表示など)は見た目だけを変えるものであり、LEN関数はセルが実際に保持している値(数値そのものや入力した文字列そのもの)を数えます。たとえば1000という数値に桁区切り表示を設定して「1,000」と見えていても、LEN(A1)は4文字と数えます。逆に郵便番号を文字列として「123-4567」のようにハイフン込みで入力している場合は、見た目通り8文字として数えられます。表示上の見た目とセルの実際の値は別物だと意識することが、LEN関数を正しく使う第一歩です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "全角スペースが入っているのにTRIMで消せないのですが、LENで何がわかりますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TRIM関数が既定で除去できるのは半角スペースのみで、全角スペースはそのまま残ります。LEN(A1)で数えた文字数と、目視で数えた文字数が一致しないときは、見えないスペースや改行が紛れ込んでいる可能性が高いというサインになります。原因を特定したい場合は、LEN(A1)とLEN(TRIM(A1))を並べて比較し、値が同じであれば半角スペースの問題ではないと判断できます。全角スペースを除去したいときはSUBSTITUTE(A1,\"　\",\"\")のように全角スペースを直接指定して置き換える必要があります。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "入力規則で文字数を制限しても、あとから貼り付けで長い文字列が入ってしまいます。防げますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "データの入力規則は、セルに直接入力したりEnterで確定したりする操作に対しては有効ですが、Excelのバージョンや貼り付け方法によっては、コピー&貼り付けの操作で入力規則のチェックが効かずにそのまま値が入ってしまうことがあります。これは入力規則そのものの仕様上の制約であり、LEN関数の問題ではありません。貼り付けによる文字数超過を確実に防ぎたい場合は、入力規則に加えて、別セルにLEN関数で文字数を表示する監視用の列を用意し、条件付き書式で規定文字数を超えたセルを赤く表示するなど、二重のチェック体制を組むことをおすすめします。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  table.codes{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px;}
+  table.codes th, table.codes td{border:1px solid var(--line);padding:8px 12px;text-align:left;}
+  table.codes th{background:#F5F2E8;font-family:var(--mono);font-size:12px;color:var(--forest-deep);}
+  table.codes td.code{font-family:var(--mono);color:#6b4a1e;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>LEN関数で文字数を数える方法｜入力規則との組み合わせと全角スペース・改行のよくある落とし穴</h1>
+  <p class="sub">社員番号は必ず7桁、名前欄は全角20文字以内など、文字数のルールが決まっている入力欄で、いちいち目視で数えていませんか。LEN関数を使えば、セルの文字数を自動でチェックし、入力規則と組み合わせて桁数違反そのものを防ぐ仕組みも作れます。この記事では、LEN関数の使い方と、実務でつまずきやすいポイントを解説します。</p>
+  <div class="meta">2026-09-28更新 ｜ 文字列操作</div>
+
+  <article class="article-body">
+    <p>
+      顧客コードや社員番号、郵便番号のように「桁数が決まっているデータ」を扱う場面は経理・総務・営業事務のどこでも登場します。手入力のExcel表では、桁数が1つ多い・少ないといったミスが混入しやすく、あとからシステムに取り込む段階で初めてエラーに気づく、ということも珍しくありません。<b>LEN関数</b>はセルの文字数を数えるだけのシンプルな関数ですが、入力規則や条件付き書式、SUBSTITUTE関数と組み合わせることで、入力段階でのミスを未然に防ぐ強力なチェック機能に育てられます。
+    </p>
+
+    <h2>LEN関数の基本構文</h2>
+    <p>
+      LEN関数は、指定したセルの文字数(または数値の桁数)を数値として返します。引数は対象セル1つだけで、非常にシンプルです。
+    </p>
+    <div class="box">
+      <div class="code">=LEN(文字列)</div>
+      <p style="margin-bottom:0;">例:A1に「東京都渋谷区」と入力されている場合<br>
+        <span style="font-family:var(--mono);">=LEN(A1)</span> → 7(全角・半角を区別せず1文字を1として数える)<br>
+        例:A2に数値の1000が入力されている場合<br>
+        <span style="font-family:var(--mono);">=LEN(A2)</span> → 4(表示形式で「1,000」と見えていても、実際の値の桁数を数える)</p>
+    </div>
+
+    <h2>入力規則と組み合わせて文字数制限をかける</h2>
+    <p>
+      「名前欄は全角20文字以内」「備考欄は100文字まで」のようなルールを、入力した後に気づかせるのではなく、入力した瞬間に弾く仕組みにしたい場合は、データの入力規則にLEN関数を組み込みます。
+    </p>
+    <ol>
+      <li>制限をかけたいセル範囲(例:B2:B100)を選択する</li>
+      <li>「データ」タブ→「データの入力規則」を開く</li>
+      <li>「設定」タブで入力値の種類を「ユーザー設定」にする</li>
+      <li>数式欄に <span style="font-family:var(--mono);">=LEN(B2)&lt;=20</span> と入力する</li>
+      <li>「エラーメッセージ」タブで、桁数オーバー時に表示する注意文を設定して「OK」</li>
+    </ol>
+    <div class="box">
+      <div class="code">=LEN(B2)&lt;=20</div>
+      <p style="margin-bottom:0;">B2に21文字以上を入力しようとすると、設定したエラーメッセージが表示されて入力が確定できなくなります。範囲の先頭セル(この例ではB2)を基準に数式を作る点は条件付き書式と同じ考え方です。</p>
+    </div>
+
+    <h2>SUBSTITUTE関数と組み合わせて特定の文字の出現回数を数える</h2>
+    <p>
+      LEN関数は「特定の文字が何回出てくるか」を数える用途でも使われます。対象の文字を空文字に置き換えたときの文字数の減り具合から、出現回数を逆算する考え方です。
+    </p>
+    <div class="box">
+      <div class="code">=LEN(A1)-LEN(SUBSTITUTE(A1,",",""))</div>
+      <p style="margin-bottom:0;">A1の文字列からカンマを取り除いた文字列とのLENの差が、そのままカンマの出現回数になります。CSV形式で受け取ったデータの区切り文字の数を検証したいときや、氏名欄に複数人の名前が「、」区切りで入っていないかをチェックしたいときに使えます。</p>
+    </div>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、社員番号や部署コードの桁数が統一されているかをLEN関数付きの監視列でチェックし、桁数違反の行だけを条件付き書式で赤く表示することで、新入社員の名簿登録時のミスを早期に発見できます。<b>経理担当者</b>であれば、振込先の口座番号や取引先コードの桁数チェックに使い、システムへの一括取込前にLENで桁数不一致の行を洗い出す運用ができます。<b>営業事務担当者</b>であれば、備考欄や住所欄に文字数制限のあるシステムへ登録する前段階で、Excel上でLEN関数によるチェック列を用意し、超過している行だけを事前に修正してから登録する、という使い方が定着しています。
+    </p>
+
+    <h2>LEN関数でよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">全角スペースが混ざっていて文字数がずれる</span>
+      <p style="margin-bottom:6px;">TRIM関数は既定では半角スペースしか取り除けません。氏名欄などに全角スペース(「山田　太郎」の間の空白)が混入していると、TRIMしても文字数が減らず、想定より1文字多い状態のままLENの結果を得てしまいます。</p>
+      <div class="code">対処法:=LEN(SUBSTITUTE(TRIM(A1),"　",""))のように、TRIMで半角スペースを、SUBSTITUTEで全角スペースを別々に除去してから数える</div>
+      <p style="margin-bottom:0;">TRIM単体で対処しようとして「全角スペースが消えない」と悩むケースが非常に多いため、全角・半角それぞれの空白を意識して処理を分けることが重要です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">改行(Alt+Enter)を含むセルで文字数が想定より多い</span>
+      <p style="margin-bottom:6px;">1つのセル内でAlt+Enterによる改行を使って複数行にわたる文章を入力している場合、その改行そのものも1文字としてLENにカウントされます。目視では気づきにくいため、「見た目の文字数と合わない」という問い合わせの原因になりがちです。</p>
+      <div class="code">対処法:=LEN(SUBSTITUTE(A1,CHAR(10),""))で改行(CHAR(10))を除去してから文字数を数える</div>
+      <p style="margin-bottom:0;">備考欄など長文を入力する欄で文字数制限をかける場合は、改行を許可するのかどうかを事前に決め、許可しないのであれば入力規則側でも改行を含む入力を弾く設計にしておくと混乱が減ります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">数値セルの表示形式とLENの結果が食い違う</span>
+      <p style="margin-bottom:6px;">セルの表示形式(桁区切り、円マーク、日付表示など)は見た目を変えるだけで、セルが保持する実際の値には影響しません。「1,000」と表示されているセルでも、LENが数えるのは実際の値である1000の4文字であり、カンマは含まれません。</p>
+      <div class="code">例:表示形式で「¥1,000」と見えるセルでも=LEN(A1)は4を返す(実際の値は1000という数値)</div>
+      <p style="margin-bottom:0;">桁区切りやハイフンを含めた「見た目通りの桁数」をチェックしたい場合は、あらかじめ文字列としてハイフンなどを含めて入力しておくか、TEXT関数で表示形式を反映した文字列に変換してからLENで数える必要があります。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>LEN関数は全角・半角を区別せず「1文字=1」で数える。</b>バイト数(半角1・全角2として数える)を数えたい場合はLENB関数という別の関数を使う必要があり、混同すると桁数チェックの基準がずれます。</li>
+      <li><b>見えない文字(スペース・改行)の存在を疑う癖をつける。</b>目視の文字数とLENの結果が合わないときは、まず全角スペースや改行が紛れていないかを確認すると原因が見つかりやすくなります。</li>
+      <li><b>入力規則は「入力時」のチェック、LEN列は「事後」のチェックと役割を分ける。</b>貼り付け操作では入力規則が効かないことがあるため、両方を併用しておくと安心です。</li>
+      <li><b>数値と文字列を混同しない。</b>数値として入力されたコードは、表示形式ではなく実際の値の桁数が数えられることを前提に設計しましょう。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      LEN関数は文字数を数えるだけのシンプルな関数ですが、入力規則と組み合わせれば文字数超過そのものを防ぐ仕組みになり、SUBSTITUTE関数と組み合わせれば特定の文字の出現回数を数えることもできます。実務でつまずきやすいのは、全角スペース・改行といった「見えない文字」の存在と、セルの表示形式と実際の値の違いです。この2点さえ意識しておけば、LEN関数を使った文字数チェックは安定して運用できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">LEN関数で数えた文字数と、セルに表示されている桁数が合わないのはなぜですか？</div>
+        <div class="a">セルの表示形式(桁区切りや円マーク、日付表示など)は見た目だけを変えるものであり、LEN関数はセルが実際に保持している値(数値そのものや入力した文字列そのもの)を数えます。たとえば1000という数値に桁区切り表示を設定して「1,000」と見えていても、LEN(A1)は4文字と数えます。逆に郵便番号を文字列として「123-4567」のようにハイフン込みで入力している場合は、見た目通り8文字として数えられます。表示上の見た目とセルの実際の値は別物だと意識することが、LEN関数を正しく使う第一歩です。</div>
+      </div>
+      <div class="qa">
+        <div class="q">全角スペースが入っているのにTRIMで消せないのですが、LENで何がわかりますか？</div>
+        <div class="a">TRIM関数が既定で除去できるのは半角スペースのみで、全角スペースはそのまま残ります。LEN(A1)で数えた文字数と、目視で数えた文字数が一致しないときは、見えないスペースや改行が紛れ込んでいる可能性が高いというサインになります。原因を特定したい場合は、LEN(A1)とLEN(TRIM(A1))を並べて比較し、値が同じであれば半角スペースの問題ではないと判断できます。全角スペースを除去したいときはSUBSTITUTE(A1,"　","")のように全角スペースを直接指定して置き換える必要があります。</div>
+      </div>
+      <div class="qa">
+        <div class="q">入力規則で文字数を制限しても、あとから貼り付けで長い文字列が入ってしまいます。防げますか？</div>
+        <div class="a">データの入力規則は、セルに直接入力したりEnterで確定したりする操作に対しては有効ですが、Excelのバージョンや貼り付け方法によっては、コピー&貼り付けの操作で入力規則のチェックが効かずにそのまま値が入ってしまうことがあります。これは入力規則そのものの仕様上の制約であり、LEN関数の問題ではありません。貼り付けによる文字数超過を確実に防ぎたい場合は、入力規則に加えて、別セルにLEN関数で文字数を表示する監視用の列を用意し、条件付き書式で規定文字数を超えたセルを赤く表示するなど、二重のチェック体制を組むことをおすすめします。</div>
+      </div>
+    </div>
+
+    <h2>関連記事</h2>
+    <ul>
+      <li><a href="/articles/trim-substitute-guide.html">TRIM・SUBSTITUTE関数で全角スペースが消えない原因と対処法</a></li>
+      <li><a href="/articles/left-right-mid-guide.html">LEFT・RIGHT・MID関数で文字列を切り出す方法｜#VALUE!エラーと桁数ズレの対処法</a></li>
+      <li><a href="/articles/concat-textjoin-guide.html">CONCAT・TEXTJOIN関数で文字列を結合する方法｜区切り文字が連続する原因と対処法</a></li>
+    </ul>
+
+    <a class="cta" href="/index.html">→ 文字列の数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
