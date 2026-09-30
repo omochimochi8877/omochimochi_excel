@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>AVERAGEIF関数で条件付き平均を出す方法｜SUMIFとの関係とよくあるエラー｜セルうめ</title>
+<meta name="description" content="AVERAGEIF関数を使って部署別・商品別の平均値を条件付きで計算する方法を実務目線で解説。範囲のズレで平均が合わない原因、0の扱いで平均が下がってしまう落とし穴、AVERAGEIFSとの使い分けまで紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/averageif-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="AVERAGEIF関数で条件付き平均を出す方法｜セルうめ">
+<meta property="og:description" content="部署別・商品別の平均値を条件付きで計算する方法、範囲のズレや0の扱いで結果が狂う原因と対処法を実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/averageif-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AVERAGEIF関数で条件付き平均を出す方法">
+<meta name="twitter:description" content="範囲のズレや0の扱いで平均が狂う原因、AVERAGEIFSとの使い分けを解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "AVERAGEIF関数で条件付き平均を出す方法｜SUMIFとの関係とよくあるエラー",
+  "description": "AVERAGEIF関数を使って部署別・商品別の平均値を条件付きで計算する方法を実務目線で解説。範囲のズレで平均が合わない原因、0の扱いで平均が下がってしまう落とし穴、AVERAGEIFSとの使い分けを紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/averageif-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-09-29"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "AVERAGEIFとAVERAGEの違いは何ですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AVERAGEは範囲内の数値をすべて対象に平均を計算しますが、AVERAGEIFは条件に一致する行だけを対象に平均を計算します。部署別・商品別など「特定の条件に絞った平均」を出したい場合はAVERAGEIF、範囲全体の単純な平均でよい場合はAVERAGEを使います。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "対象データが1件もないとどうなりますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "条件に一致するデータが1件も見つからない場合、AVERAGEIFは#DIV/0!エラーを返します。0で割る計算と同じ扱いになるためです。この場合はIFERROR関数と組み合わせて、エラー時に空欄や「対象なし」と表示させると見た目がすっきりします。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "条件が2つ以上ある場合はどうすればよいですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AVERAGEIFは条件を1つしか指定できません。「部署が営業部、かつ雇用形態が正社員」のように条件が2つ以上になる場合は、複数条件に対応したAVERAGEIFSを使います。引数の順番がAVERAGEIFと少し異なり、AVERAGEIFSでは平均対象の範囲を一番最初に書く点に注意してください。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:640px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>AVERAGEIF関数で条件付き平均を出す方法｜SUMIFとの関係とよくあるエラー</h1>
+  <p class="sub">部署ごとの平均残業時間、商品ごとの平均単価――「条件に合うデータだけの平均」を出したいのに、AVERAGEで全部まとめて平均してしまい数字が合わない。AVERAGEIFの書き方とよくある落とし穴を整理します。</p>
+  <div class="meta">2026-09-29更新 ｜ 集計・計算</div>
+
+  <article class="article-body">
+    <p>
+      「A部署だけの平均残業時間を知りたい」「この商品カテゴリだけの平均単価を出したい」――集計表を作っていると、範囲全体の平均ではなく、条件に合う行だけの平均を求めたい場面が頻繁にあります。AVERAGE関数をそのまま使うと全員・全商品を巻き込んで平均してしまい、本来知りたかった数字とはズレた結果になりがちです。この記事では、条件付き平均を1つの数式で出せるAVERAGEIF関数の使い方と、実務でよく起きるトラブルへの対処法を解説します。
+    </p>
+
+    <h2>AVERAGEIFの基本構文</h2>
+    <p>
+      AVERAGEIFは、SUMIF関数の「平均バージョン」にあたる関数です。条件に一致する行を探すところまではSUMIFと同じ考え方で、最後に合計ではなく平均を計算する点だけが違います。
+    </p>
+    <div class="box">
+      <div class="code">=AVERAGEIF(条件範囲, 条件, 平均対象範囲)</div>
+      <p style="margin-bottom:0;">例：部署列(B列)が「営業部」の行だけを対象に、残業時間列(C列)の平均を出す<br>
+        <span style="font-family:var(--mono);">=AVERAGEIF(B1:B10,"営業部",C1:C10)</span></p>
+    </div>
+    <p>
+      注意したいのは引数の順番です。SUMIFと同じく「条件範囲→条件→平均(合計)対象範囲」の順に書きますが、条件範囲と平均対象範囲を逆に指定してしまうと、意図しない列を平均してしまったり、エラーにすらならずに違う数字が出てしまったりすることがあります。数式を組むときは「どの列を見て判定するか」と「どの列の数字を平均するか」を分けて考えると間違いにくくなります。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>総務担当者</b>であれば、勤怠データから「部署別の平均残業時間」や「拠点別の平均通勤手当」を出して、労務管理の資料に使う場面が典型的です。<b>経理担当者</b>であれば、経費精算データから「勘定科目別の平均申請額」を集計し、異常値が混ざっていないかのチェックに使えます。<b>営業事務担当者</b>であれば、受注データから「商品カテゴリ別の平均単価」や「担当者別の平均受注額」を出して、営業会議の資料作成に活用するケースがよくあります。いずれも「範囲全体の平均」ではなく「属性ごとに切り分けた平均」を知りたいという共通点があり、AVERAGEIFが得意とする領域です。
+    </p>
+
+    <h2>AVERAGEIFでよくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#DIV/0! エラー</span>
+      <p style="margin-bottom:6px;">条件に一致するデータが1件も見つからないときに発生します。AVERAGEIFは内部的に「合計÷件数」を計算しているため、該当件数が0だと0で割る計算と同じ扱いになってしまいます。</p>
+      <div class="code">例：="AVERAGEIF(B1:B10,"開発部",C1:C10) で、B列に「開発部」が1件もない</div>
+      <p style="margin-bottom:0;">対処法として、条件に該当するデータが存在しない可能性がある場合は、IFERROR関数で包んで <span style="font-family:var(--mono);">=IFERROR(AVERAGEIF(B1:B10,"開発部",C1:C10),"対象なし")</span> のようにしておくと、エラーのままシートに残らず見た目も崩れません。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">平均が想定より大きく下がる（0が混ざっている）</span>
+      <p style="margin-bottom:6px;">未入力のつもりで「0」と入力してしまったセルは、空白と違ってAVERAGEIFの計算対象にそのまま含まれてしまいます。</p>
+      <div class="code">例：欠勤者の残業時間欄に「0」と入力 → 実際は9人分のはずが10人分として平均される</div>
+      <p style="margin-bottom:0;">対処法として、「まだ実績がない」「対象外」であるデータは0ではなく空白のままにしておくのが基本です。すでに0が入力されてしまっているデータを集計する場合は、条件範囲側に「0でない」という条件を追加するか、平均対象範囲側で0を除外する工夫が必要になります。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">条件範囲と平均対象範囲の行数がズレて結果がおかしい</span>
+      <p style="margin-bottom:6px;">条件範囲(B列)と平均対象範囲(C列)の開始行・終了行が1行でもズレていると、Aさんの部署とBさんの残業時間が組み合わさって計算されるなど、対応関係が崩れたまま平均が出てしまいます。</p>
+      <div class="code">例：=AVERAGEIF(B2:B10,"営業部",C1:C9) のように開始行が1行ズレている</div>
+      <p style="margin-bottom:0;">対処法として、条件範囲と平均対象範囲は必ず同じ開始行・終了行で指定してください。列全体(B:B、C:C)で指定しておくと、後でデータ行が増減してもズレる心配がなく安定します。</p>
+    </div>
+
+    <h2>AVERAGEとAVERAGEIF・AVERAGEIFSの使い分け</h2>
+    <div class="compare">
+      <div class="col">
+        <h3>AVERAGE</h3>
+        <ul>
+          <li>範囲内の数値すべてが対象</li>
+          <li>条件なしの単純な平均</li>
+          <li>文字列・空白は無視される</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>AVERAGEIF</h3>
+        <ul>
+          <li>条件は1つだけ指定可能</li>
+          <li>「部署が営業部」など1条件の平均</li>
+          <li>SUMIFと同じ引数の考え方</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>AVERAGEIFS</h3>
+        <ul>
+          <li>条件を2つ以上指定できる</li>
+          <li>「部署が営業部、かつ正社員」など複合条件</li>
+          <li>平均対象範囲を一番最初に書く</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      条件が1つで足りるうちはAVERAGEIFで十分ですが、「部署も雇用形態も両方絞り込みたい」というように条件が増えたときは、複数条件に対応したAVERAGEIFSに切り替えます。AVERAGEIFSはAVERAGEIFと引数の並び順が異なり、平均対象範囲を一番最初に書く点だけ注意しておくと書き間違いを防げます。
+    </p>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>条件は必ずダブルクォーテーションで囲む。</b>"営業部"のように文字列条件はクォーテーションが必須です。数値の条件(">=100"など)も同様に文字列として囲みます。</li>
+      <li><b>平均対象範囲に文字列や空白が混ざっていても問題ない。</b>AVERAGEIFは条件に一致した行のうち、数値が入っているセルだけを自動的に平均の対象にします。ただし「0」は数値として扱われるため無視されない点に注意してください。</li>
+      <li><b>ワイルドカードで部分一致もできる。</b>"営業*"のように書けば「営業」で始まる部署名をまとめて条件にできます。表記ゆれがある部署名を1つの条件でまとめたいときに便利です。</li>
+      <li><b>結果は小数点以下まで出ることが多い。</b>平均を出すと割り切れない小数になることがほとんどなので、ROUND関数と組み合わせて桁数を揃えておくと資料として見やすくなります。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      AVERAGEIFは、条件に一致するデータだけを対象に平均を計算できる、実務で非常に使用頻度の高い関数です。AVERAGEとの違いを理解し、0と空白の扱いの違い、範囲のズレによる対応関係の崩れに気をつければ、部署別・商品別といった条件付きの平均集計を安定して作れるようになります。条件が2つ以上必要になったらAVERAGEIFS、条件がまったく不要ならAVERAGEと、目的に応じて使い分けましょう。数式を一から組み立てるのが不安な方は、下のツールで日本語の空欄を埋めるだけで数式を作成できます。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">AVERAGEIFとAVERAGEの違いは何ですか？</div>
+        <div class="a">AVERAGEは範囲内の数値をすべて対象に平均を計算しますが、AVERAGEIFは条件に一致する行だけを対象に平均を計算します。部署別・商品別など「特定の条件に絞った平均」を出したい場合はAVERAGEIF、範囲全体の単純な平均でよい場合はAVERAGEを使います。</div>
+      </div>
+      <div class="qa">
+        <div class="q">対象データが1件もないとどうなりますか？</div>
+        <div class="a">条件に一致するデータが1件も見つからない場合、AVERAGEIFは#DIV/0!エラーを返します。0で割る計算と同じ扱いになるためです。この場合はIFERROR関数と組み合わせて、エラー時に空欄や「対象なし」と表示させると見た目がすっきりします。</div>
+      </div>
+      <div class="qa">
+        <div class="q">条件が2つ以上ある場合はどうすればよいですか？</div>
+        <div class="a">AVERAGEIFは条件を1つしか指定できません。「部署が営業部、かつ雇用形態が正社員」のように条件が2つ以上になる場合は、複数条件に対応したAVERAGEIFSを使います。引数の順番がAVERAGEIFと少し異なり、AVERAGEIFSでは平均対象の範囲を一番最初に書く点に注意してください。</div>
+      </div>
+    </div>
+
+    <h2>関連記事</h2>
+    <ul>
+      <li><a href="/articles/sumif-vs-sumifs.html">SUMIFとSUMIFSの違いは？条件付き集計でよくあるエラーと使い分け</a></li>
+      <li><a href="/articles/countifs-guide.html">COUNTIFS関数で複数条件を数える方法｜COUNTIFとの違いとよくあるエラー</a></li>
+      <li><a href="/articles/max-min-vs-large-small.html">MAX・MINとLARGE・SMALLの違いは？最大値・最小値を求める関数の使い分けガイド</a></li>
+    </ul>
+
+    <a class="cta" href="/index.html">→ AVERAGEIFの数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
