@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>SUMPRODUCT関数の使い方｜OR条件の集計・加重平均の作り方とよくあるエラー｜セルうめ</title>
+<meta name="description" content="SUMPRODUCT関数を使って、SUMIFSでは組みにくい「OR条件」の集計や、単価×数量の加重平均を計算する方法を実務目線で解説。配列のサイズが合わず#VALUE!になる原因、文字列が混ざるとエラーになる理由、SUMIFS・COUNTIFSとの使い分けも紹介します。">
+<link rel="canonical" href="https://www.omochimochis.com/articles/sumproduct-guide.html">
+
+<!-- OGP（SNSでシェアされたときの見た目） -->
+<meta property="og:title" content="SUMPRODUCT関数の使い方｜OR条件集計と加重平均｜セルうめ">
+<meta property="og:description" content="SUMPRODUCTでOR条件の集計や加重平均を作る方法、#VALUE!エラーの原因と対処法、SUMIFS・COUNTIFSとの使い分けを実務目線で解説します。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.omochimochis.com/articles/sumproduct-guide.html">
+<meta property="og:site_name" content="セルうめ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SUMPRODUCT関数の使い方｜OR条件集計と加重平均">
+<meta name="twitter:description" content="SUMIFSでは組みにくいOR条件の集計や加重平均をSUMPRODUCTで作る方法、よくあるエラーと対処法を解説します。">
+
+<!-- 構造化データ（記事） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "SUMPRODUCT関数の使い方｜OR条件の集計・加重平均の作り方とよくあるエラー",
+  "description": "SUMPRODUCT関数を使って、SUMIFSでは組みにくいOR条件の集計や単価×数量の加重平均を計算する方法を実務目線で解説。よくあるエラーと対処法、SUMIFS・COUNTIFSとの使い分けも紹介します。",
+  "author": { "@type": "Organization", "name": "セルうめ" },
+  "publisher": { "@type": "Organization", "name": "セルうめ" },
+  "mainEntityOfPage": "https://www.omochimochis.com/articles/sumproduct-guide.html",
+  "inLanguage": "ja",
+  "datePublished": "2026-10-01"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "SUMPRODUCTとSUMIFS、何が違うのですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SUMIFSは複数条件をすべて満たす行を合計する「AND条件」が基本です。一方SUMPRODUCTは条件同士を掛け算・足し算で自由に組み合わせられるため、『部署が営業部、または総務部』のようなOR条件や、『単価×数量の合計（加重平均の元になる計算）』など、SUMIFSでは組みにくい集計に向いています。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SUMPRODUCTで#VALUE!エラーが出るのはなぜですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "多くの場合、掛け算している配列同士の行数（サイズ）が一致していないことが原因です。例えばA2:A100とB2:B99のように範囲の終わりの行番号がずれていると、配列の形が合わずエラーになります。すべての範囲を同じ行数でそろえてください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SUMPRODUCTはCtrl+Shift+Enterで入力する必要がありますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "必要ありません。SUMPRODUCTは配列を扱う関数でありながら、通常のEnterキーだけで配列計算を行ってくれる数少ない関数の一つです。これは他の関数で配列計算をする場合との大きな違いで、SUMPRODUCTが初心者にも使いやすいとされる理由のひとつです。"
+      }
+    }
+  ]
+}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --ink:#20281F; --line:#D8D0BE;
+    --forest:#2F6F5E; --forest-deep:#1E4A3E; --amber:#E8A33D;
+    --cell-bg:#FFFFFF;
+    --sans:'Noto Sans JP',sans-serif; --serif:'Shippori Mincho',serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    color:var(--ink);font-family:var(--sans);
+    padding:40px 20px 80px;line-height:1.9;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  a{color:var(--forest-deep);}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+    color:var(--forest-deep);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"読";font-weight:700;background:var(--forest);color:#fff;
+    padding:2px 8px;border-radius:3px;font-size:11px;}
+  h1{font-family:var(--serif);font-size:clamp(24px,5vw,32px);margin:10px 0 8px;line-height:1.5;}
+  .sub{color:#5b6459;font-size:14.5px;max-width:56ch;margin-bottom:10px;}
+  .meta{font-family:var(--mono);font-size:12px;color:#8a9184;margin-bottom:36px;}
+
+  .article-body{
+    background:var(--cell-bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line);
+    padding:32px 34px 36px;
+  }
+  @media (max-width:560px){
+    .article-body{padding:24px 20px 28px;}
+  }
+
+  article h2{
+    font-family:var(--serif);font-size:20px;color:var(--forest-deep);
+    margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--forest);
+  }
+  article h3{font-size:15.5px;color:var(--forest-deep);margin:22px 0 8px;}
+  article p{font-size:14.5px;color:#3c4438;margin:0 0 14px;}
+  article ul, article ol{font-size:14.5px;color:#3c4438;margin:0 0 14px;padding-left:1.4em;}
+  article li{margin-bottom:6px;}
+
+  .box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:20px 22px;margin:18px 0;
+  }
+  .box.error{border-left:3px solid #C24B3F;}
+  .box.error .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:#C24B3F;
+    letter-spacing:.06em;margin-bottom:6px;display:block;
+  }
+  .box .code{
+    font-family:var(--mono);font-size:13px;
+    background:#F5F2E8;border-left:3px solid var(--amber);
+    padding:10px 14px;border-radius:0 3px 3px 0;color:#6b4a1e;
+    margin:8px 0;
+  }
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;
+  }
+  @media (max-width:560px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px 18px;
+  }
+  .compare .col h3{margin-top:0;color:var(--forest-deep);font-family:var(--mono);font-size:14px;}
+  .compare .col ul{padding-left:1.2em;font-size:13.5px;}
+
+  .faq{margin-top:40px;}
+  .faq h2{font-family:var(--serif);font-size:20px;border-bottom:2px solid var(--forest);padding-bottom:8px;}
+  .qa{margin-top:20px;}
+  .qa .q{font-weight:700;font-size:14.5px;color:var(--forest-deep);margin-bottom:6px;}
+  .qa .q::before{content:"Q. ";}
+  .qa .a{font-size:14px;color:#3c4438;}
+  .qa .a::before{content:"A. ";font-weight:700;color:var(--amber);}
+
+  .cta{
+    display:inline-block;margin-top:36px;
+    background:var(--forest);color:#fff;text-decoration:none;
+    padding:13px 26px;border-radius:4px;font-weight:700;font-size:14.5px;
+  }
+  .backlink{display:inline-block;margin-top:14px;margin-left:14px;font-size:13.5px;color:#5b6459;text-decoration:none;}
+  footer{text-align:center;font-size:12px;color:#9aa093;margin-top:50px;font-family:var(--mono);}
+  .footer-links a{color:#5b6459;text-decoration:none;margin:0 8px;font-family:var(--sans);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Column</div>
+  <h1>SUMPRODUCT関数の使い方｜OR条件の集計・加重平均の作り方とよくあるエラー</h1>
+  <p class="sub">「SUMIFSでは条件を組めない」場面で頼りになるのがSUMPRODUCT関数です。配列同士を掛け算・足し算する仕組みを理解すると、OR条件の集計や加重平均など応用範囲が一気に広がります。</p>
+  <div class="meta">2026-10-01更新 ｜ 集計・関数の使い分け</div>
+
+  <article class="article-body">
+    <p>
+      「部署が営業部、または総務部の件だけを合計したい」「SUMIFSだと単価×数量のような掛け算を挟んだ集計ができない」——こうした場面でSUMIFやSUMIFSの限界にぶつかった経験がある方は多いのではないでしょうか。SUMPRODUCT関数は、もともと「配列同士を掛け算してから合計する」ための関数ですが、この性質を利用することでOR条件の集計や、複数の数値を掛け合わせてから合計する加重平均の計算など、SUMIFS・COUNTIFSでは組みにくい集計を1つの数式で実現できます。少し難しそうに見える関数ですが、仕組みを理解すれば経理・購買・営業事務の集計業務で非常に強力な武器になります。
+    </p>
+
+    <h2>SUMPRODUCTが行っていること</h2>
+    <p>
+      SUMPRODUCTは本来、「配列1の1行目×配列2の1行目」「配列1の2行目×配列2の2行目」というように、同じ位置同士の値を掛け算し、その結果をすべて合計する関数です。例えば単価の列と数量の列を用意し、<code>=SUMPRODUCT(単価の範囲, 数量の範囲)</code>とすれば、行ごとに単価×数量を計算してから合計した「売上合計」を一発で求められます。SUMのようにセルをそのまま合計するのではなく、「掛け算してから合計する」という一手間が最初から組み込まれている点が最大の特徴です。
+    </p>
+    <p>
+      この「配列同士を比較・掛け算できる」という性質を応用すると、条件判定（TRUE/FALSEの配列）を数値（1/0）として掛け算に組み込むことができ、結果として条件付き集計の関数としても使えるようになります。これがSUMIFS・COUNTIFSでは対応しきれない集計にSUMPRODUCTが使われる理由です。
+    </p>
+
+    <h2>実務でのよくある使用シーン</h2>
+    <p>
+      <b>経理担当者</b>であれば「勘定科目が『交通費』または『通信費』の行だけを合計する」というOR条件の集計で使います。SUMIFSは条件範囲同士がAND（かつ）でしか組み合わせられないため、「どちらか一方に該当」という条件には不向きですが、SUMPRODUCTなら<code>=SUMPRODUCT((A2:A100="交通費")+(A2:A100="通信費"), B2:B100)</code>のように、条件を足し算（+）でつなぐことでOR条件の集計が組めます。<b>購買・在庫担当者</b>であれば「商品ごとの単価×数量を一括で合計して仕入総額を出す」場面、<b>営業事務</b>であれば「契約件数×契約単価の合計から売上見込みを計算する」場面など、単純な合計では済まない「掛け算を挟んだ集計」で重宝します。
+    </p>
+
+    <h2>SUMIFS・COUNTIFSとの使い分け</h2>
+    <div class="compare">
+      <div class="col">
+        <h3>SUMIFS / COUNTIFS</h3>
+        <ul>
+          <li>複数条件はすべてAND（かつ）条件</li>
+          <li>引数の書き方がシンプルで読みやすい</li>
+          <li>条件が「等しい」「以上」「以下」などの単純な比較のみ</li>
+          <li>OR条件や掛け算を挟んだ集計はできない</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>SUMPRODUCT</h3>
+        <ul>
+          <li>条件を+（OR）や*（AND）で自由に組み合わせられる</li>
+          <li>単価×数量のような掛け算を挟んだ集計ができる</li>
+          <li>数式がやや複雑になり読み解きにくい</li>
+          <li>配列のサイズが合わないとエラーになりやすい</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      迷ったときの目安はシンプルです。条件がすべてAND（かつ）で、単純な比較だけで済むならSUMIFS・COUNTIFSで十分です。条件にOR（または）が混ざる場合や、掛け算を挟んだ集計をしたい場合に、初めてSUMPRODUCTの出番が来る、と覚えておくと数式選びで迷いません。
+    </p>
+
+    <h2>よくあるエラー・トラブルと対処法</h2>
+
+    <div class="box error">
+      <span class="tag">#VALUE! エラー</span>
+      <p style="margin-bottom:6px;">SUMPRODUCTで最も多いエラーです。掛け算・比較している配列同士の行数（サイズ）が一致していない場合に発生します。</p>
+      <div class="code">例：=SUMPRODUCT((A2:A100="営業部")*1, B2:B99) ← B列の範囲だけ99行までになっている</div>
+      <p style="margin-bottom:0;">条件範囲と数値範囲をコピー＆修正しながら数式を組み立てるときに起きやすいミスです。すべての範囲の開始行・終了行がそろっているか、数式バーで見比べて確認してください。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">結果が想定よりかなり大きい・小さい</span>
+      <p style="margin-bottom:6px;">OR条件のつもりで書いた数式が、実はAND条件になっている（またはその逆）というケースです。</p>
+      <div class="code">OR条件（どちらかに該当）：(A2:A100="営業部")+(A2:A100="総務部")<br>AND条件（両方に該当）：(A2:A100="営業部")*(B2:B100="承認済み")</div>
+      <p style="margin-bottom:0;">条件を足し算（+）でつなぐとOR、掛け算（*）でつなぐとANDになります。この+と*の意味を混同すると、集計件数が2倍になったり、逆に0件になったりするので注意が必要です。</p>
+    </div>
+
+    <div class="box error">
+      <span class="tag">文字列が混ざっていると正しく計算されない</span>
+      <p style="margin-bottom:6px;">数値の範囲の中に空白セルや文字列が混ざっていると、掛け算がエラーになったり、意図しない0として扱われたりすることがあります。</p>
+      <p style="margin-bottom:0;">集計対象の数値範囲に、他システムからコピーした「文字列としての数字」や、未入力のまま残った空白セルが混ざっていないか確認しましょう。TRIM関数やVALUE関数で事前に数値へ変換しておくと安定します。</p>
+    </div>
+
+    <h2>初心者がつまずきやすいポイントとコツ</h2>
+    <ul>
+      <li><b>条件は「TRUE/FALSEの配列」として扱われていることを意識する。</b>(A2:A100="営業部")の部分は、1件ずつTRUE・FALSEを返す配列になっており、これを+や*で計算することで1と0の数値として扱えるようになります。</li>
+      <li><b>OR条件は+（足し算）、AND条件は*（掛け算）と覚える。</b>この対応関係さえ覚えてしまえば、複雑に見える数式もパターンで組み立てられます。</li>
+      <li><b>Ctrl+Shift+Enterは不要。</b>SUMPRODUCTは配列を扱う関数でありながら、通常のEnterだけで計算が完結する数少ない関数です。他の配列数式との違いとして覚えておくと安心です。</li>
+      <li><b>範囲はすべて同じ行数でそろえる。</b>複数の範囲を指定するときは、開始行・終了行が1行でもずれていないか必ず確認しましょう。</li>
+    </ul>
+
+    <h2>まとめ</h2>
+    <p>
+      SUMPRODUCTは「配列同士を掛け算してから合計する」という仕組みを持つ関数で、この性質を応用することでSUMIFS・COUNTIFSでは組みにくいOR条件の集計や、単価×数量のような掛け算を挟んだ集計に対応できます。条件が単純なAND条件だけで済むならSUMIFS・COUNTIFSのほうがシンプルで読みやすいため、OR条件や掛け算が必要になったときの「もう一段上の集計関数」として使い分けるのがおすすめです。+はOR、*はANDという対応関係だけ押さえておけば、複雑に見える数式も組み立てやすくなります。
+    </p>
+
+    <div class="faq">
+      <h2>よくある質問</h2>
+      <div class="qa">
+        <div class="q">SUMPRODUCTとSUMIFS、何が違うのですか？</div>
+        <div class="a">SUMIFSは複数条件をすべて満たす行を合計する「AND条件」が基本です。一方SUMPRODUCTは条件同士を掛け算・足し算で自由に組み合わせられるため、「部署が営業部、または総務部」のようなOR条件や、「単価×数量の合計」など、SUMIFSでは組みにくい集計に向いています。</div>
+      </div>
+      <div class="qa">
+        <div class="q">SUMPRODUCTで#VALUE!エラーが出るのはなぜですか？</div>
+        <div class="a">多くの場合、掛け算している配列同士の行数（サイズ）が一致していないことが原因です。例えばA2:A100とB2:B99のように範囲の終わりの行番号がずれていると、配列の形が合わずエラーになります。すべての範囲を同じ行数でそろえてください。</div>
+      </div>
+      <div class="qa">
+        <div class="q">SUMPRODUCTはCtrl+Shift+Enterで入力する必要がありますか？</div>
+        <div class="a">必要ありません。SUMPRODUCTは配列を扱う関数でありながら、通常のEnterキーだけで配列計算を行ってくれる数少ない関数の一つです。これは他の関数で配列計算をする場合との大きな違いで、SUMPRODUCTが初心者にも使いやすいとされる理由のひとつです。</div>
+      </div>
+    </div>
+
+    <h2>関連記事</h2>
+    <ul>
+      <li><a href="/articles/sumif-vs-sumifs.html">SUMIFとSUMIFSの違いは？条件付き集計でよくあるエラーと使い分け</a></li>
+      <li><a href="/articles/countifs-guide.html">COUNTIFS関数で複数条件を数える方法</a></li>
+      <li><a href="/articles/averageif-guide.html">AVERAGEIF関数で条件付き平均を出す方法</a></li>
+    </ul>
+
+    <a class="cta" href="/index.html">→ 条件付き集計の数式を作ってみる</a>
+    <a class="backlink" href="/articles.html">← 記事一覧に戻る</a>
+  </article>
+
+  <footer>
+    セルうめ β — 事務員さんのためのExcel関数ジェネレーター
+    <div class="footer-links">
+      <a href="/guide.html">使い方</a>|
+      <a href="/articles.html">お役立ち記事</a>|
+      <a href="/privacy.html">プライバシーポリシー</a>|
+      <a href="/terms.html">利用規約</a>|
+      <a href="/contact.html">お問い合わせ</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
