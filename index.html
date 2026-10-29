@@ -602,6 +602,21 @@ const functions = {
     pitfall: `部署ごとの平均残業時間を出す際、条件の列（部署名）と平均を出す列（残業時間）の開始行が1行でもズレていると、Aさんの残業時間がBさんの部署の集計に混ざるなど対応関係が崩れたまま平均が計算されてしまいます。SUMIFと同じく、「条件を見る列」と「平均を出す列」の行数・開始行がズレていないか確認してください。`,
     version: `Excel 2007以降で使用できます。`
   },
+  averageifs: {
+    cat:'agg', label:'複数条件で平均 (AVERAGEIFS)', level:'中級',
+    scene:'こんな時に：「営業部」かつ「正社員」の平均売上など、2つの条件に合う数字の平均を出したい',
+    render: (v) => `<span contenteditable class="blank" data-k="target">${v.target}</span> セルに、
+      <span contenteditable class="blank" data-k="avgRange">${v.avgRange}</span> の数字から、
+      <span contenteditable class="blank" data-k="range1">${v.range1}</span> が
+      「<span contenteditable class="blank" data-k="cond1" style="width:65px;">${v.cond1}</span>」で、
+      <span contenteditable class="blank" data-k="range2">${v.range2}</span> が
+      「<span contenteditable class="blank" data-k="cond2" style="width:65px;">${v.cond2}</span>」の行だけの平均を出したい。`,
+    values: {target:'E2', avgRange:'C2:C100', range1:'B2:B100', cond1:'営業部', range2:'D2:D100', cond2:'正社員'},
+    formula: (v) => `=AVERAGEIFS(${v.avgRange},${v.range1},"${v.cond1}",${v.range2},"${v.cond2}")`,
+    explain: (v) => `<b>AVERAGEIFS関数</b>は、すべての条件に一致する行だけを対象に平均を計算します。平均範囲（${v.avgRange}）と、条件範囲（${v.range1}、${v.range2}）は同じ行に対応させます。`,
+    pitfall: (v) => `条件に一致する数値が1つもないと<b>#DIV/0!</b>エラーになります。また、平均範囲（${v.avgRange}）と条件範囲（${v.range1}、${v.range2}）の開始行や行数がずれていると、別の行の値を平均してしまうため、範囲の大きさを揃えてください。`,
+    version: `Excel 2007以降で使用できます。`
+  },
   maxmin: {
     cat:'agg', label:'最大値・最小値 (MAX/MIN)', level:'初級',
     scene:'こんな時に：月間売上で一番高かった日、経費精算で一番少なかった申請額を知りたい',
